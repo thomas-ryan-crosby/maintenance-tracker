@@ -738,11 +738,18 @@ function handleTicketSubmit(e) {
         return;
     }
     
-    // Disable submit button
+    // Disable submit button and show loading modal
     const submitBtn = e.target.querySelector('button[type="submit"]');
     if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Saving...';
+        submitBtn.classList.add('saving');
+    }
+    
+    // Show loading modal
+    const loadingModal = document.getElementById('loadingModal');
+    if (loadingModal) {
+        loadingModal.classList.add('show');
     }
 
     // Upload photos first if any - track type with each upload
@@ -817,13 +824,24 @@ function handleTicketSubmit(e) {
 
                 return db.collection('tickets').doc(id).update(ticketData);
             }).then(() => {
+                // Hide loading modal
+                const loadingModal = document.getElementById('loadingModal');
+                if (loadingModal) {
+                    loadingModal.classList.remove('show');
+                }
                 closeTicketModal();
             }).catch((error) => {
                 console.error('Error updating ticket:', error);
+                // Hide loading modal
+                const loadingModal = document.getElementById('loadingModal');
+                if (loadingModal) {
+                    loadingModal.classList.remove('show');
+                }
                 alert('Error saving ticket: ' + error.message);
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Save Ticket';
+                    submitBtn.classList.remove('saving');
                 }
             });
         } else {
@@ -880,22 +898,39 @@ function handleTicketSubmit(e) {
                     return db.collection('tickets').doc(newTicketId).update(updateData);
                 }
             }).then(() => {
+                // Hide loading modal
+                const loadingModal = document.getElementById('loadingModal');
+                if (loadingModal) {
+                    loadingModal.classList.remove('show');
+                }
                 closeTicketModal();
             }).catch((error) => {
                 console.error('Error creating ticket:', error);
+                // Hide loading modal
+                const loadingModal = document.getElementById('loadingModal');
+                if (loadingModal) {
+                    loadingModal.classList.remove('show');
+                }
                 alert('Error saving ticket: ' + error.message);
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Save Ticket';
+                    submitBtn.classList.remove('saving');
                 }
             });
         }
     }).catch((error) => {
         console.error('Error uploading photos:', error);
+        // Hide loading modal
+        const loadingModal = document.getElementById('loadingModal');
+        if (loadingModal) {
+            loadingModal.classList.remove('show');
+        }
         alert('Error uploading photos: ' + error.message);
         if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.textContent = 'Save Ticket';
+            submitBtn.classList.remove('saving');
         }
     });
 }
