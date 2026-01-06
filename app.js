@@ -548,6 +548,9 @@ function openTicketModal(ticketId = null) {
     document.getElementById('completedByGroup').style.display = 'none';
     document.getElementById('howResolvedGroup').style.display = 'none';
     document.getElementById('afterPhotoGroup').style.display = 'none';
+    document.getElementById('retroactiveDatesGroup').style.display = 'none';
+    document.getElementById('customDateCreated').value = '';
+    document.getElementById('customDateCompleted').value = '';
     // Before photo is always visible, so no need to hide it
     
     // Reset file uploads
@@ -618,10 +621,12 @@ function handleStatusChange(e) {
         document.getElementById('completedByGroup').style.display = 'block';
         document.getElementById('howResolvedGroup').style.display = 'block';
         document.getElementById('afterPhotoGroup').style.display = 'block';
+        document.getElementById('retroactiveDatesGroup').style.display = 'block';
     } else {
         document.getElementById('completedByGroup').style.display = 'none';
         document.getElementById('howResolvedGroup').style.display = 'none';
         document.getElementById('afterPhotoGroup').style.display = 'none';
+        document.getElementById('retroactiveDatesGroup').style.display = 'none';
     }
 }
 
@@ -660,25 +665,30 @@ function handleTicketSubmit(e) {
         submitBtn.textContent = 'Saving...';
     }
 
-    // Upload photos first if any
+    // Upload photos first if any - track type with each upload
     const uploadPromises = [];
     
     if (beforePhotoFile) {
-        uploadPromises.push(uploadPhoto(beforePhotoFile, id || 'temp', 'before'));
+        uploadPromises.push(uploadPhoto(beforePhotoFile, id || 'temp', 'before').then(url => ({ type: 'before', url })));
     }
     if (afterPhotoFile) {
-        uploadPromises.push(uploadPhoto(afterPhotoFile, id || 'temp', 'after'));
+        uploadPromises.push(uploadPhoto(afterPhotoFile, id || 'temp', 'after').then(url => ({ type: 'after', url })));
     }
     
     // If no new photos, use existing URLs
-    Promise.all(uploadPromises).then((photoUrls) => {
-        const beforeUrl = photoUrls.find(url => url && url.includes('before')) || beforePhotoUrl;
-        const afterUrl = photoUrls.find(url => url && url.includes('after')) || afterPhotoUrl;
+    Promise.all(uploadPromises).then((photoResults) => {
+        const beforeUrl = photoResults.find(r => r && r.type === 'before')?.url || beforePhotoUrl;
+        const afterUrl = photoResults.find(r => r && r.type === 'after')?.url || afterPhotoUrl;
         
         if (id && editingTicketId) {
             // Update existing - preserve dateCreated and handle dateCompleted properly
             db.collection('tickets').doc(id).get().then((doc) => {
                 const existing = doc.data();
+                
+                // Check for custom dates
+                const customDateCreated = document.getElementById('customDateCreated')?.value;
+                const customDateCompleted = document.getElementById('customDateCompleted')?.value;
+                
                 const ticketData = {
                     propertyId,
                     buildingNumber: buildingNumber || null,
@@ -690,27 +700,39 @@ function handleTicketSubmit(e) {
                     requestedBy,
                     managedBy,
                     status,
-                    dateCreated: existing?.dateCreated || firebase.firestore.FieldValue.serverTimestamp(),
+                    dateCreated: customDateCreated 
+                        ? firebase.firestore.Timestamp.fromDate(new Date(customDateCreated))
+                        : (existing?.dateCreated || firebase.firestore.FieldValue.serverTimestamp()),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
+                // Always save before photo if it exists (can be uploaded for any status)
+                if (beforeUrl) ticketData.beforePhotoUrl = beforeUrl;
+                // Only save after photo if status is Completed
                 if (status === 'Completed') {
                     ticketData.completedBy = completedBy;
                     ticketData.howResolved = howResolved || null;
-                    if (beforeUrl) ticketData.beforePhotoUrl = beforeUrl;
                     if (afterUrl) ticketData.afterPhotoUrl = afterUrl;
                     // Only set dateCompleted if it wasn't already completed
                     if (existing?.status !== 'Completed') {
-                        ticketData.dateCompleted = firebase.firestore.FieldValue.serverTimestamp();
+                        ticketData.dateCompleted = customDateCompleted
+                            ? firebase.firestore.Timestamp.fromDate(new Date(customDateCompleted))
+                            : firebase.firestore.FieldValue.serverTimestamp();
                     } else {
-                        ticketData.dateCompleted = existing.dateCompleted;
+                        // If already completed, use custom date if provided, otherwise keep existing
+                        ticketData.dateCompleted = customDateCompleted
+                            ? firebase.firestore.Timestamp.fromDate(new Date(customDateCompleted))
+                            : existing.dateCompleted;
                     }
                 } else {
                     ticketData.completedBy = null;
                     ticketData.howResolved = null;
-                    ticketData.beforePhotoUrl = null;
                     ticketData.afterPhotoUrl = null;
                     ticketData.dateCompleted = null;
+                    // Preserve existing afterPhotoUrl if status changed from Completed to something else
+                    if (existing?.afterPhotoUrl && !afterUrl) {
+                        ticketData.afterPhotoUrl = existing.afterPhotoUrl;
+                    }
                 }
 
                 return db.collection('tickets').doc(id).update(ticketData);
@@ -725,7 +747,7 @@ function handleTicketSubmit(e) {
                 }
             });
         } else {
-            // Create new - need to get the ID first for photo uploads
+            // Create new ticket - first create the ticket to get ID, then update with photos
             const ticketData = {
                 propertyId,
                 buildingNumber: buildingNumber || null,
@@ -741,21 +763,43 @@ function handleTicketSubmit(e) {
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
+            // Check if this is a retroactive ticket with custom dates
+            const customDateCreated = document.getElementById('customDateCreated')?.value;
+            const customDateCompleted = document.getElementById('customDateCompleted')?.value;
+            
+            if (customDateCreated) {
+                ticketData.dateCreated = firebase.firestore.Timestamp.fromDate(new Date(customDateCreated));
+            }
+            
             if (status === 'Completed') {
                 ticketData.completedBy = completedBy;
                 ticketData.howResolved = howResolved || null;
-                ticketData.dateCompleted = firebase.firestore.FieldValue.serverTimestamp();
-                if (beforeUrl) ticketData.beforePhotoUrl = beforeUrl;
-                if (afterUrl) ticketData.afterPhotoUrl = afterUrl;
+                if (customDateCompleted) {
+                    ticketData.dateCompleted = firebase.firestore.Timestamp.fromDate(new Date(customDateCompleted));
+                } else {
+                    ticketData.dateCompleted = firebase.firestore.FieldValue.serverTimestamp();
+                }
             } else {
                 ticketData.completedBy = null;
                 ticketData.howResolved = null;
-                ticketData.beforePhotoUrl = null;
-                ticketData.afterPhotoUrl = null;
                 ticketData.dateCompleted = null;
             }
 
-            db.collection('tickets').add(ticketData).then(() => {
+            // Create ticket first to get ID
+            db.collection('tickets').add(ticketData).then((docRef) => {
+                const newTicketId = docRef.id;
+                
+                // If photos were uploaded with 'temp', we need to re-upload them with the real ID
+                // OR update the ticket with the URLs we already have
+                const updateData = {};
+                if (beforeUrl) updateData.beforePhotoUrl = beforeUrl;
+                if (afterUrl && status === 'Completed') updateData.afterPhotoUrl = afterUrl;
+                
+                // If we have photos to add, update the ticket
+                if (Object.keys(updateData).length > 0) {
+                    return db.collection('tickets').doc(newTicketId).update(updateData);
+                }
+            }).then(() => {
                 closeTicketModal();
             }).catch((error) => {
                 console.error('Error creating ticket:', error);

@@ -114,6 +114,20 @@
                                     <option value="Completed">Completed</option>
                                 </select>
                             </div>
+                            <div class="form-group" id="retroactiveDatesGroup" style="display: none;">
+                                <label style="font-weight: 600; color: #667eea;">Retroactive Ticket Dates (Optional)</label>
+                                <small style="display: block; color: #666; margin-bottom: 10px;">Use this for previously completed work</small>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                    <div>
+                                        <label for="customDateCreated" style="font-size: 14px;">Date Created</label>
+                                        <input type="date" id="customDateCreated">
+                                    </div>
+                                    <div>
+                                        <label for="customDateCompleted" style="font-size: 14px;">Date Completed</label>
+                                        <input type="date" id="customDateCompleted">
+                                    </div>
+                                </div>
+                            </div>
                             <div class="form-group">
                                 <label>Before Photo (Optional)</label>
                                 <div class="file-upload-section" style="grid-template-columns: 1fr;">
