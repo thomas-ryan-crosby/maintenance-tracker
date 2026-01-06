@@ -32,8 +32,19 @@ A simple, user-friendly maintenance tracking system for HOA and Property Managem
 
 ### 2. Configure Firebase in the Project
 
-1. Copy `firebase-config.example.js` to `firebase-config.js` (or create `firebase-config.js` if it doesn't exist)
+**IMPORTANT:** The `firebase-config.js` file is not included in the repository for security reasons. You must create it.
+
+1. Copy `firebase-config.example.js` to `firebase-config.js`:
+   ```bash
+   cp firebase-config.example.js firebase-config.js
+   ```
+   Or on Windows:
+   ```bash
+   copy firebase-config.example.js firebase-config.js
+   ```
+
 2. Open `firebase-config.js`
+
 3. Replace the placeholder values with your Firebase configuration:
 
 ```javascript

@@ -135,10 +135,7 @@
             <!-- Dashboard -->
             <div class="dashboard">
                 <div class="dashboard-header">
-                    <div class="dashboard-actions">
-                        <button id="addPropertyBtn" class="btn-primary btn-large">+ Add Property</button>
-                        <button id="createTicketBtn" class="btn-primary btn-large">+ Create New Ticket</button>
-                    </div>
+                    <button id="createTicketBtn" class="btn-primary btn-large">+ Create New Ticket</button>
                     <div class="view-toggle">
                         <button id="viewActiveBtn" class="btn-toggle active">Active Tickets</button>
                         <button id="viewCompletedBtn" class="btn-toggle">Completed Tickets</button>
@@ -158,8 +155,29 @@
         </main>
     </div>
 
+    <!-- Firebase Config - Create firebase-config.js from firebase-config.example.js -->
     <script src="firebase-config.js"></script>
     <script src="app.js"></script>
+    <script>
+        // Fallback if firebase-config.js is missing
+        if (typeof firebase === 'undefined' || typeof db === 'undefined') {
+            document.body.innerHTML = `
+                <div style="padding: 40px; text-align: center; font-family: sans-serif;">
+                    <h1 style="color: #e74c3c;">⚠️ Configuration Missing</h1>
+                    <p style="font-size: 18px; margin: 20px 0;">The <code>firebase-config.js</code> file is missing.</p>
+                    <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; max-width: 600px; margin: 20px auto; text-align: left;">
+                        <h3>To fix this:</h3>
+                        <ol style="line-height: 1.8;">
+                            <li>Copy <code>firebase-config.example.js</code> to <code>firebase-config.js</code></li>
+                            <li>Fill in your Firebase configuration values</li>
+                            <li>Refresh this page</li>
+                        </ol>
+                        <p style="margin-top: 20px;"><strong>Note:</strong> This file is excluded from Git for security reasons.</p>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
 </body>
 </html>
 

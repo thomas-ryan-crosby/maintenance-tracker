@@ -26,7 +26,6 @@ function initializeApp() {
 function setupEventListeners() {
     // Property management
     document.getElementById('managePropertiesBtn').addEventListener('click', openPropertyModal);
-    document.getElementById('addPropertyBtn').addEventListener('click', openPropertyModalForAdd);
     document.getElementById('closePropertyModal').addEventListener('click', closePropertyModal);
     document.getElementById('propertyForm').addEventListener('submit', handlePropertySubmit);
     document.getElementById('cancelPropertyForm').addEventListener('click', closePropertyModal);
