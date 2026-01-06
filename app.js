@@ -368,6 +368,31 @@ function createTicketCard(ticket) {
                     <span class="ticket-detail-value" style="font-weight: 600; color: #2e7d32;">${escapeHtml(ticket.completedBy)}</span>
                 </div>
             ` : ''}
+            ${isCompleted && ticket.howResolved ? `
+                <div class="ticket-detail" style="grid-column: 1 / -1;">
+                    <span class="ticket-detail-label">How Resolved</span>
+                    <span class="ticket-detail-value">${escapeHtml(ticket.howResolved)}</span>
+                </div>
+            ` : ''}
+            ${isCompleted && (ticket.beforePhotoUrl || ticket.afterPhotoUrl) ? `
+                <div class="ticket-detail" style="grid-column: 1 / -1;">
+                    <span class="ticket-detail-label">Photos</span>
+                    <div class="ticket-photos">
+                        ${ticket.beforePhotoUrl ? `
+                            <div class="photo-item">
+                                <span class="photo-label">Before</span>
+                                <img src="${escapeHtml(ticket.beforePhotoUrl)}" alt="Before" class="ticket-photo" onclick="openPhotoModal('${escapeHtml(ticket.beforePhotoUrl)}')">
+                            </div>
+                        ` : ''}
+                        ${ticket.afterPhotoUrl ? `
+                            <div class="photo-item">
+                                <span class="photo-label">After</span>
+                                <img src="${escapeHtml(ticket.afterPhotoUrl)}" alt="After" class="ticket-photo" onclick="openPhotoModal('${escapeHtml(ticket.afterPhotoUrl)}')">
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            ` : ''}
             <div class="ticket-detail">
                 <span class="ticket-detail-label">Date Created</span>
                 <span class="ticket-detail-value">${formatDate(ticket.dateCreated)}</span>
@@ -419,6 +444,20 @@ function openTicketModal(ticketId = null) {
     // Set default status
     document.getElementById('ticketStatus').value = 'Not Started';
     document.getElementById('completedByGroup').style.display = 'none';
+    document.getElementById('howResolvedGroup').style.display = 'none';
+    document.getElementById('fileUploadGroup').style.display = 'none';
+    
+    // Reset file uploads
+    beforePhotoFile = null;
+    afterPhotoFile = null;
+    beforePhotoUrl = null;
+    afterPhotoUrl = null;
+    document.getElementById('beforePhoto').value = '';
+    document.getElementById('afterPhoto').value = '';
+    document.getElementById('beforePhotoPreview').innerHTML = '';
+    document.getElementById('afterPhotoPreview').innerHTML = '';
+    document.getElementById('removeBeforePhoto').style.display = 'none';
+    document.getElementById('removeAfterPhoto').style.display = 'none';
 
     // If editing, load ticket data
     if (ticketId) {
@@ -446,7 +485,20 @@ function loadTicketForEdit(ticketId) {
             
             if (ticket.status === 'Completed') {
                 document.getElementById('completedBy').value = ticket.completedBy || '';
+                document.getElementById('howResolved').value = ticket.howResolved || '';
                 document.getElementById('completedByGroup').style.display = 'block';
+                document.getElementById('howResolvedGroup').style.display = 'block';
+                document.getElementById('fileUploadGroup').style.display = 'block';
+                
+                // Load existing photos if any
+                if (ticket.beforePhotoUrl) {
+                    beforePhotoUrl = ticket.beforePhotoUrl;
+                    showPhotoPreview(ticket.beforePhotoUrl, 'before');
+                }
+                if (ticket.afterPhotoUrl) {
+                    afterPhotoUrl = ticket.afterPhotoUrl;
+                    showPhotoPreview(ticket.afterPhotoUrl, 'after');
+                }
             }
         }
     });
@@ -455,8 +507,12 @@ function loadTicketForEdit(ticketId) {
 function handleStatusChange(e) {
     if (e.target.value === 'Completed') {
         document.getElementById('completedByGroup').style.display = 'block';
+        document.getElementById('howResolvedGroup').style.display = 'block';
+        document.getElementById('fileUploadGroup').style.display = 'block';
     } else {
         document.getElementById('completedByGroup').style.display = 'none';
+        document.getElementById('howResolvedGroup').style.display = 'none';
+        document.getElementById('fileUploadGroup').style.display = 'none';
     }
 }
 
@@ -471,6 +527,7 @@ function handleTicketSubmit(e) {
     const managedBy = document.getElementById('managedBy').value.trim();
     const status = document.getElementById('ticketStatus').value;
     const completedBy = document.getElementById('completedBy').value.trim();
+    const howResolved = document.getElementById('howResolved').value.trim();
 
     if (!propertyId || !workDescription || !timeAllocated || !requestedBy || !managedBy) {
         alert('Please fill in all required fields');
@@ -481,62 +538,120 @@ function handleTicketSubmit(e) {
         alert('Please enter who completed the work');
         return;
     }
+    
+    // Disable submit button
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+    }
 
-    if (id && editingTicketId) {
-        // Update existing - preserve dateCreated and handle dateCompleted properly
-        db.collection('tickets').doc(id).get().then((doc) => {
-            const existing = doc.data();
+    // Upload photos first if any
+    const uploadPromises = [];
+    
+    if (beforePhotoFile) {
+        uploadPromises.push(uploadPhoto(beforePhotoFile, id || 'temp', 'before'));
+    }
+    if (afterPhotoFile) {
+        uploadPromises.push(uploadPhoto(afterPhotoFile, id || 'temp', 'after'));
+    }
+    
+    // If no new photos, use existing URLs
+    Promise.all(uploadPromises).then((photoUrls) => {
+        const beforeUrl = photoUrls.find(url => url && url.includes('before')) || beforePhotoUrl;
+        const afterUrl = photoUrls.find(url => url && url.includes('after')) || afterPhotoUrl;
+        
+        if (id && editingTicketId) {
+            // Update existing - preserve dateCreated and handle dateCompleted properly
+            db.collection('tickets').doc(id).get().then((doc) => {
+                const existing = doc.data();
+                const ticketData = {
+                    propertyId,
+                    workDescription,
+                    timeAllocated,
+                    requestedBy,
+                    managedBy,
+                    status,
+                    dateCreated: existing?.dateCreated || firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                if (status === 'Completed') {
+                    ticketData.completedBy = completedBy;
+                    ticketData.howResolved = howResolved || null;
+                    if (beforeUrl) ticketData.beforePhotoUrl = beforeUrl;
+                    if (afterUrl) ticketData.afterPhotoUrl = afterUrl;
+                    // Only set dateCompleted if it wasn't already completed
+                    if (existing?.status !== 'Completed') {
+                        ticketData.dateCompleted = firebase.firestore.FieldValue.serverTimestamp();
+                    } else {
+                        ticketData.dateCompleted = existing.dateCompleted;
+                    }
+                } else {
+                    ticketData.completedBy = null;
+                    ticketData.howResolved = null;
+                    ticketData.beforePhotoUrl = null;
+                    ticketData.afterPhotoUrl = null;
+                    ticketData.dateCompleted = null;
+                }
+
+                return db.collection('tickets').doc(id).update(ticketData);
+            }).then(() => {
+                closeTicketModal();
+            }).catch((error) => {
+                console.error('Error updating ticket:', error);
+                alert('Error saving ticket: ' + error.message);
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Save Ticket';
+                }
+            });
+        } else {
+            // Create new - need to get the ID first for photo uploads
             const ticketData = {
                 propertyId,
                 workDescription,
                 timeAllocated,
                 requestedBy,
                 managedBy,
-                status,
-                dateCreated: existing?.dateCreated || firebase.firestore.FieldValue.serverTimestamp(),
+                status: status || 'Not Started',
+                dateCreated: firebase.firestore.FieldValue.serverTimestamp(),
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
             if (status === 'Completed') {
                 ticketData.completedBy = completedBy;
-                // Only set dateCompleted if it wasn't already completed
-                if (existing?.status !== 'Completed') {
-                    ticketData.dateCompleted = firebase.firestore.FieldValue.serverTimestamp();
-                } else {
-                    ticketData.dateCompleted = existing.dateCompleted;
-                }
+                ticketData.howResolved = howResolved || null;
+                ticketData.dateCompleted = firebase.firestore.FieldValue.serverTimestamp();
+                if (beforeUrl) ticketData.beforePhotoUrl = beforeUrl;
+                if (afterUrl) ticketData.afterPhotoUrl = afterUrl;
             } else {
                 ticketData.completedBy = null;
+                ticketData.howResolved = null;
+                ticketData.beforePhotoUrl = null;
+                ticketData.afterPhotoUrl = null;
                 ticketData.dateCompleted = null;
             }
 
-            db.collection('tickets').doc(id).update(ticketData);
-        });
-    } else {
-        // Create new
-        const ticketData = {
-            propertyId,
-            workDescription,
-            timeAllocated,
-            requestedBy,
-            managedBy,
-            status: status || 'Not Started',
-            dateCreated: firebase.firestore.FieldValue.serverTimestamp(),
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-
-        if (status === 'Completed') {
-            ticketData.completedBy = completedBy;
-            ticketData.dateCompleted = firebase.firestore.FieldValue.serverTimestamp();
-        } else {
-            ticketData.completedBy = null;
-            ticketData.dateCompleted = null;
+            db.collection('tickets').add(ticketData).then(() => {
+                closeTicketModal();
+            }).catch((error) => {
+                console.error('Error creating ticket:', error);
+                alert('Error saving ticket: ' + error.message);
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Save Ticket';
+                }
+            });
         }
-
-        db.collection('tickets').add(ticketData);
-    }
-
-    closeTicketModal();
+    }).catch((error) => {
+        console.error('Error uploading photos:', error);
+        alert('Error uploading photos: ' + error.message);
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Save Ticket';
+        }
+    });
 }
 
 window.markTicketComplete = function(ticketId) {
