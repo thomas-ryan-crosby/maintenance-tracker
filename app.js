@@ -551,6 +551,14 @@ function openTicketModal(ticketId = null) {
     document.getElementById('ticketForm').reset();
     document.getElementById('ticketId').value = '';
     editingTicketId = null;
+    
+    // Reset submit button state
+    const submitBtn = document.querySelector('#ticketForm button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save Ticket';
+        submitBtn.classList.remove('saving');
+    }
 
     // Populate property dropdown
     const ticketPropertySelect = document.getElementById('ticketProperty');
