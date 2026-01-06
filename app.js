@@ -341,17 +341,35 @@ window.editProperty = function(id) {
     db.collection('properties').doc(id).get().then((doc) => {
         const property = doc.data();
         if (property) {
-            // Open edit modal and populate form
-            document.getElementById('propertyEditModal').classList.add('show');
-            document.getElementById('propertyEditId').value = id;
-            document.getElementById('propertyEditName').value = property.name || '';
-            document.getElementById('propertyEditAddress').value = property.address || '';
-            document.getElementById('propertyEditType').value = property.propertyType || '';
-            document.getElementById('propertyEditDescription').value = property.description || '';
-            // Focus on property name input
-            setTimeout(() => {
-                document.getElementById('propertyEditName').focus();
-            }, 100);
+            // Check if edit modal exists, if not use the main modal
+            const editModal = document.getElementById('propertyEditModal');
+            if (editModal) {
+                // Open edit modal and populate form
+                editModal.classList.add('show');
+                document.getElementById('propertyEditId').value = id;
+                document.getElementById('propertyEditName').value = property.name || '';
+                document.getElementById('propertyEditAddress').value = property.address || '';
+                document.getElementById('propertyEditType').value = property.propertyType || '';
+                document.getElementById('propertyEditDescription').value = property.description || '';
+                // Focus on property name input
+                setTimeout(() => {
+                    document.getElementById('propertyEditName').focus();
+                }, 100);
+            } else {
+                // Fallback: use main property modal and show form
+                editingPropertyId = id;
+                document.getElementById('propertyModal').classList.add('show');
+                document.getElementById('propertyId').value = id;
+                document.getElementById('propertyName').value = property.name || '';
+                document.getElementById('propertyAddress').value = property.address || '';
+                document.getElementById('propertyType').value = property.propertyType || '';
+                document.getElementById('propertyDescription').value = property.description || '';
+                document.getElementById('propertyForm').style.display = 'block';
+                // Focus on property name input
+                setTimeout(() => {
+                    document.getElementById('propertyName').focus();
+                }, 100);
+            }
         }
     }).catch((error) => {
         console.error('Error loading property:', error);
@@ -360,9 +378,18 @@ window.editProperty = function(id) {
 };
 
 function closePropertyEditModal() {
-    document.getElementById('propertyEditModal').classList.remove('show');
-    document.getElementById('propertyEditForm').reset();
-    document.getElementById('propertyEditId').value = '';
+    const editModal = document.getElementById('propertyEditModal');
+    if (editModal) {
+        editModal.classList.remove('show');
+        const editForm = document.getElementById('propertyEditForm');
+        if (editForm) {
+            editForm.reset();
+        }
+        const editId = document.getElementById('propertyEditId');
+        if (editId) {
+            editId.value = '';
+        }
+    }
 }
 
 function handlePropertyEditSubmit(e) {
