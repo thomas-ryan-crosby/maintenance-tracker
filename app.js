@@ -222,11 +222,20 @@ function handlePropertySubmit(e) {
         return;
     }
 
-    // Disable submit button to prevent double submission
+    // Disable submit button and show loading modal
     const submitBtn = e.target.querySelector('button[type="submit"]');
     if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Saving...';
+        submitBtn.classList.add('saving');
+    }
+    
+    // Show loading modal
+    const loadingModal = document.getElementById('loadingModal');
+    if (loadingModal) {
+        document.getElementById('loadingModalTitle').textContent = 'Saving Property...';
+        document.getElementById('loadingModalMessage').textContent = 'Please wait while we save your property';
+        loadingModal.classList.add('show');
     }
 
     if (id && editingPropertyId) {
@@ -244,15 +253,23 @@ function handlePropertySubmit(e) {
             return db.collection('properties').doc(id).update(propertyData);
         }).then(() => {
             console.log('Property updated successfully');
-            closePropertyModal();
+            // Hide loading modal
+            if (loadingModal) {
+                loadingModal.classList.remove('show');
+            }
+            hidePropertyForm();
         }).catch((error) => {
             console.error('Error updating property:', error);
+            // Hide loading modal
+            if (loadingModal) {
+                loadingModal.classList.remove('show');
+            }
             alert('Error saving property: ' + error.message);
             // Re-enable submit button on error
-            const submitBtn = document.querySelector('#propertyForm button[type="submit"]');
             if (submitBtn) {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Save Property';
+                submitBtn.classList.remove('saving');
             }
         });
     } else {
@@ -268,16 +285,24 @@ function handlePropertySubmit(e) {
         db.collection('properties').add(propertyData)
             .then((docRef) => {
                 console.log('Property created successfully with ID:', docRef.id);
-                closePropertyModal();
+                // Hide loading modal
+                if (loadingModal) {
+                    loadingModal.classList.remove('show');
+                }
+                hidePropertyForm();
             })
             .catch((error) => {
                 console.error('Error creating property:', error);
+                // Hide loading modal
+                if (loadingModal) {
+                    loadingModal.classList.remove('show');
+                }
                 alert('Error saving property: ' + error.message);
                 // Re-enable submit button on error
-                const submitBtn = document.querySelector('#propertyForm button[type="submit"]');
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Save Property';
+                    submitBtn.classList.remove('saving');
                 }
             });
     }
