@@ -843,6 +843,41 @@ function removeFile(type) {
     }
 }
 
+function handleCompletionFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+    }
+    
+    completionAfterPhotoFile = file;
+    
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const preview = document.getElementById('completionAfterPhotoPreview');
+        preview.innerHTML = `<img src="${e.target.result}" alt="after preview" style="max-width: 200px; max-height: 200px; border-radius: 4px; margin-top: 10px;">`;
+        document.getElementById('removeCompletionAfterPhoto').style.display = 'inline-block';
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeCompletionFile() {
+    completionAfterPhotoFile = null;
+    document.getElementById('completionAfterPhoto').value = '';
+    document.getElementById('completionAfterPhotoPreview').innerHTML = '';
+    document.getElementById('removeCompletionAfterPhoto').style.display = 'none';
+}
+
 function uploadPhoto(file, ticketId, type) {
     return new Promise((resolve, reject) => {
         // Use a temporary ID if creating new ticket
