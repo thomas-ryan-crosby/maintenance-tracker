@@ -98,6 +98,21 @@
                                     <option value="Completed">Completed</option>
                                 </select>
                             </div>
+                            <div class="form-group">
+                                <label>Before Photo (Optional)</label>
+                                <div class="file-upload-section" style="grid-template-columns: 1fr;">
+                                    <div class="file-upload-item">
+                                        <label for="beforePhoto" class="file-upload-label">
+                                            <span class="file-upload-icon">📷</span>
+                                            <span>Upload Before Photo</span>
+                                        </label>
+                                        <input type="file" id="beforePhoto" accept="image/*" style="display: none;">
+                                        <div id="beforePhotoPreview" class="file-preview"></div>
+                                        <button type="button" class="btn-remove-file" id="removeBeforePhoto" style="display: none;">Remove</button>
+                                    </div>
+                                </div>
+                                <small style="color: #666; font-size: 12px;">Upload a photo showing the issue before work begins</small>
+                            </div>
                             <div class="form-group" id="completedByGroup" style="display: none;">
                                 <label for="completedBy">Completed By *</label>
                                 <input type="text" id="completedBy">
@@ -106,28 +121,20 @@
                                 <label for="howResolved">How Resolved</label>
                                 <textarea id="howResolved" rows="3" placeholder="Describe how the issue was resolved..."></textarea>
                             </div>
-                            <div class="form-group" id="fileUploadGroup" style="display: none;">
-                                <label>Before/After Photos</label>
-                                <div class="file-upload-section">
-                                    <div class="file-upload-item">
-                                        <label for="beforePhoto" class="file-upload-label">
-                                            <span class="file-upload-icon">📷</span>
-                                            <span>Before Photo</span>
-                                        </label>
-                                        <input type="file" id="beforePhoto" accept="image/*" style="display: none;">
-                                        <div id="beforePhotoPreview" class="file-preview"></div>
-                                        <button type="button" class="btn-remove-file" id="removeBeforePhoto" style="display: none;">Remove</button>
-                                    </div>
+                            <div class="form-group" id="afterPhotoGroup" style="display: none;">
+                                <label>After Photo (Optional)</label>
+                                <div class="file-upload-section" style="grid-template-columns: 1fr;">
                                     <div class="file-upload-item">
                                         <label for="afterPhoto" class="file-upload-label">
                                             <span class="file-upload-icon">📷</span>
-                                            <span>After Photo</span>
+                                            <span>Upload After Photo</span>
                                         </label>
                                         <input type="file" id="afterPhoto" accept="image/*" style="display: none;">
                                         <div id="afterPhotoPreview" class="file-preview"></div>
                                         <button type="button" class="btn-remove-file" id="removeAfterPhoto" style="display: none;">Remove</button>
                                     </div>
                                 </div>
+                                <small style="color: #666; font-size: 12px;">Upload a photo showing the completed work</small>
                             </div>
                             <div class="form-actions">
                                 <button type="submit" class="btn-primary">Save Ticket</button>

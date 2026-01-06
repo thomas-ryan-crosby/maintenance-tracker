@@ -451,7 +451,8 @@ function openTicketModal(ticketId = null) {
     document.getElementById('ticketStatus').value = 'Not Started';
     document.getElementById('completedByGroup').style.display = 'none';
     document.getElementById('howResolvedGroup').style.display = 'none';
-    document.getElementById('fileUploadGroup').style.display = 'none';
+    document.getElementById('afterPhotoGroup').style.display = 'none';
+    // Before photo is always visible, so no need to hide it
     
     // Reset file uploads
     beforePhotoFile = null;
@@ -514,11 +515,11 @@ function handleStatusChange(e) {
     if (e.target.value === 'Completed') {
         document.getElementById('completedByGroup').style.display = 'block';
         document.getElementById('howResolvedGroup').style.display = 'block';
-        document.getElementById('fileUploadGroup').style.display = 'block';
+        document.getElementById('afterPhotoGroup').style.display = 'block';
     } else {
         document.getElementById('completedByGroup').style.display = 'none';
         document.getElementById('howResolvedGroup').style.display = 'none';
-        document.getElementById('fileUploadGroup').style.display = 'none';
+        document.getElementById('afterPhotoGroup').style.display = 'none';
     }
 }
 
