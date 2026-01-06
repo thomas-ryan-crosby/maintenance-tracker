@@ -883,6 +883,7 @@ function loadTicketForEdit(ticketId) {
             }
             document.getElementById('workDescription').value = ticket.workDescription || '';
             document.getElementById('detailedDescription').value = ticket.detailedDescription || '';
+            document.getElementById('workUpdates').value = ticket.workUpdates || '';
             document.getElementById('timeAllocated').value = ticket.timeAllocated || '';
             document.getElementById('billingRate').value = ticket.billingRate || '';
             document.getElementById('requestedBy').value = ticket.requestedBy || '';
