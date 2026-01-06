@@ -415,6 +415,16 @@ function createTicketCard(ticket) {
                 <span class="ticket-detail-label">Time Allocated</span>
                 <span class="ticket-detail-value">${ticket.timeAllocated} hours</span>
             </div>
+            ${ticket.billingRate ? `
+                <div class="ticket-detail">
+                    <span class="ticket-detail-label">Billing Rate</span>
+                    <span class="ticket-detail-value">$${parseFloat(ticket.billingRate).toFixed(2)}/hr</span>
+                </div>
+                <div class="ticket-detail">
+                    <span class="ticket-detail-label">Estimated Cost</span>
+                    <span class="ticket-detail-value" style="font-weight: 600; color: #667eea;">$${((ticket.timeAllocated || 0) * (ticket.billingRate || 0)).toFixed(2)}</span>
+                </div>
+            ` : ''}
             <div class="ticket-detail">
                 <span class="ticket-detail-label">Requested By</span>
                 <span class="ticket-detail-value">${escapeHtml(ticket.requestedBy)}</span>
