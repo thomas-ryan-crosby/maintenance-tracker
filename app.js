@@ -261,8 +261,10 @@ function handlePropertySubmit(e) {
     // Show loading modal
     const loadingModal = document.getElementById('loadingModal');
     if (loadingModal) {
-        document.getElementById('loadingModalTitle').textContent = 'Saving Property...';
-        document.getElementById('loadingModalMessage').textContent = 'Please wait while we save your property';
+        const loadingModalTitle = document.getElementById('loadingModalTitle');
+        const loadingModalMessage = document.getElementById('loadingModalMessage');
+        if (loadingModalTitle) loadingModalTitle.textContent = 'Saving Property...';
+        if (loadingModalMessage) loadingModalMessage.textContent = 'Please wait while we save your property';
         loadingModal.classList.add('show');
     }
 
@@ -973,9 +975,12 @@ function handleTicketSubmit(e) {
                     requestedBy,
                     managedBy,
                     status,
+                    // Always preserve existing dateCreated unless custom date is provided
                     dateCreated: customDateCreated 
                         ? firebase.firestore.Timestamp.fromDate(new Date(customDateCreated))
                         : (existing?.dateCreated || firebase.firestore.FieldValue.serverTimestamp()),
+                    // Always update the lastUpdated timestamp
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
