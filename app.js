@@ -955,6 +955,7 @@ function handleTicketSubmit(e) {
     const tenantName = document.getElementById('tenantName').value.trim();
     const workDescription = document.getElementById('workDescription').value.trim();
     const detailedDescription = document.getElementById('detailedDescription').value.trim();
+    const workUpdates = document.getElementById('workUpdates').value.trim();
     const timeAllocated = parseFloat(document.getElementById('timeAllocated').value);
     const billingRateInput = document.getElementById('billingRate');
     const billingRate = billingRateInput && billingRateInput.value ? parseFloat(billingRateInput.value) : null;
@@ -1025,20 +1026,23 @@ function handleTicketSubmit(e) {
                     tenantName: tenantName || null,
                     workDescription,
                     detailedDescription: detailedDescription || null,
+                    workUpdates: workUpdates || null,
                     timeAllocated: timeAllocated && !isNaN(timeAllocated) ? timeAllocated : null,
                     billingRate: billingRate || null,
                     requestedBy,
                     managedBy,
                     status,
-                    // Always preserve existing dateCreated unless custom date is provided
-                    // Never update dateCreated on edit - always use existing value
-                    dateCreated: customDateCreated 
-                        ? firebase.firestore.Timestamp.fromDate(new Date(customDateCreated))
-                        : existing?.dateCreated,
                     // Always update the lastUpdated timestamp
                     lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
+                
+                // ONLY include dateCreated if a custom date is explicitly provided
+                // Otherwise, DO NOT include it in the update to preserve the existing value
+                if (customDateCreated) {
+                    ticketData.dateCreated = firebase.firestore.Timestamp.fromDate(new Date(customDateCreated));
+                }
+                // If no custom date, we don't include dateCreated at all - Firestore will preserve existing value
 
                 // Always save before photo if it exists (can be uploaded for any status)
                 if (beforeUrl) ticketData.beforePhotoUrl = beforeUrl;
