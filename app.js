@@ -822,6 +822,23 @@ function switchView(view) {
     }
 }
 
+// Metrics Dashboard Toggle
+function toggleMetrics() {
+    const content = document.getElementById('metricsContent');
+    const toggleText = document.getElementById('metricsToggleText');
+    const toggleIcon = document.getElementById('metricsToggleIcon');
+    
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        toggleText.textContent = 'Click to Collapse';
+        toggleIcon.textContent = '▲';
+    } else {
+        content.style.display = 'none';
+        toggleText.textContent = 'Click to Expand';
+        toggleIcon.textContent = '▼';
+    }
+}
+
 // Utility Functions
 function escapeHtml(text) {
     const div = document.createElement('div');
