@@ -1025,7 +1025,7 @@ function handleTicketSubmit(e) {
                     tenantName: tenantName || null,
                     workDescription,
                     detailedDescription: detailedDescription || null,
-                    timeAllocated,
+                    timeAllocated: timeAllocated && !isNaN(timeAllocated) ? timeAllocated : null,
                     billingRate: billingRate || null,
                     requestedBy,
                     managedBy,
