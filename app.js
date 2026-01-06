@@ -822,9 +822,16 @@ function updateCommercialFieldsVisibility(propertyId) {
             const property = doc.data();
             const commercialFieldsGroup = document.getElementById('commercialFieldsGroup');
             
-            if (property && property.propertyType === 'commercial') {
+            // Check property type (case-insensitive and handle variations)
+            const propertyType = property?.propertyType ? String(property.propertyType).toLowerCase().trim() : '';
+            const isCommercial = propertyType === 'commercial';
+            
+            console.log('Property type check:', { propertyId: cleanPropertyId, propertyType, isCommercial, property });
+            
+            if (property && isCommercial) {
                 if (commercialFieldsGroup) {
                     commercialFieldsGroup.style.display = 'block';
+                    console.log('Commercial fields shown for property:', cleanPropertyId);
                 }
             } else {
                 if (commercialFieldsGroup) {
