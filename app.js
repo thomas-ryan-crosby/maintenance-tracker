@@ -19,6 +19,7 @@ function initializeApp() {
 function setupEventListeners() {
     // Property management
     document.getElementById('managePropertiesBtn').addEventListener('click', openPropertyModal);
+    document.getElementById('addPropertyBtn').addEventListener('click', openPropertyModalForAdd);
     document.getElementById('closePropertyModal').addEventListener('click', closePropertyModal);
     document.getElementById('propertyForm').addEventListener('submit', handlePropertySubmit);
     document.getElementById('cancelPropertyForm').addEventListener('click', closePropertyModal);
@@ -83,6 +84,17 @@ function loadProperties() {
             localStorage.setItem('selectedPropertyId', selectedPropertyId);
         }
 
+        // Show helpful message if no properties exist
+        if (Object.keys(properties).length === 0) {
+            const select = document.getElementById('propertySelect');
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'No properties - Click "Add Property" to get started!';
+            option.disabled = true;
+            option.selected = true;
+            select.appendChild(option);
+        }
+
         renderPropertiesList(properties);
         loadTickets();
     });
@@ -121,6 +133,19 @@ function openPropertyModal() {
     document.getElementById('propertyForm').reset();
     document.getElementById('propertyId').value = '';
     editingPropertyId = null;
+    // Focus on property name input for quick entry
+    setTimeout(() => {
+        document.getElementById('propertyName').focus();
+    }, 100);
+}
+
+function openPropertyModalForAdd() {
+    openPropertyModal();
+    // Scroll to top of modal to show the form
+    const modalBody = document.querySelector('#propertyModal .modal-body');
+    if (modalBody) {
+        modalBody.scrollTop = 0;
+    }
 }
 
 function closePropertyModal() {
@@ -326,7 +351,16 @@ function createTicketCard(ticket) {
 
 function openTicketModal(ticketId = null) {
     if (!selectedPropertyId && !ticketId) {
-        alert('Please select a property first');
+        // Check if there are any properties
+        db.collection('properties').get().then((snapshot) => {
+            if (snapshot.empty) {
+                if (confirm('No properties found. Would you like to add a property first?')) {
+                    openPropertyModalForAdd();
+                }
+            } else {
+                alert('Please select a property first, or choose one when creating the ticket.');
+            }
+        });
         return;
     }
 
