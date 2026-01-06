@@ -62,6 +62,9 @@ function setupEventListeners() {
     // View toggles
     document.getElementById('viewActiveBtn').addEventListener('click', () => switchView('active'));
     document.getElementById('viewCompletedBtn').addEventListener('click', () => switchView('completed'));
+    
+    // Metrics dashboard toggle
+    document.getElementById('toggleMetricsBtn').addEventListener('click', toggleMetrics);
 
     // Completion modal
     document.getElementById('closeCompletionModal').addEventListener('click', closeCompletionModal);

@@ -192,31 +192,39 @@
 
             <!-- Metrics Dashboard -->
             <div class="metrics-dashboard">
-                <h2>📊 Metrics Dashboard</h2>
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-label">Active Tickets</div>
-                        <div class="metric-value" id="metricActiveTickets">0</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Completed Tickets</div>
-                        <div class="metric-value" id="metricCompletedTickets">0</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Total Hours Allocated</div>
-                        <div class="metric-value" id="metricTotalHours">0</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Completed Hours</div>
-                        <div class="metric-value" id="metricCompletedHours">0</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Estimated Cost (Active)</div>
-                        <div class="metric-value" id="metricEstimatedCost">$0.00</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Total Cost (Completed)</div>
-                        <div class="metric-value" id="metricTotalCost">$0.00</div>
+                <div class="metrics-header">
+                    <h2>📊 Metrics Dashboard</h2>
+                    <button id="toggleMetricsBtn" class="btn-secondary btn-small">
+                        <span id="metricsToggleText">Click to Expand</span>
+                        <span id="metricsToggleIcon">▼</span>
+                    </button>
+                </div>
+                <div class="metrics-content" id="metricsContent" style="display: none;">
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-label">Active Tickets</div>
+                            <div class="metric-value" id="metricActiveTickets">0</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Completed Tickets</div>
+                            <div class="metric-value" id="metricCompletedTickets">0</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Total Hours Allocated</div>
+                            <div class="metric-value" id="metricTotalHours">0</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Completed Hours</div>
+                            <div class="metric-value" id="metricCompletedHours">0</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Estimated Cost (Active)</div>
+                            <div class="metric-value" id="metricEstimatedCost">$0.00</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Total Cost (Completed)</div>
+                            <div class="metric-value" id="metricTotalCost">$0.00</div>
+                        </div>
                     </div>
                 </div>
             </div>
