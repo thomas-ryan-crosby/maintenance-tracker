@@ -320,6 +320,7 @@
                     <div class="view-toggle">
                         <button id="viewActiveBtn" class="btn-toggle active">Active Tickets</button>
                         <button id="viewCompletedBtn" class="btn-toggle">Completed Tickets</button>
+                        <button id="viewDeletedBtn" class="btn-toggle">Deleted Tickets</button>
                     </div>
                 </div>
 
@@ -331,6 +332,11 @@
                 <div id="completedTicketsView" class="tickets-view" style="display: none;">
                     <h2>Completed Tickets</h2>
                     <div id="completedTicketsList" class="tickets-list"></div>
+                </div>
+                <div id="deletedTicketsView" class="tickets-view" style="display: none;">
+                    <h2>Deleted Tickets</h2>
+                    <p style="color: #666; margin-bottom: 15px;">Tickets in this section will be permanently removed after 30 days.</p>
+                    <div id="deletedTicketsList" class="tickets-list"></div>
                 </div>
             </div>
         </main>
