@@ -1,6 +1,6 @@
 # Firestore Security Rules Setup
 
-If the "Save Property" button isn't working, it's likely because Firestore security rules are blocking writes.
+If the "Save Property" or "Save Ticket" buttons aren't working, it's likely because Firestore security rules are blocking writes.
 
 ## Quick Fix: Allow All Access (For Testing)
 
