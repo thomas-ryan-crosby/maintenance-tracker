@@ -64,7 +64,7 @@ header h1 {
     border-color: #667eea;
 }
 
-.btn-primary, .btn-secondary, .btn-toggle {
+.btn-primary, .btn-secondary, .btn-toggle, .btn-danger {
     padding: 10px 20px;
     border: none;
     border-radius: 6px;
@@ -476,10 +476,18 @@ header h1 {
 .btn-danger {
     background: #f44336;
     color: white;
+    border: none;
 }
 
 .btn-danger:hover {
     background: #d32f2f;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+}
+
+.btn-danger:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(244, 67, 54, 0.2);
 }
 
 hr {
