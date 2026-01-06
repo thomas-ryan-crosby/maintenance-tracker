@@ -632,9 +632,18 @@ function loadTicketForEdit(ticketId) {
             editingTicketId = ticketId;
             document.getElementById('ticketId').value = ticketId;
             document.getElementById('ticketProperty').value = ticket.propertyId || '';
-            document.getElementById('buildingNumber').value = ticket.buildingNumber || '';
-            document.getElementById('floorNumber').value = ticket.floorNumber || '';
-            document.getElementById('tenantName').value = ticket.tenantName || '';
+            // Check property type and show/hide commercial fields, then set values
+            if (ticket.propertyId) {
+                updateCommercialFieldsVisibility(ticket.propertyId).then(() => {
+                    document.getElementById('buildingNumber').value = ticket.buildingNumber || '';
+                    document.getElementById('floorNumber').value = ticket.floorNumber || '';
+                    document.getElementById('tenantName').value = ticket.tenantName || '';
+                });
+            } else {
+                document.getElementById('buildingNumber').value = ticket.buildingNumber || '';
+                document.getElementById('floorNumber').value = ticket.floorNumber || '';
+                document.getElementById('tenantName').value = ticket.tenantName || '';
+            }
             document.getElementById('workDescription').value = ticket.workDescription || '';
             document.getElementById('timeAllocated').value = ticket.timeAllocated || '';
             document.getElementById('billingRate').value = ticket.billingRate || '';
