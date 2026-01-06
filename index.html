@@ -158,6 +158,25 @@
                                 <label for="completionCompletedBy">Completed By *</label>
                                 <input type="text" id="completionCompletedBy" required>
                             </div>
+                            <div class="form-group">
+                                <label for="completionHowResolved">How Resolved</label>
+                                <textarea id="completionHowResolved" rows="3" placeholder="Describe how the issue was resolved..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>After Photo (Optional)</label>
+                                <div class="file-upload-section" style="grid-template-columns: 1fr;">
+                                    <div class="file-upload-item">
+                                        <label for="completionAfterPhoto" class="file-upload-label">
+                                            <span class="file-upload-icon">📷</span>
+                                            <span>Upload After Photo</span>
+                                        </label>
+                                        <input type="file" id="completionAfterPhoto" accept="image/*" style="display: none;">
+                                        <div id="completionAfterPhotoPreview" class="file-preview"></div>
+                                        <button type="button" class="btn-remove-file" id="removeCompletionAfterPhoto" style="display: none;">Remove</button>
+                                    </div>
+                                </div>
+                                <small style="color: #666; font-size: 12px;">Upload a photo showing the completed work</small>
+                            </div>
                             <div class="form-actions">
                                 <button type="submit" class="btn-primary">Mark as Complete</button>
                                 <button type="button" class="btn-secondary" id="cancelCompletionForm">Cancel</button>
