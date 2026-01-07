@@ -3062,22 +3062,31 @@ function handleTenantSubmit(e) {
         }
     };
     
-    const id = document.getElementById('tenantId').value;
-    const tenantNameField = document.getElementById('tenantName');
+    // Get form element to scope field lookups
+    const tenantForm = document.getElementById('tenantForm');
+    if (!tenantForm) {
+        console.error('Tenant form not found');
+        alert('Error: Tenant form not found. Please refresh the page.');
+        resetButtonState();
+        return;
+    }
+    
+    const id = tenantForm.querySelector('#tenantId').value;
+    const tenantNameField = tenantForm.querySelector('#tenantName');
     const tenantName = tenantNameField ? tenantNameField.value.trim() : '';
-    const tenantType = document.getElementById('tenantType').value;
-    const status = document.getElementById('tenantStatus').value;
-    const mailingAddress = document.getElementById('tenantMailingAddress').value.trim();
-    const notes = document.getElementById('tenantNotes').value.trim();
+    const tenantType = tenantForm.querySelector('#tenantType').value;
+    const status = tenantForm.querySelector('#tenantStatus').value;
+    const mailingAddress = tenantForm.querySelector('#tenantMailingAddress').value.trim();
+    const notes = tenantForm.querySelector('#tenantNotes').value.trim();
     
     // Commercial specific fields
-    const taxId = document.getElementById('tenantTaxId')?.value.trim() || null;
-    const businessType = document.getElementById('tenantBusinessType')?.value.trim() || null;
-    const numberOfEmployees = parseInt(document.getElementById('tenantNumberOfEmployees')?.value) || null;
-    const website = document.getElementById('tenantWebsite')?.value.trim() || null;
+    const taxId = tenantForm.querySelector('#tenantTaxId')?.value.trim() || null;
+    const businessType = tenantForm.querySelector('#tenantBusinessType')?.value.trim() || null;
+    const numberOfEmployees = parseInt(tenantForm.querySelector('#tenantNumberOfEmployees')?.value) || null;
+    const website = tenantForm.querySelector('#tenantWebsite')?.value.trim() || null;
     
     // Residential specific fields
-    const dateOfBirthStr = document.getElementById('tenantDateOfBirth')?.value || null;
+    const dateOfBirthStr = tenantForm.querySelector('#tenantDateOfBirth')?.value || null;
     const dateOfBirth = dateOfBirthStr ? firebase.firestore.Timestamp.fromDate(new Date(dateOfBirthStr)) : null;
     
     // Validation - check if field exists and has value
