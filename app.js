@@ -44,6 +44,10 @@ function setupEventListeners() {
     if (cancelPropertyFormBtn) cancelPropertyFormBtn.addEventListener('click', hidePropertyForm);
     if (propertySelect) propertySelect.addEventListener('change', handlePropertySelect);
     
+    // Property type change handler for conditional fields
+    const propertyTypeSelect = document.getElementById('propertyType');
+    if (propertyTypeSelect) propertyTypeSelect.addEventListener('change', updatePropertyTypeFields);
+    
     // Property edit modal
     const closePropertyEditModalBtn = document.getElementById('closePropertyEditModal');
     const propertyEditForm = document.getElementById('propertyEditForm');
@@ -218,11 +222,14 @@ function renderPropertiesList(properties) {
         const property = properties[id];
         const item = document.createElement('div');
         item.className = 'property-item';
+        const statusBadge = property.status ? `<span class="status-badge status-${property.status.toLowerCase().replace(' ', '-')}">${property.status}</span>` : '';
         item.innerHTML = `
             <div class="property-info">
-                <h4>${escapeHtml(property.name)}</h4>
+                <h4>${escapeHtml(property.name)} ${statusBadge}</h4>
                 <p><strong>Type:</strong> ${property.propertyType === 'commercial' ? 'Commercial' : property.propertyType === 'hoa' ? 'HOA' : property.propertyType === 'residential' ? 'Residential' : 'Not Set'}</p>
                 ${property.address ? `<p>📍 ${escapeHtml(property.address)}</p>` : ''}
+                ${property.squareFootage ? `<p><strong>Square Footage:</strong> ${property.squareFootage.toLocaleString()} sq ft</p>` : ''}
+                ${property.numberOfUnits ? `<p><strong>Units/Spaces:</strong> ${property.numberOfUnits}</p>` : ''}
                 ${property.description ? `<p>${escapeHtml(property.description)}</p>` : ''}
             </div>
             <div class="property-item-actions">
@@ -255,6 +262,21 @@ function hidePropertyForm() {
     document.getElementById('propertyForm').reset();
     document.getElementById('propertyId').value = '';
     editingPropertyId = null;
+    // Reset field visibility
+    updatePropertyTypeFields();
+}
+
+function updatePropertyTypeFields() {
+    const propertyType = document.getElementById('propertyType')?.value || '';
+    const commercialFields = document.getElementById('commercialPropertyFields');
+    const residentialFields = document.getElementById('residentialPropertyFields');
+    
+    if (commercialFields) {
+        commercialFields.style.display = propertyType === 'commercial' ? 'block' : 'none';
+    }
+    if (residentialFields) {
+        residentialFields.style.display = propertyType === 'residential' ? 'block' : 'none';
+    }
 }
 
 function closePropertyModal() {
@@ -272,9 +294,30 @@ function handlePropertySubmit(e) {
     const name = document.getElementById('propertyName').value.trim();
     const address = document.getElementById('propertyAddress').value.trim();
     const propertyType = document.getElementById('propertyType').value;
-    const description = document.getElementById('propertyDescription').value.trim();
+    const status = document.getElementById('propertyStatus').value;
+    const squareFootage = parseFloat(document.getElementById('propertySquareFootage').value) || null;
+    const yearBuilt = parseInt(document.getElementById('propertyYearBuilt').value) || null;
+    const numberOfUnits = parseInt(document.getElementById('propertyNumberOfUnits').value) || null;
+    const lotSize = parseFloat(document.getElementById('propertyLotSize').value) || null;
+    const numberOfFloors = parseInt(document.getElementById('propertyNumberOfFloors').value) || null;
+    const parkingSpaces = parseInt(document.getElementById('propertyParkingSpaces').value) || null;
+    const taxId = document.getElementById('propertyTaxId').value.trim() || null;
+    const ownerName = document.getElementById('propertyOwnerName').value.trim() || null;
+    const ownerContact = document.getElementById('propertyOwnerContact').value.trim() || null;
+    const description = document.getElementById('propertyDescription').value.trim() || null;
+    
+    // Commercial specific fields
+    const buildingNumber = document.getElementById('propertyBuildingNumber')?.value.trim() || null;
+    const numberOfBuildings = parseInt(document.getElementById('propertyNumberOfBuildings')?.value) || null;
+    const totalLeasableSqFt = parseFloat(document.getElementById('propertyTotalLeasableSqFt')?.value) || null;
+    const commonAreaSqFt = parseFloat(document.getElementById('propertyCommonAreaSqFt')?.value) || null;
+    
+    // Residential specific fields
+    const numberOfBedrooms = parseInt(document.getElementById('propertyNumberOfBedrooms')?.value) || null;
+    const numberOfBathrooms = parseFloat(document.getElementById('propertyNumberOfBathrooms')?.value) || null;
+    const propertySubtype = document.getElementById('propertySubtype')?.value || null;
 
-    console.log('Form data:', { id, name, address, propertyType, description });
+    console.log('Form data:', { id, name, address, propertyType, status, squareFootage, yearBuilt, numberOfUnits });
 
     if (!name) {
         alert('Property name is required');
@@ -283,6 +326,26 @@ function handlePropertySubmit(e) {
     
     if (!propertyType) {
         alert('Property type is required');
+        return;
+    }
+    
+    if (!status) {
+        alert('Property status is required');
+        return;
+    }
+    
+    if (!squareFootage || squareFootage <= 0) {
+        alert('Square footage is required and must be greater than 0');
+        return;
+    }
+    
+    if (!yearBuilt || yearBuilt < 1800 || yearBuilt > 2100) {
+        alert('Year built is required and must be a valid year');
+        return;
+    }
+    
+    if (!numberOfUnits || numberOfUnits < 0) {
+        alert('Number of units/spaces is required and must be 0 or greater');
         return;
     }
 
@@ -312,10 +375,52 @@ function handlePropertySubmit(e) {
                 name,
                 address: address || null,
                 propertyType: propertyType,
-                description: description || null,
+                status: status,
+                squareFootage: squareFootage,
+                yearBuilt: yearBuilt,
+                numberOfUnits: numberOfUnits,
+                lotSize: lotSize,
+                numberOfFloors: numberOfFloors,
+                parkingSpaces: parkingSpaces,
+                taxId: taxId,
+                ownerName: ownerName,
+                ownerContact: ownerContact,
+                description: description,
                 createdAt: existing?.createdAt || firebase.firestore.FieldValue.serverTimestamp(),
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
+            
+            // Add commercial-specific fields if property type is commercial
+            if (propertyType === 'commercial') {
+                propertyData.buildingNumber = buildingNumber;
+                propertyData.numberOfBuildings = numberOfBuildings;
+                propertyData.totalLeasableSqFt = totalLeasableSqFt;
+                propertyData.commonAreaSqFt = commonAreaSqFt;
+                // Clear residential fields
+                propertyData.numberOfBedrooms = null;
+                propertyData.numberOfBathrooms = null;
+                propertyData.propertySubtype = null;
+            } else if (propertyType === 'residential') {
+                // Add residential-specific fields
+                propertyData.numberOfBedrooms = numberOfBedrooms;
+                propertyData.numberOfBathrooms = numberOfBathrooms;
+                propertyData.propertySubtype = propertySubtype;
+                // Clear commercial fields
+                propertyData.buildingNumber = null;
+                propertyData.numberOfBuildings = null;
+                propertyData.totalLeasableSqFt = null;
+                propertyData.commonAreaSqFt = null;
+            } else {
+                // HOA - clear both commercial and residential specific fields
+                propertyData.buildingNumber = null;
+                propertyData.numberOfBuildings = null;
+                propertyData.totalLeasableSqFt = null;
+                propertyData.commonAreaSqFt = null;
+                propertyData.numberOfBedrooms = null;
+                propertyData.numberOfBathrooms = null;
+                propertyData.propertySubtype = null;
+            }
+            
             return db.collection('properties').doc(id).update(propertyData);
         }).then(() => {
             console.log('Property updated successfully');
@@ -344,10 +449,33 @@ function handlePropertySubmit(e) {
             name,
             address: address || null,
             propertyType: propertyType,
-            description: description || null,
+            status: status,
+            squareFootage: squareFootage,
+            yearBuilt: yearBuilt,
+            numberOfUnits: numberOfUnits,
+            lotSize: lotSize,
+            numberOfFloors: numberOfFloors,
+            parkingSpaces: parkingSpaces,
+            taxId: taxId,
+            ownerName: ownerName,
+            ownerContact: ownerContact,
+            description: description,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
+        
+        // Add commercial-specific fields if property type is commercial
+        if (propertyType === 'commercial') {
+            propertyData.buildingNumber = buildingNumber;
+            propertyData.numberOfBuildings = numberOfBuildings;
+            propertyData.totalLeasableSqFt = totalLeasableSqFt;
+            propertyData.commonAreaSqFt = commonAreaSqFt;
+        } else if (propertyType === 'residential') {
+            // Add residential-specific fields
+            propertyData.numberOfBedrooms = numberOfBedrooms;
+            propertyData.numberOfBathrooms = numberOfBathrooms;
+            propertyData.propertySubtype = propertySubtype;
+        }
         db.collection('properties').add(propertyData)
             .then((docRef) => {
                 console.log('Property created successfully with ID:', docRef.id);
@@ -401,7 +529,32 @@ window.editProperty = function(id) {
                 document.getElementById('propertyName').value = property.name || '';
                 document.getElementById('propertyAddress').value = property.address || '';
                 document.getElementById('propertyType').value = property.propertyType || '';
+                document.getElementById('propertyStatus').value = property.status || 'Active';
+                document.getElementById('propertySquareFootage').value = property.squareFootage || '';
+                document.getElementById('propertyYearBuilt').value = property.yearBuilt || '';
+                document.getElementById('propertyNumberOfUnits').value = property.numberOfUnits || '';
+                document.getElementById('propertyLotSize').value = property.lotSize || '';
+                document.getElementById('propertyNumberOfFloors').value = property.numberOfFloors || '';
+                document.getElementById('propertyParkingSpaces').value = property.parkingSpaces || '';
+                document.getElementById('propertyTaxId').value = property.taxId || '';
+                document.getElementById('propertyOwnerName').value = property.ownerName || '';
+                document.getElementById('propertyOwnerContact').value = property.ownerContact || '';
                 document.getElementById('propertyDescription').value = property.description || '';
+                
+                // Commercial fields
+                if (property.buildingNumber) document.getElementById('propertyBuildingNumber').value = property.buildingNumber;
+                if (property.numberOfBuildings) document.getElementById('propertyNumberOfBuildings').value = property.numberOfBuildings;
+                if (property.totalLeasableSqFt) document.getElementById('propertyTotalLeasableSqFt').value = property.totalLeasableSqFt;
+                if (property.commonAreaSqFt) document.getElementById('propertyCommonAreaSqFt').value = property.commonAreaSqFt;
+                
+                // Residential fields
+                if (property.numberOfBedrooms) document.getElementById('propertyNumberOfBedrooms').value = property.numberOfBedrooms;
+                if (property.numberOfBathrooms) document.getElementById('propertyNumberOfBathrooms').value = property.numberOfBathrooms;
+                if (property.propertySubtype) document.getElementById('propertySubtype').value = property.propertySubtype;
+                
+                // Update field visibility based on property type
+                updatePropertyTypeFields();
+                
                 document.getElementById('propertyForm').style.display = 'block';
                 // Focus on property name input
                 setTimeout(() => {

@@ -273,6 +273,31 @@ header h1 {
     color: #2e7d32;
 }
 
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 10px;
+    text-transform: capitalize;
+}
+
+.status-active {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-inactive {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.status-under-development {
+    background: #fff3e0;
+    color: #e65100;
+}
+
 .ticket-details {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
