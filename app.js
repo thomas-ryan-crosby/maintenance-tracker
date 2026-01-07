@@ -92,6 +92,14 @@ function showPage(page) {
         pageElement.style.display = 'block';
     }
     
+    // Update nav link active state to match the page
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('data-page') === page) {
+            link.classList.add('active');
+        }
+    });
+    
     // Load page-specific data
     if (page === 'properties') {
         loadProperties();
@@ -970,19 +978,29 @@ function handlePropertySubmit(e) {
         return;
     }
     
-    if (!squareFootage || squareFootage <= 0) {
-        alert('Square footage is required and must be greater than 0');
-        return;
-    }
-    
-    if (!yearBuilt || yearBuilt < 1800 || yearBuilt > 2100) {
-        alert('Year built is required and must be a valid year');
-        return;
-    }
-    
-    if (!numberOfUnits || numberOfUnits < 0) {
-        alert('Number of units/spaces is required and must be 0 or greater');
-        return;
+    // Validation based on property type
+    if (propertyType === 'hoa') {
+        // HOA: Only require number of units, not square footage or year built
+        if (!numberOfUnits || numberOfUnits < 0) {
+            alert('Number of units is required and must be 0 or greater');
+            return;
+        }
+    } else {
+        // Commercial and Residential: Require square footage, year built, and units
+        if (!squareFootage || squareFootage <= 0) {
+            alert('Square footage is required and must be greater than 0');
+            return;
+        }
+        
+        if (!yearBuilt || yearBuilt < 1800 || yearBuilt > 2100) {
+            alert('Year built is required and must be a valid year');
+            return;
+        }
+        
+        if (!numberOfUnits || numberOfUnits < 0) {
+            alert('Number of units/spaces is required and must be 0 or greater');
+            return;
+        }
     }
 
     // Disable submit button and show loading modal
@@ -1119,7 +1137,8 @@ function handlePropertySubmit(e) {
                 if (loadingModal) {
                     loadingModal.classList.remove('show');
                 }
-                hidePropertyForm();
+                // Close modal and reset form
+                closePropertyModal();
             })
             .catch((error) => {
                 console.error('Error creating property:', error);
