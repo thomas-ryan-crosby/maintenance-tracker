@@ -278,6 +278,34 @@ header h1 {
     color: #2e7d32;
 }
 
+.assigned-to-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.assigned-to-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
+}
+
+.assigned-to-icon {
+    font-size: 14px;
+    opacity: 0.95;
+}
+
+.assigned-to-text {
+    letter-spacing: 0.3px;
+}
+
 .ticket-details {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

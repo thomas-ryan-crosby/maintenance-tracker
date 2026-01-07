@@ -697,9 +697,11 @@ function createTicketCard(ticket, isDeleted = false) {
             <span class="ticket-status ${statusClass}">${escapeHtml(ticket.status)}</span>
         </div>
         ${ticket.assignedTo ? `
-            <div style="text-align: center; padding: 10px 0; margin-bottom: 15px; background: #f8f9fa; border-radius: 6px; border: 1px solid #e0e0e0;">
-                <span style="font-size: 12px; color: #666; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Assigned To:</span>
-                <div style="font-size: 16px; color: #333; font-weight: 600; margin-top: 4px;">${escapeHtml(ticket.assignedTo)}</div>
+            <div style="display: flex; justify-content: center; margin: 12px 0 16px 0;">
+                <div class="assigned-to-badge">
+                    <span class="assigned-to-icon">👤</span>
+                    <span class="assigned-to-text">${escapeHtml(ticket.assignedTo)}</span>
+                </div>
             </div>
         ` : ''}
         <div class="ticket-details">
