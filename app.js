@@ -297,7 +297,9 @@ function renderPropertiesList(properties) {
 
 // View property detail (for buildings and units)
 window.viewPropertyDetail = function(propertyId) {
+    // Set the current property ID first
     currentPropertyIdForDetail = propertyId;
+    
     // Hide properties list, show detail view
     const propertiesList = document.querySelector('.properties-page-content .section');
     const propertyDetailView = document.getElementById('propertyDetailView');
@@ -305,6 +307,9 @@ window.viewPropertyDetail = function(propertyId) {
     if (propertiesList) propertiesList.style.display = 'none';
     if (propertyDetailView) {
         propertyDetailView.style.display = 'block';
+        
+        // Store propertyId in a data attribute for reference
+        propertyDetailView.setAttribute('data-property-id', propertyId);
         
         // Load property name
         db.collection('properties').doc(propertyId).get().then((doc) => {
