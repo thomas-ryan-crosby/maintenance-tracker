@@ -11,8 +11,8 @@ let afterPhotoUrl = null;
 let completionAfterPhotoFile = null;
 
 // Initialize app
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('📄 DOM Content Loaded');
+function startApp() {
+    console.log('📄 Starting app initialization...');
     
     // Wait a bit for config script to load if it hasn't already
     const checkFirebase = () => {
@@ -35,7 +35,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Start checking
     checkFirebase();
-});
+}
+
+// Check if DOM is already loaded, if so run immediately, otherwise wait
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startApp);
+} else {
+    // DOM is already loaded, run immediately
+    startApp();
+}
 
 function initializeApp() {
     setupEventListeners();
