@@ -3335,17 +3335,22 @@ function loadContacts(tenantId) {
                 contactItem.className = 'unit-item';
                 
                 const classifications = contact.classifications || [];
-                const classificationBadges = classifications.map(c => `<span class="status-badge" style="background: #9b59b6; font-size: 11px;">${c}</span>`).join(' ');
+                const classificationBadges = classifications.map(c => `<span class="contact-classification-badge">${c}</span>`).join(' ');
                 
                 contactItem.innerHTML = `
-                    <div class="unit-info">
-                        <h4>${escapeHtml(contact.contactName)} ${classificationBadges}</h4>
-                        ${contact.contactTitle ? `<p><strong>Title:</strong> ${escapeHtml(contact.contactTitle)}</p>` : ''}
-                        ${contact.contactEmail ? `<p><strong>Email:</strong> <a href="mailto:${escapeHtml(contact.contactEmail)}">${escapeHtml(contact.contactEmail)}</a></p>` : ''}
-                        ${contact.contactPhone ? `<p><strong>Phone:</strong> <a href="tel:${escapeHtml(contact.contactPhone)}">${escapeHtml(contact.contactPhone)}</a></p>` : ''}
-                        ${contact.notes ? `<p><strong>Notes:</strong> ${escapeHtml(contact.notes)}</p>` : ''}
+                    <div class="contact-card-header">
+                        <div class="contact-name-section">
+                            <h4>${escapeHtml(contact.contactName)}</h4>
+                            <div class="contact-classifications">${classificationBadges}</div>
+                        </div>
                     </div>
-                    <div class="unit-item-actions">
+                    <div class="contact-card-body">
+                        ${contact.contactTitle ? `<div class="contact-info-item"><span class="contact-icon">💼</span><span>${escapeHtml(contact.contactTitle)}</span></div>` : ''}
+                        ${contact.contactEmail ? `<div class="contact-info-item"><span class="contact-icon">✉️</span><a href="mailto:${escapeHtml(contact.contactEmail)}" class="contact-link">${escapeHtml(contact.contactEmail)}</a></div>` : ''}
+                        ${contact.contactPhone ? `<div class="contact-info-item"><span class="contact-icon">📞</span><a href="tel:${escapeHtml(contact.contactPhone)}" class="contact-link">${escapeHtml(contact.contactPhone)}</a></div>` : ''}
+                        ${contact.notes ? `<div class="contact-notes"><span class="contact-icon">📝</span><span>${escapeHtml(contact.notes)}</span></div>` : ''}
+                    </div>
+                    <div class="contact-card-actions">
                         <button class="btn-secondary btn-small" onclick="editContact('${contact.id}')">Edit</button>
                         <button class="btn-danger btn-small" onclick="deleteContact('${contact.id}')">Delete</button>
                     </div>
