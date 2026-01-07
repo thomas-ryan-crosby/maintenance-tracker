@@ -337,7 +337,9 @@ function setupEventListeners() {
     // Tenant detail view
     const backToTenantsBtn = document.getElementById('backToTenantsBtn');
     if (backToTenantsBtn) {
-        backToTenantsBtn.addEventListener('click', backToTenants);
+        backToTenantsBtn.addEventListener('click', () => {
+            window.backToTenants();
+        });
     }
     
     // Contact management
