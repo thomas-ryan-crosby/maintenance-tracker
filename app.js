@@ -129,7 +129,13 @@ function setupEventListeners() {
     // Back to properties button
     const backToPropertiesBtn = document.getElementById('backToPropertiesBtn');
     if (backToPropertiesBtn) {
-        backToPropertiesBtn.addEventListener('click', backToProperties);
+        backToPropertiesBtn.addEventListener('click', function() {
+            const propertiesList = document.querySelector('.properties-page-content .section');
+            const propertyDetailView = document.getElementById('propertyDetailView');
+            
+            if (propertiesList) propertiesList.style.display = 'block';
+            if (propertyDetailView) propertyDetailView.style.display = 'none';
+        });
     }
     
     // Property type change handler for conditional fields
