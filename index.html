@@ -619,8 +619,24 @@
             <main>
                 <div class="tenants-page-content">
                     <div class="section">
-                        <h3>Tenants</h3>
+                        <div class="section-header-controls">
+                            <div class="filter-controls">
+                                <label for="tenantPropertyFilter">Filter by Property:</label>
+                                <select id="tenantPropertyFilter">
+                                    <option value="">All Properties</option>
+                                </select>
+                            </div>
+                            <div class="view-toggle">
+                                <button class="btn-toggle active" id="viewCardsBtn" data-view="cards">
+                                    <span>📋</span> Cards
+                                </button>
+                                <button class="btn-toggle" id="viewTableBtn" data-view="table">
+                                    <span>📊</span> Table
+                                </button>
+                            </div>
+                        </div>
                         <div id="tenantsList" class="tenants-grid"></div>
+                        <div id="tenantsTable" class="tenants-table-container" style="display: none;"></div>
                     </div>
                 </div>
             </main>

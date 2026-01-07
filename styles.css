@@ -1123,6 +1123,181 @@ hr {
     margin-top: 20px;
 }
 
+/* Tenants Page Controls */
+.section-header-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.filter-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter-controls label {
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+}
+
+.filter-controls select {
+    padding: 8px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: white;
+    cursor: pointer;
+    min-width: 200px;
+}
+
+.filter-controls select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* Tenants Table View */
+.tenants-table-container {
+    margin-top: 20px;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.building-group {
+    margin-bottom: 0;
+}
+
+.building-group-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 20px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.building-group-header::before {
+    content: '🏢';
+    font-size: 1.3rem;
+}
+
+.tenants-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tenants-table thead {
+    background: #f8f9fa;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.tenants-table th {
+    padding: 15px 20px;
+    text-align: left;
+    font-weight: 700;
+    color: #333;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tenants-table tbody tr {
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s;
+}
+
+.tenants-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.tenants-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.tenants-table td {
+    padding: 15px 20px;
+    color: #4a4a4a;
+    font-size: 0.95rem;
+    vertical-align: middle;
+}
+
+.tenants-table .tenant-name-cell {
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.tenants-table .tenant-status-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tenants-table .tenant-contacts-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.tenants-table .contact-info {
+    font-size: 0.85rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tenants-table .contact-info a {
+    color: #667eea;
+    text-decoration: none;
+}
+
+.tenants-table .contact-info a:hover {
+    text-decoration: underline;
+}
+
+.tenants-table .tenant-occupancies-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.tenants-table .occupancy-info {
+    font-size: 0.85rem;
+    color: #666;
+    padding: 4px 8px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.tenants-table .tenant-actions-cell {
+    display: flex;
+    gap: 8px;
+}
+
+.tenants-table .btn-small {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+.no-tenants-message {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+    font-size: 1.1rem;
+}
+
 /* Tenant Card Styling */
 .tenant-card {
     background: white;

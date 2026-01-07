@@ -327,6 +327,63 @@ function setupEventListeners() {
             showAddTenantForm();
         });
     }
+    
+    // Tenant view toggle
+    const viewCardsBtn = document.getElementById('viewCardsBtn');
+    const viewTableBtn = document.getElementById('viewTableBtn');
+    const tenantPropertyFilter = document.getElementById('tenantPropertyFilter');
+    
+    if (viewCardsBtn) {
+        viewCardsBtn.addEventListener('click', function() {
+            currentTenantView = 'cards';
+            viewCardsBtn.classList.add('active');
+            viewTableBtn.classList.remove('active');
+            // Reload tenants to render in card view
+            db.collection('tenants').get().then((snapshot) => {
+                const tenants = {};
+                snapshot.forEach((doc) => {
+                    tenants[doc.id] = { id: doc.id, ...doc.data() };
+                });
+                renderTenantsList(tenants);
+            });
+        });
+    }
+    
+    if (viewTableBtn) {
+        viewTableBtn.addEventListener('click', function() {
+            currentTenantView = 'table';
+            viewTableBtn.classList.add('active');
+            viewCardsBtn.classList.remove('active');
+            // Reload tenants to render in table view
+            db.collection('tenants').get().then((snapshot) => {
+                const tenants = {};
+                snapshot.forEach((doc) => {
+                    tenants[doc.id] = { id: doc.id, ...doc.data() };
+                });
+                renderTenantsList(tenants);
+            });
+        });
+    }
+    
+    if (tenantPropertyFilter) {
+        tenantPropertyFilter.addEventListener('change', function() {
+            selectedPropertyForTenants = this.value || null;
+            localStorage.setItem('selectedPropertyForTenants', selectedPropertyForTenants || '');
+            // Reload tenants with filter
+            db.collection('tenants').get().then((snapshot) => {
+                const tenants = {};
+                snapshot.forEach((doc) => {
+                    tenants[doc.id] = { id: doc.id, ...doc.data() };
+                });
+                renderTenantsList(tenants);
+            });
+        });
+    }
+    
+    // Load properties for filter on tenants page
+    if (document.getElementById('tenantsPage')) {
+        loadPropertiesForTenantFilter();
+    }
     if (tenantForm) tenantForm.addEventListener('submit', handleTenantSubmit);
     if (closeTenantModalBtn) closeTenantModalBtn.addEventListener('click', closeTenantModal);
     if (cancelTenantFormBtn) cancelTenantFormBtn.addEventListener('click', closeTenantModal);
@@ -2951,6 +3008,8 @@ window.openPhotoModal = function(photoUrl) {
 };
 // Tenant Management
 let editingTenantId = null;
+let currentTenantView = 'cards'; // 'cards' or 'table'
+let selectedPropertyForTenants = null;
 
 function loadTenants() {
     db.collection('tenants').onSnapshot((snapshot) => {
@@ -2965,6 +3024,32 @@ function loadTenants() {
         if (tenantsList) {
             tenantsList.innerHTML = '<p style="color: #e74c3c; text-align: center; padding: 20px;">Error loading tenants. Please try again.</p>';
         }
+    });
+}
+
+function loadPropertiesForTenantFilter() {
+    const propertyFilter = document.getElementById('tenantPropertyFilter');
+    if (!propertyFilter) return;
+    
+    propertyFilter.innerHTML = '<option value="">All Properties</option>';
+    
+    db.collection('properties').get().then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            const property = doc.data();
+            const option = document.createElement('option');
+            option.value = doc.id;
+            option.textContent = property.name || 'Unnamed Property';
+            propertyFilter.appendChild(option);
+        });
+        
+        // Restore selected property from localStorage
+        const savedProperty = localStorage.getItem('selectedPropertyForTenants');
+        if (savedProperty && Array.from(propertyFilter.options).some(opt => opt.value === savedProperty)) {
+            propertyFilter.value = savedProperty;
+            selectedPropertyForTenants = savedProperty;
+        }
+    }).catch((error) => {
+        console.error('Error loading properties for filter:', error);
     });
 }
 
