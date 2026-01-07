@@ -3245,10 +3245,13 @@ async function renderTenantsTableView(tenants) {
             const statusBadge = tenant.status ? `<span class="status-badge status-${tenant.status.toLowerCase()}">${tenant.status}</span>` : '';
             const typeBadge = tenant.tenantType ? `<span class="status-badge type-badge">${tenant.tenantType}</span>` : '';
             
-            // Occupancies - show all occupancies for this tenant in this building
+            // Get ALL occupancies for this tenant (not just this building)
+            const allTenantOccupancies = occupanciesMap[tenant.id] || [];
+            
+            // Occupancies - show all occupancies for this tenant
             let occupanciesHtml = '<span style="color: #999;">No occupancies</span>';
-            if (occupancies.length > 0) {
-                occupanciesHtml = occupancies.map(occ => {
+            if (allTenantOccupancies.length > 0) {
+                occupanciesHtml = allTenantOccupancies.map(occ => {
                     if (occ.unitId && unitsMap[occ.unitId]) {
                         const unit = unitsMap[occ.unitId];
                         return `<span class="occupancy-info">Unit ${escapeHtml(unit.unitNumber || 'N/A')}</span>`;
@@ -3257,7 +3260,7 @@ async function renderTenantsTableView(tenants) {
                     } else {
                         return `<span class="occupancy-info">Property Level</span>`;
                     }
-                }).join(' ');
+                }).join('');
             }
             
             html += `
@@ -3306,13 +3309,31 @@ async function renderTenantsTableView(tenants) {
             const statusBadge = tenant.status ? `<span class="status-badge status-${tenant.status.toLowerCase()}">${tenant.status}</span>` : '';
             const typeBadge = tenant.tenantType ? `<span class="status-badge type-badge">${tenant.tenantType}</span>` : '';
             
+            // Get ALL occupancies for this tenant
+            const allTenantOccupancies = occupanciesMap[tenant.id] || [];
+            
+            // Occupancies
+            let occupanciesHtml = '<span style="color: #999;">No occupancies</span>';
+            if (allTenantOccupancies.length > 0) {
+                occupanciesHtml = allTenantOccupancies.map(occ => {
+                    if (occ.unitId && unitsMap[occ.unitId]) {
+                        const unit = unitsMap[occ.unitId];
+                        return `<span class="occupancy-info">Unit ${escapeHtml(unit.unitNumber || 'N/A')}</span>`;
+                    } else if (occ.unitId) {
+                        return `<span class="occupancy-info">Unit (ID: ${occ.unitId.substring(0, 8)}...)</span>`;
+                    } else {
+                        return `<span class="occupancy-info">Property Level</span>`;
+                    }
+                }).join('');
+            }
+            
             html += `
                 <tr data-tenant-id="${tenant.id}">
                     <td class="tenant-name-cell">${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</td>
                     <td>${typeBadge}</td>
                     <td class="tenant-status-cell">${statusBadge}</td>
                     <td class="tenant-contacts-cell"><span style="color: #999;">Loading...</span></td>
-                    <td class="tenant-occupancies-cell"><span style="color: #999;">No occupancies</span></td>
+                    <td class="tenant-occupancies-cell">${occupanciesHtml}</td>
                     <td class="tenant-actions-cell">
                         <button class="btn-primary btn-small" onclick="viewTenantDetail('${tenant.id}')">View</button>
                         <button class="btn-secondary btn-small" onclick="editTenant('${tenant.id}')">Edit</button>
@@ -3366,16 +3387,20 @@ async function loadContactsForTableView(tenants) {
             if (contacts.length === 0) {
                 contactsCell.innerHTML = '<span style="color: #999;">No contacts</span>';
             } else {
-                contactsCell.innerHTML = contacts.slice(0, 3).map(contact => {
-                    let html = '';
+                // Show all contacts with email and phone on separate lines
+                const contactItems = [];
+                contacts.forEach(contact => {
                     if (contact.contactEmail) {
-                        html += `<div class="contact-info">✉️ <a href="mailto:${escapeHtml(contact.contactEmail)}">${escapeHtml(contact.contactEmail)}</a></div>`;
+                        contactItems.push(`<div class="contact-info">✉️ <a href="mailto:${escapeHtml(contact.contactEmail)}">${escapeHtml(contact.contactEmail)}</a></div>`);
                     }
                     if (contact.contactPhone) {
-                        html += `<div class="contact-info">📞 <a href="tel:${escapeHtml(contact.contactPhone)}">${escapeHtml(contact.contactPhone)}</a></div>`;
+                        contactItems.push(`<div class="contact-info">📞 <a href="tel:${escapeHtml(contact.contactPhone)}">${escapeHtml(contact.contactPhone)}</a></div>`);
                     }
-                    return html;
-                }).join('') || '<span style="color: #999;">No contact info</span>';
+                });
+                
+                contactsCell.innerHTML = contactItems.length > 0 
+                    ? contactItems.join('') 
+                    : '<span style="color: #999;">No contacts</span>';
             }
         }
     });

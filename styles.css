@@ -1246,49 +1246,98 @@ hr {
 .tenants-table .tenant-contacts-cell {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
+    min-width: 200px;
 }
 
 .tenants-table .contact-info {
-    font-size: 0.85rem;
-    color: #666;
+    font-size: 0.9rem;
+    color: #4a4a4a;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    line-height: 1.4;
 }
 
 .tenants-table .contact-info a {
     color: #667eea;
     text-decoration: none;
+    font-weight: 500;
+    word-break: break-all;
 }
 
 .tenants-table .contact-info a:hover {
+    color: #764ba2;
     text-decoration: underline;
 }
 
 .tenants-table .tenant-occupancies-cell {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }
 
 .tenants-table .occupancy-info {
     font-size: 0.85rem;
-    color: #666;
-    padding: 4px 8px;
-    background: #f8f9fa;
-    border-radius: 4px;
+    color: #4a4a4a;
+    padding: 6px 10px;
+    background: #f0f0f0;
+    border-radius: 6px;
     display: inline-block;
+    font-weight: 500;
+    white-space: nowrap;
 }
 
 .tenants-table .tenant-actions-cell {
     display: flex;
     gap: 8px;
+    white-space: nowrap;
 }
 
 .tenants-table .btn-small {
-    padding: 6px 12px;
+    padding: 8px 14px;
     font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.tenants-table .btn-primary.btn-small {
+    background: #667eea;
+    color: white;
+    border: none;
+}
+
+.tenants-table .btn-primary.btn-small:hover {
+    background: #764ba2;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+.tenants-table .btn-secondary.btn-small {
+    background: #f8f9fa;
+    color: #4a4a4a;
+    border: 1px solid #e0e0e0;
+}
+
+.tenants-table .btn-secondary.btn-small:hover {
+    background: #e9ecef;
+    border-color: #667eea;
+    color: #667eea;
+    transform: translateY(-1px);
+}
+
+.tenants-table .btn-danger.btn-small {
+    background: #fff;
+    color: #e74c3c;
+    border: 1px solid #e74c3c;
+}
+
+.tenants-table .btn-danger.btn-small:hover {
+    background: #e74c3c;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
 }
 
 .no-tenants-message {
