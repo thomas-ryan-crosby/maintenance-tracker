@@ -297,6 +297,7 @@ function renderPropertiesList(properties) {
 
 // View property detail (for buildings and units)
 window.viewPropertyDetail = function(propertyId) {
+    currentPropertyIdForDetail = propertyId;
     // Hide properties list, show detail view
     const propertiesList = document.querySelector('.properties-page-content .section');
     const propertyDetailView = document.getElementById('propertyDetailView');
@@ -328,13 +329,202 @@ window.backToProperties = function() {
     if (propertyDetailView) propertyDetailView.style.display = 'none';
 };
 
-// Placeholder functions for buildings and units
+// Building Management
+let currentPropertyIdForDetail = null;
+let editingBuildingId = null;
+
 function loadBuildings(propertyId) {
-    // To be implemented
+    currentPropertyIdForDetail = propertyId;
     const buildingsList = document.getElementById('buildingsList');
-    if (buildingsList) {
-        buildingsList.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No buildings yet. Add one to get started.</p>';
+    if (!buildingsList) return;
+    
+    db.collection('buildings')
+        .where('propertyId', '==', propertyId)
+        .get()
+        .then((querySnapshot) => {
+            const buildings = {};
+            querySnapshot.forEach((doc) => {
+                buildings[doc.id] = { id: doc.id, ...doc.data() };
+            });
+            renderBuildingsList(buildings);
+        })
+        .catch((error) => {
+            console.error('Error loading buildings:', error);
+            buildingsList.innerHTML = '<p style="color: #e74c3c; text-align: center; padding: 20px;">Error loading buildings. Please try again.</p>';
+        });
+}
+
+function renderBuildingsList(buildings) {
+    const buildingsList = document.getElementById('buildingsList');
+    if (!buildingsList) return;
+    
+    buildingsList.innerHTML = '';
+
+    if (Object.keys(buildings).length === 0) {
+        buildingsList.innerHTML = '<p style="color: #999; text-align: center; padding: 20px; grid-column: 1 / -1;">No buildings yet. Add one to get started.</p>';
+        return;
     }
+
+    Object.keys(buildings).forEach(id => {
+        const building = buildings[id];
+        const item = document.createElement('div');
+        item.className = 'building-item';
+        item.innerHTML = `
+            <div class="building-info">
+                <h4>${escapeHtml(building.buildingName)}</h4>
+                ${building.buildingAddress ? `<p>📍 ${escapeHtml(building.buildingAddress)}</p>` : ''}
+                ${building.numberOfFloors ? `<p><strong>Floors:</strong> ${building.numberOfFloors}</p>` : ''}
+                ${building.numberOfUnits ? `<p><strong>Units:</strong> ${building.numberOfUnits}</p>` : ''}
+            </div>
+            <div class="building-item-actions">
+                <button class="btn-secondary btn-small" onclick="editBuilding('${id}')">Edit</button>
+                <button class="btn-danger btn-small" onclick="deleteBuilding('${id}')">Delete</button>
+            </div>
+        `;
+        buildingsList.appendChild(item);
+    });
+}
+
+window.addBuilding = function(propertyId) {
+    currentPropertyIdForDetail = propertyId;
+    editingBuildingId = null;
+    document.getElementById('buildingModalTitle').textContent = 'Add Building';
+    document.getElementById('buildingId').value = '';
+    document.getElementById('buildingPropertyId').value = propertyId;
+    document.getElementById('buildingForm').reset();
+    document.getElementById('buildingModal').classList.add('show');
+    setTimeout(() => {
+        document.getElementById('buildingName').focus();
+    }, 100);
+};
+
+window.editBuilding = function(buildingId) {
+    db.collection('buildings').doc(buildingId).get().then((doc) => {
+        const building = doc.data();
+        if (building) {
+            editingBuildingId = buildingId;
+            document.getElementById('buildingModalTitle').textContent = 'Edit Building';
+            document.getElementById('buildingId').value = buildingId;
+            document.getElementById('buildingPropertyId').value = building.propertyId;
+            document.getElementById('buildingName').value = building.buildingName || '';
+            document.getElementById('buildingAddress').value = building.buildingAddress || '';
+            document.getElementById('buildingNumberOfFloors').value = building.numberOfFloors || '';
+            document.getElementById('buildingNumberOfUnits').value = building.numberOfUnits || '';
+            document.getElementById('buildingModal').classList.add('show');
+            setTimeout(() => {
+                document.getElementById('buildingName').focus();
+            }, 100);
+        }
+    }).catch((error) => {
+        console.error('Error loading building:', error);
+        alert('Error loading building: ' + error.message);
+    });
+};
+
+window.deleteBuilding = function(buildingId) {
+    if (!confirm('Are you sure you want to delete this building? This action cannot be undone.')) {
+        return;
+    }
+    
+    db.collection('buildings').doc(buildingId).delete()
+        .then(() => {
+            console.log('Building deleted successfully');
+            if (currentPropertyIdForDetail) {
+                loadBuildings(currentPropertyIdForDetail);
+            }
+        })
+        .catch((error) => {
+            console.error('Error deleting building:', error);
+            alert('Error deleting building: ' + error.message);
+        });
+};
+
+function handleBuildingSubmit(e) {
+    e.preventDefault();
+    
+    const id = document.getElementById('buildingId').value;
+    const propertyId = document.getElementById('buildingPropertyId').value;
+    const buildingName = document.getElementById('buildingName').value.trim();
+    const buildingAddress = document.getElementById('buildingAddress').value.trim();
+    const numberOfFloors = parseInt(document.getElementById('buildingNumberOfFloors').value) || null;
+    const numberOfUnits = parseInt(document.getElementById('buildingNumberOfUnits').value) || null;
+
+    if (!buildingName) {
+        alert('Building name/number is required');
+        return;
+    }
+    
+    if (!propertyId) {
+        alert('Property ID is missing');
+        return;
+    }
+
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+    }
+
+    const buildingData = {
+        propertyId: propertyId,
+        buildingName: buildingName,
+        buildingAddress: buildingAddress || null,
+        numberOfFloors: numberOfFloors,
+        numberOfUnits: numberOfUnits,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    if (id && editingBuildingId) {
+        // Update existing
+        db.collection('buildings').doc(id).get().then((doc) => {
+            const existing = doc.data();
+            buildingData.createdAt = existing?.createdAt || firebase.firestore.FieldValue.serverTimestamp();
+            return db.collection('buildings').doc(id).update(buildingData);
+        }).then(() => {
+            console.log('Building updated successfully');
+            closeBuildingModal();
+            if (currentPropertyIdForDetail) {
+                loadBuildings(currentPropertyIdForDetail);
+            }
+        }).catch((error) => {
+            console.error('Error updating building:', error);
+            alert('Error saving building: ' + error.message);
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Save Building';
+            }
+        });
+    } else {
+        // Create new
+        buildingData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+        db.collection('buildings').add(buildingData)
+            .then((docRef) => {
+                console.log('Building created successfully with ID:', docRef.id);
+                closeBuildingModal();
+                if (currentPropertyIdForDetail) {
+                    loadBuildings(currentPropertyIdForDetail);
+                }
+            })
+            .catch((error) => {
+                console.error('Error creating building:', error);
+                alert('Error saving building: ' + error.message);
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Save Building';
+                }
+            });
+    }
+}
+
+function closeBuildingModal() {
+    const modal = document.getElementById('buildingModal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+    document.getElementById('buildingForm').reset();
+    document.getElementById('buildingId').value = '';
+    document.getElementById('buildingPropertyId').value = '';
+    editingBuildingId = null;
 }
 
 function loadUnits(propertyId) {
