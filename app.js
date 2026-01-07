@@ -126,6 +126,12 @@ function setupEventListeners() {
     if (cancelPropertyFormBtn) cancelPropertyFormBtn.addEventListener('click', hidePropertyForm);
     if (propertySelect) propertySelect.addEventListener('change', handlePropertySelect);
     
+    // Back to properties button
+    const backToPropertiesBtn = document.getElementById('backToPropertiesBtn');
+    if (backToPropertiesBtn) {
+        backToPropertiesBtn.addEventListener('click', backToProperties);
+    }
+    
     // Property type change handler for conditional fields
     const propertyTypeSelect = document.getElementById('propertyType');
     if (propertyTypeSelect) propertyTypeSelect.addEventListener('change', updatePropertyTypeFields);
@@ -636,32 +642,143 @@ function renderUnitsList(units, propertyId) {
     unitsList.innerHTML = '';
 
     if (Object.keys(units).length === 0) {
-        unitsList.innerHTML = '<p style="color: #999; text-align: center; padding: 20px; grid-column: 1 / -1;">No units yet. Add one to get started.</p>';
+        unitsList.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No units yet. Add one to get started.</p>';
         return;
     }
 
-    Object.keys(units).forEach(id => {
-        const unit = units[id];
-        const item = document.createElement('div');
-        item.className = 'unit-item';
-        const statusBadge = unit.status ? `<span class="status-badge status-${unit.status.toLowerCase().replace(' ', '-')}">${unit.status}</span>` : '';
-        item.innerHTML = `
-            <div class="unit-info">
-                <h4>${escapeHtml(unit.unitNumber)} ${statusBadge}</h4>
-                <p><strong>Type:</strong> ${unit.unitType || 'Not Set'}</p>
-                ${unit.squareFootage ? `<p><strong>Square Footage:</strong> ${unit.squareFootage.toLocaleString()} sq ft</p>` : ''}
-                ${unit.floorNumber ? `<p><strong>Floor:</strong> ${unit.floorNumber}</p>` : ''}
-                ${unit.numberOfBedrooms ? `<p><strong>Bedrooms:</strong> ${unit.numberOfBedrooms}</p>` : ''}
-                ${unit.numberOfBathrooms ? `<p><strong>Bathrooms:</strong> ${unit.numberOfBathrooms}</p>` : ''}
-                ${unit.monthlyRent ? `<p><strong>Monthly Rent:</strong> $${unit.monthlyRent.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>` : ''}
-            </div>
-            <div class="unit-item-actions">
-                <button class="btn-secondary btn-small" onclick="editUnit('${id}')">Edit</button>
-                <button class="btn-danger btn-small" onclick="deleteUnit('${id}')">Delete</button>
-            </div>
-        `;
-        unitsList.appendChild(item);
-    });
+    // First, load buildings to group units by building
+    db.collection('buildings')
+        .where('propertyId', '==', propertyId)
+        .get()
+        .then((buildingsSnapshot) => {
+            const buildingsMap = {};
+            buildingsSnapshot.forEach((doc) => {
+                buildingsMap[doc.id] = { id: doc.id, ...doc.data() };
+            });
+            
+            // Group units by building
+            const unitsByBuilding = {};
+            const unitsWithoutBuilding = [];
+            
+            Object.keys(units).forEach(id => {
+                const unit = units[id];
+                if (unit.buildingId && buildingsMap[unit.buildingId]) {
+                    if (!unitsByBuilding[unit.buildingId]) {
+                        unitsByBuilding[unit.buildingId] = [];
+                    }
+                    unitsByBuilding[unit.buildingId].push({ id, ...unit });
+                } else {
+                    unitsWithoutBuilding.push({ id, ...unit });
+                }
+            });
+            
+            // Render units grouped by building
+            Object.keys(buildingsMap).forEach(buildingId => {
+                const building = buildingsMap[buildingId];
+                const buildingUnits = unitsByBuilding[buildingId] || [];
+                
+                const buildingSection = document.createElement('div');
+                buildingSection.className = 'building-units-section';
+                buildingSection.innerHTML = `
+                    <div class="building-units-header">
+                        <h4>${escapeHtml(building.buildingName)}</h4>
+                        <button class="btn-primary btn-small" onclick="addUnitToBuilding('${propertyId}', '${buildingId}')">+ Add Unit</button>
+                    </div>
+                    <div class="building-units-list" id="units-building-${buildingId}"></div>
+                `;
+                unitsList.appendChild(buildingSection);
+                
+                const buildingUnitsList = document.getElementById(`units-building-${buildingId}`);
+                if (buildingUnits.length === 0) {
+                    buildingUnitsList.innerHTML = '<p style="color: #999; font-size: 14px; padding: 10px;">No units in this building.</p>';
+                } else {
+                    buildingUnits.forEach(unit => {
+                        const item = document.createElement('div');
+                        item.className = 'unit-item';
+                        const statusBadge = unit.status ? `<span class="status-badge status-${unit.status.toLowerCase().replace(' ', '-')}">${unit.status}</span>` : '';
+                        item.innerHTML = `
+                            <div class="unit-info">
+                                <h4>${escapeHtml(unit.unitNumber)} ${statusBadge}</h4>
+                                <p><strong>Type:</strong> ${unit.unitType || 'Not Set'}</p>
+                                ${unit.squareFootage ? `<p><strong>Square Footage:</strong> ${unit.squareFootage.toLocaleString()} sq ft</p>` : ''}
+                                ${unit.floorNumber ? `<p><strong>Floor:</strong> ${unit.floorNumber}</p>` : ''}
+                                ${unit.numberOfBedrooms ? `<p><strong>Bedrooms:</strong> ${unit.numberOfBedrooms}</p>` : ''}
+                                ${unit.numberOfBathrooms ? `<p><strong>Bathrooms:</strong> ${unit.numberOfBathrooms}</p>` : ''}
+                                ${unit.monthlyRent ? `<p><strong>Monthly Rent:</strong> $${unit.monthlyRent.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>` : ''}
+                            </div>
+                            <div class="unit-item-actions">
+                                <button class="btn-secondary btn-small" onclick="editUnit('${unit.id}')">Edit</button>
+                                <button class="btn-danger btn-small" onclick="deleteUnit('${unit.id}')">Delete</button>
+                            </div>
+                        `;
+                        buildingUnitsList.appendChild(item);
+                    });
+                }
+            });
+            
+            // Render units without a building (property-level units)
+            if (unitsWithoutBuilding.length > 0) {
+                const propertyLevelSection = document.createElement('div');
+                propertyLevelSection.className = 'building-units-section';
+                propertyLevelSection.innerHTML = `
+                    <div class="building-units-header">
+                        <h4>Property-Level Units</h4>
+                        <button class="btn-primary btn-small" onclick="addUnit('${propertyId}')">+ Add Unit</button>
+                    </div>
+                    <div class="building-units-list" id="units-property-level"></div>
+                `;
+                unitsList.appendChild(propertyLevelSection);
+                
+                const propertyLevelList = document.getElementById('units-property-level');
+                unitsWithoutBuilding.forEach(unit => {
+                    const item = document.createElement('div');
+                    item.className = 'unit-item';
+                    const statusBadge = unit.status ? `<span class="status-badge status-${unit.status.toLowerCase().replace(' ', '-')}">${unit.status}</span>` : '';
+                    item.innerHTML = `
+                        <div class="unit-info">
+                            <h4>${escapeHtml(unit.unitNumber)} ${statusBadge}</h4>
+                            <p><strong>Type:</strong> ${unit.unitType || 'Not Set'}</p>
+                            ${unit.squareFootage ? `<p><strong>Square Footage:</strong> ${unit.squareFootage.toLocaleString()} sq ft</p>` : ''}
+                            ${unit.floorNumber ? `<p><strong>Floor:</strong> ${unit.floorNumber}</p>` : ''}
+                            ${unit.numberOfBedrooms ? `<p><strong>Bedrooms:</strong> ${unit.numberOfBedrooms}</p>` : ''}
+                            ${unit.numberOfBathrooms ? `<p><strong>Bathrooms:</strong> ${unit.numberOfBathrooms}</p>` : ''}
+                            ${unit.monthlyRent ? `<p><strong>Monthly Rent:</strong> $${unit.monthlyRent.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>` : ''}
+                        </div>
+                        <div class="unit-item-actions">
+                            <button class="btn-secondary btn-small" onclick="editUnit('${unit.id}')">Edit</button>
+                            <button class="btn-danger btn-small" onclick="deleteUnit('${unit.id}')">Delete</button>
+                        </div>
+                    `;
+                    propertyLevelList.appendChild(item);
+                });
+            }
+        })
+        .catch((error) => {
+            console.error('Error loading buildings for unit grouping:', error);
+            // Fallback to flat list if building loading fails
+            Object.keys(units).forEach(id => {
+                const unit = units[id];
+                const item = document.createElement('div');
+                item.className = 'unit-item';
+                const statusBadge = unit.status ? `<span class="status-badge status-${unit.status.toLowerCase().replace(' ', '-')}">${unit.status}</span>` : '';
+                item.innerHTML = `
+                    <div class="unit-info">
+                        <h4>${escapeHtml(unit.unitNumber)} ${statusBadge}</h4>
+                        <p><strong>Type:</strong> ${unit.unitType || 'Not Set'}</p>
+                        ${unit.squareFootage ? `<p><strong>Square Footage:</strong> ${unit.squareFootage.toLocaleString()} sq ft</p>` : ''}
+                        ${unit.floorNumber ? `<p><strong>Floor:</strong> ${unit.floorNumber}</p>` : ''}
+                        ${unit.numberOfBedrooms ? `<p><strong>Bedrooms:</strong> ${unit.numberOfBedrooms}</p>` : ''}
+                        ${unit.numberOfBathrooms ? `<p><strong>Bathrooms:</strong> ${unit.numberOfBathrooms}</p>` : ''}
+                        ${unit.monthlyRent ? `<p><strong>Monthly Rent:</strong> $${unit.monthlyRent.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>` : ''}
+                    </div>
+                    <div class="unit-item-actions">
+                        <button class="btn-secondary btn-small" onclick="editUnit('${id}')">Edit</button>
+                        <button class="btn-danger btn-small" onclick="deleteUnit('${id}')">Delete</button>
+                    </div>
+                `;
+                unitsList.appendChild(item);
+            });
+        });
 }
 
 function loadBuildingsForUnitSelect(propertyId) {
@@ -943,6 +1060,22 @@ function handlePropertySubmit(e) {
     e.preventDefault();
     console.log('Property form submitted');
     
+    // Get submit button early for state management
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const loadingModal = document.getElementById('loadingModal');
+    
+    // Helper function to reset button state
+    const resetButtonState = () => {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Save Property';
+            submitBtn.classList.remove('saving');
+        }
+        if (loadingModal) {
+            loadingModal.classList.remove('show');
+        }
+    };
+    
     const id = document.getElementById('propertyId').value;
     const name = document.getElementById('propertyName').value.trim();
     const address = document.getElementById('propertyAddress').value.trim();
@@ -972,18 +1105,22 @@ function handlePropertySubmit(e) {
 
     console.log('Form data:', { id, name, address, propertyType, status, squareFootage, yearBuilt, numberOfUnits });
 
+    // Validation - ensure button is enabled if validation fails
     if (!name) {
         alert('Property name is required');
+        resetButtonState();
         return;
     }
     
     if (!propertyType) {
         alert('Property type is required');
+        resetButtonState();
         return;
     }
     
     if (!status) {
         alert('Property status is required');
+        resetButtonState();
         return;
     }
     
@@ -992,28 +1129,31 @@ function handlePropertySubmit(e) {
         // HOA: Only require number of units, not square footage or year built
         if (!numberOfUnits || numberOfUnits < 0) {
             alert('Number of units is required and must be 0 or greater');
+            resetButtonState();
             return;
         }
     } else {
         // Commercial and Residential: Require square footage, year built, and units
         if (!squareFootage || squareFootage <= 0) {
             alert('Square footage is required and must be greater than 0');
+            resetButtonState();
             return;
         }
         
         if (!yearBuilt || yearBuilt < 1800 || yearBuilt > 2100) {
             alert('Year built is required and must be a valid year');
+            resetButtonState();
             return;
         }
         
         if (!numberOfUnits || numberOfUnits < 0) {
             alert('Number of units/spaces is required and must be 0 or greater');
+            resetButtonState();
             return;
         }
     }
 
-    // Disable submit button and show loading modal
-    const submitBtn = e.target.querySelector('button[type="submit"]');
+    // Disable submit button and show loading modal (only after validation passes)
     if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Saving...';
@@ -1021,7 +1161,6 @@ function handlePropertySubmit(e) {
     }
     
     // Show loading modal
-    const loadingModal = document.getElementById('loadingModal');
     if (loadingModal) {
         const loadingModalTitle = document.getElementById('loadingModalTitle');
         const loadingModalMessage = document.getElementById('loadingModalMessage');
@@ -1029,6 +1168,13 @@ function handlePropertySubmit(e) {
         if (loadingModalMessage) loadingModalMessage.textContent = 'Please wait while we save your property';
         loadingModal.classList.add('show');
     }
+    
+    // Set a timeout safety mechanism (30 seconds)
+    const timeoutId = setTimeout(() => {
+        console.error('Property save operation timed out');
+        resetButtonState();
+        alert('The save operation is taking longer than expected. Please check your connection and try again.');
+    }, 30000);
 
     if (id && editingPropertyId) {
         // Update existing - preserve createdAt
@@ -1086,26 +1232,20 @@ function handlePropertySubmit(e) {
             
             return db.collection('properties').doc(id).update(propertyData);
         }).then(() => {
+            clearTimeout(timeoutId);
             console.log('Property updated successfully');
-            // Hide loading modal
-            if (loadingModal) {
-                loadingModal.classList.remove('show');
-            }
+            // Hide loading modal and reset button
+            resetButtonState();
             // Close modal and reset form
             closePropertyModal();
+            // Reload properties list
+            loadProperties();
         }).catch((error) => {
+            clearTimeout(timeoutId);
             console.error('Error updating property:', error);
-            // Hide loading modal
-            if (loadingModal) {
-                loadingModal.classList.remove('show');
-            }
             alert('Error saving property: ' + error.message);
             // Re-enable submit button on error
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Save Property';
-                submitBtn.classList.remove('saving');
-            }
+            resetButtonState();
         });
     } else {
         // Create new
@@ -1142,27 +1282,21 @@ function handlePropertySubmit(e) {
         }
         db.collection('properties').add(propertyData)
             .then((docRef) => {
+                clearTimeout(timeoutId);
                 console.log('Property created successfully with ID:', docRef.id);
-                // Hide loading modal
-                if (loadingModal) {
-                    loadingModal.classList.remove('show');
-                }
+                // Hide loading modal and reset button
+                resetButtonState();
                 // Close modal and reset form
                 closePropertyModal();
+                // Reload properties list
+                loadProperties();
             })
             .catch((error) => {
+                clearTimeout(timeoutId);
                 console.error('Error creating property:', error);
-                // Hide loading modal
-                if (loadingModal) {
-                    loadingModal.classList.remove('show');
-                }
                 alert('Error saving property: ' + error.message);
                 // Re-enable submit button on error
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Save Property';
-                    submitBtn.classList.remove('saving');
-                }
+                resetButtonState();
             });
     }
 }
