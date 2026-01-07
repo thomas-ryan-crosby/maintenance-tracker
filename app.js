@@ -12,14 +12,24 @@ let completionAfterPhotoFile = null;
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('📄 DOM Content Loaded');
+    
     // Wait a bit for config script to load if it hasn't already
     const checkFirebase = () => {
-        if (typeof firebase === 'undefined' || typeof db === 'undefined') {
-            console.warn('Firebase not ready yet, waiting...');
+        if (typeof firebase === 'undefined') {
+            console.warn('⏳ Waiting for Firebase SDK...');
             setTimeout(checkFirebase, 100);
             return;
         }
-        console.log('Firebase initialized successfully');
+        
+        if (typeof db === 'undefined') {
+            console.warn('⏳ Waiting for Firebase db initialization...');
+            setTimeout(checkFirebase, 100);
+            return;
+        }
+        
+        console.log('✅ Firebase initialized successfully');
+        console.log('🚀 Initializing app...');
         initializeApp();
     };
     

@@ -665,17 +665,32 @@
             
             // Wait for config to load before loading app.js
             script.onload = function() {
-                // Verify db is defined
-                if (typeof db === 'undefined') {
-                    console.error('❌ Firebase db is not defined after loading config');
-                    alert('Error: Firebase configuration did not initialize properly. Please check firebase-config.test.js or firebase-config.js');
-                    return;
-                }
+                console.log('✅ Config script loaded:', configFile);
                 
-                // Now load app.js after config is ready
-                const appScript = document.createElement('script');
-                appScript.src = 'app.js?v=2.0';
-                document.head.appendChild(appScript);
+                // Give it a moment for Firebase to initialize
+                setTimeout(function() {
+                    // Verify db is defined
+                    if (typeof db === 'undefined') {
+                        console.error('❌ Firebase db is not defined after loading config');
+                        console.error('Firebase object:', typeof firebase !== 'undefined' ? 'exists' : 'missing');
+                        alert('Error: Firebase configuration did not initialize properly. Please check firebase-config.test.js or firebase-config.js');
+                        return;
+                    }
+                    
+                    console.log('✅ Firebase db is ready, loading app.js...');
+                    
+                    // Now load app.js after config is ready
+                    const appScript = document.createElement('script');
+                    appScript.src = 'app.js?v=2.1';
+                    appScript.onload = function() {
+                        console.log('✅ app.js loaded successfully');
+                    };
+                    appScript.onerror = function() {
+                        console.error('❌ Failed to load app.js');
+                        alert('Error: Failed to load app.js. Please check the file exists.');
+                    };
+                    document.head.appendChild(appScript);
+                }, 100);
             };
             
             script.onerror = function() {
