@@ -736,7 +736,11 @@ function renderUnitsList(units, propertyId) {
                 buildingSection.className = 'building-units-section';
                 buildingSection.innerHTML = `
                     <div class="building-units-header">
-                        <h4>${escapeHtml(building.buildingName)}</h4>
+                        <div>
+                            <h4>${escapeHtml(building.buildingName)}</h4>
+                            ${building.buildingAddress ? `<p style="color: #666; font-size: 0.9rem; margin: 5px 0 0 0;">📍 ${escapeHtml(building.buildingAddress)}</p>` : ''}
+                            ${buildingUnits.length > 0 ? `<p style="color: #999; font-size: 0.85rem; margin: 5px 0 0 0;">${buildingUnits.length} unit${buildingUnits.length !== 1 ? 's' : ''}</p>` : ''}
+                        </div>
                         <button class="btn-primary btn-small" onclick="addUnitToBuilding('${propertyId}', '${buildingId}')">+ Add Unit</button>
                     </div>
                     <div class="building-units-list" id="units-building-${buildingId}"></div>
