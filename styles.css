@@ -1213,19 +1213,48 @@ hr {
 /* Contacts List */
 .contacts-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 24px;
     margin-top: 20px;
 }
 
-/* Contact Card Styling */
+/* Contact Card Styling - Modern Design */
+.contacts-list .unit-item {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid #e8e8e8;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.contacts-list .unit-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+.contacts-list .unit-item:hover {
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+    border-color: #667eea;
+    transform: translateY(-4px);
+}
+
 .contact-card-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 15px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #f0f0f0;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f5f5f5;
 }
 
 .contact-name-section {
@@ -1233,61 +1262,83 @@ hr {
 }
 
 .contact-name-section h4 {
-    margin: 0 0 8px 0;
-    font-size: 1.2rem;
-    color: #333;
-    font-weight: 600;
+    margin: 0 0 12px 0;
+    font-size: 1.5rem;
+    color: #1a1a1a;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    line-height: 1.2;
 }
 
 .contact-classifications {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 8px;
+    gap: 8px;
+    margin-top: 12px;
 }
 
 .contact-classification-badge {
     display: inline-block;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+    letter-spacing: 0.8px;
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
 }
 
 .contact-card-body {
-    margin-bottom: 15px;
+    flex: 1;
+    margin-bottom: 20px;
 }
 
 .contact-info-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 0;
-    color: #666;
-    font-size: 0.9rem;
-    border-bottom: 1px solid #f5f5f5;
+    gap: 14px;
+    padding: 14px 0;
+    color: #4a4a4a;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    line-height: 1.5;
 }
 
-.contact-info-item:last-of-type {
-    border-bottom: none;
+.contact-info-item:hover {
+    color: #667eea;
+    padding-left: 4px;
+}
+
+.contact-info-item:not(:last-child) {
+    border-bottom: 1px solid #f0f0f0;
 }
 
 .contact-icon {
-    font-size: 1.1rem;
-    width: 24px;
-    text-align: center;
+    font-size: 1.3rem;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border-radius: 10px;
     flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.contact-info-item:hover .contact-icon {
+    background: linear-gradient(135deg, #e8ecff 0%, #f0f4ff 100%);
+    transform: scale(1.1);
 }
 
 .contact-link {
     color: #667eea;
     text-decoration: none;
-    transition: color 0.2s;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    word-break: break-all;
 }
 
 .contact-link:hover {
@@ -1298,42 +1349,64 @@ hr {
 .contact-notes {
     display: flex;
     align-items: flex-start;
-    gap: 10px;
-    padding: 12px;
-    margin-top: 10px;
-    background: #f8f9fa;
-    border-radius: 8px;
+    gap: 12px;
+    padding: 16px;
+    margin-top: 16px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%);
+    border-radius: 12px;
     color: #666;
     font-size: 0.9rem;
-    line-height: 1.5;
-    border-left: 3px solid #667eea;
+    line-height: 1.6;
+    border-left: 4px solid #667eea;
 }
 
 .contact-notes .contact-icon {
     margin-top: 2px;
+    background: transparent;
 }
 
 .contact-card-actions {
     display: flex;
-    gap: 10px;
-    padding-top: 15px;
-    border-top: 2px solid #f0f0f0;
+    gap: 12px;
+    padding-top: 18px;
+    border-top: 2px solid #f5f5f5;
+    margin-top: auto;
 }
 
-/* Update unit-item styling for contacts */
-.contacts-list .unit-item {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s;
-    border: 2px solid #e0e0e0;
+.contact-card-actions .btn-small {
+    flex: 1;
+    padding: 11px 18px;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
 }
 
-.contacts-list .unit-item:hover {
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+.contact-card-actions .btn-secondary {
+    background: #f8f9fa;
+    color: #4a4a4a;
+    border: 1px solid #e0e0e0;
+}
+
+.contact-card-actions .btn-secondary:hover {
+    background: #e9ecef;
     border-color: #667eea;
-    transform: translateY(-2px);
+    color: #667eea;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.1);
+}
+
+.contact-card-actions .btn-danger {
+    background: #fff;
+    color: #e74c3c;
+    border: 1px solid #e74c3c;
+}
+
+.contact-card-actions .btn-danger:hover {
+    background: #e74c3c;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
 }
 
 /* Occupancies List */
