@@ -18,15 +18,15 @@ This document details the requirements for Phase 1 of the Property Management Pl
 ### 2.1 Primary Goals
 - Enhance property management with detailed property profiles
 - Implement unit/space management for multi-unit properties
-- Create a tenant database with contact management
+- Create a tenant database with flexible contact management
 - Establish tenant-property associations
-- Enable basic user authentication and permissions
+- Support multiple contacts per tenant with role classifications
 
 ### 2.2 Success Criteria
 - All properties have detailed profiles with essential information
 - Unit inventory can be managed for multi-unit properties
 - Tenant records can be created and linked to properties/units
-- Users can authenticate and access the system based on roles
+- Multiple contacts can be added to tenants with appropriate classifications
 - Data model supports future lease and financial features
 
 ---
@@ -111,23 +111,7 @@ This document details the requirements for Phase 1 of the Property Management Pl
 - **Reserved:** Reserved for a specific tenant (lease pending)
 - **Not Available:** Not available for lease (owner use, etc.)
 
-#### 3.2.2 Unit Features (Optional)
-- Amenities checklist (checkbox list):
-  - Balcony/Patio
-  - Parking Included
-  - Storage Included
-  - Washer/Dryer
-  - Dishwasher
-  - Air Conditioning
-  - Heating
-  - Fireplace
-  - Hardwood Floors
-  - Carpet
-  - Updated Kitchen
-  - Updated Bathroom
-  - Other (text field)
-
-#### 3.2.3 Unit History
+#### 3.2.2 Unit History
 - Track unit status changes over time
 - Display current and past tenants
 - Maintenance history (linked to work orders)
@@ -144,13 +128,9 @@ This document details the requirements for Phase 1 of the Property Management Pl
 - Tenant Name (text) - Company name for commercial, individual name for residential
 - Tenant Type (dropdown: Commercial, Residential)
 - Tenant Status (dropdown: Active, Past, Prospect)
-- Primary Contact Email (email)
-- Primary Contact Phone (text)
+- At least one contact must be added (with at least one contact classification)
 
 **Optional Fields:**
-- Secondary Contact Name (text)
-- Secondary Contact Email (email)
-- Secondary Contact Phone (text)
 - Mailing Address (text) - if different from property address
 - Tax ID/EIN (text) - for commercial tenants
 - Notes (textarea) - general notes about the tenant
@@ -162,9 +142,6 @@ This document details the requirements for Phase 1 of the Property Management Pl
 
 **Residential Tenant Specific Fields:**
 - Date of Birth (date, optional)
-- Emergency Contact Name (text)
-- Emergency Contact Phone (text)
-- Emergency Contact Relationship (text)
 
 #### 4.1.2 Tenant Status
 
@@ -174,10 +151,31 @@ This document details the requirements for Phase 1 of the Property Management Pl
 - **Prospect:** Potential tenant (lead/applicant)
 
 #### 4.1.3 Tenant Contact Management
-- Primary and secondary contacts
+
+**Multiple Contacts Support:**
+- Tenants can have unlimited contacts
+- Each contact can have multiple classifications
+- Contact classifications (checkboxes - multiple can be selected):
+  - **Primary Contact:** Main point of contact
+  - **Secondary Contact:** Backup/alternate contact
+  - **Leasing Contact:** Contact for leasing-related matters
+  - **Billing Contact:** Contact for billing and payment matters
+
+**Contact Information (per contact):**
+- Contact Name (text, required)
+- Contact Email (email, optional)
+- Contact Phone (text, optional)
+- Contact Title/Position (text, optional) - e.g., "Property Manager", "Accounts Payable"
+- Contact Classifications (checkboxes, at least one required)
+- Contact Notes (textarea, optional) - notes specific to this contact
+
+**Contact Management Features:**
+- Add multiple contacts to a tenant
+- Edit contact information
+- Remove contacts
+- View all contacts with their classifications
+- Filter contacts by classification
 - Contact history (future: communication log)
-- Preferred contact method
-- Contact notes
 
 ### 4.2 Tenant-Property Association
 
@@ -199,74 +197,6 @@ This document details the requirements for Phase 1 of the Property Management Pl
 - Move-out Date (date, optional if active)
 - Occupancy Status (Active, Past, Pending)
 - Notes (textarea) - occupancy-specific notes
-
----
-
-## 5. User Management & Permissions
-
-### 5.1 User Authentication
-
-#### 5.1.1 User Registration
-- Email-based registration
-- Password requirements (minimum 8 characters)
-- Email verification
-- Account activation workflow
-
-#### 5.1.2 User Login
-- Email/password authentication
-- "Remember me" functionality
-- Password reset functionality
-- Session management
-
-### 5.2 Role Definitions
-
-#### 5.2.1 User Roles
-
-**Admin:**
-- Full system access
-- Can manage all properties
-- Can manage all tenants
-- Can manage users and permissions
-- Can access all features
-
-**Property Manager:**
-- Can manage assigned properties
-- Can create/edit tenants
-- Can create/edit work orders
-- Can view financial information
-- Cannot manage users
-
-**Maintenance Staff:**
-- Can view assigned properties
-- Can create/edit work orders
-- Can view tenant information (limited)
-- Cannot edit property/tenant details
-- Cannot access financial information
-
-**Tenant (Future - Phase 9):**
-- Can view own information
-- Can submit maintenance requests
-- Can view own documents
-- Limited access
-
-#### 5.2.2 Permission Framework
-- Role-based access control (RBAC)
-- Property-level permissions
-- Feature-level permissions
-- Permission inheritance
-
-### 5.3 Organization Structure
-
-#### 5.3.1 Multi-Organization Support
-- Users belong to an organization
-- Properties belong to an organization
-- Data isolation between organizations
-- Organization admin role
-
-#### 5.3.2 Team Management
-- Users can be assigned to teams
-- Teams can be assigned to properties
-- Team-based permissions
 
 ---
 
@@ -335,23 +265,11 @@ This document details the requirements for Phase 1 of the Property Management Pl
 #### 6.3.3 Tenant Form
 - Tenant creation/edit form
 - Conditional fields based on tenant type
+- Multiple contact management section
+- Add/remove contacts
+- Contact classification selection (checkboxes)
 - Property/unit association
-- Contact management
 - Status management
-
-### 6.4 User Management UI
-
-#### 6.4.1 User List View
-- List of all users in organization
-- User roles and status
-- Last login information
-- Quick actions
-
-#### 6.4.2 User Form
-- User creation/edit
-- Role assignment
-- Property assignments
-- Permission management
 
 ---
 
@@ -421,7 +339,6 @@ This document details the requirements for Phase 1 of the Property Management Pl
   floorNumber: number | null,
   status: 'Occupied' | 'Vacant' | 'Maintenance' | 'Reserved' | 'Not Available',
   monthlyRent: number | null,
-  amenities: string[], // Array of amenity strings
   createdAt: timestamp,
   updatedAt: timestamp
 }
@@ -435,11 +352,6 @@ This document details the requirements for Phase 1 of the Property Management Pl
   tenantName: string,
   tenantType: 'Commercial' | 'Residential',
   status: 'Active' | 'Past' | 'Prospect',
-  primaryContactEmail: string,
-  primaryContactPhone: string,
-  secondaryContactName: string | null,
-  secondaryContactEmail: string | null,
-  secondaryContactPhone: string | null,
   mailingAddress: string | null,
   taxId: string | null, // Commercial
   notes: string | null,
@@ -449,12 +361,26 @@ This document details the requirements for Phase 1 of the Property Management Pl
   website: string | null,
   // Residential specific
   dateOfBirth: timestamp | null,
-  emergencyContactName: string | null,
-  emergencyContactPhone: string | null,
-  emergencyContactRelationship: string | null,
   createdAt: timestamp,
   updatedAt: timestamp,
   organizationId: string
+}
+```
+
+### 7.4.1 Tenant Contact Schema
+
+```javascript
+{
+  id: string,
+  tenantId: string,
+  contactName: string,
+  contactEmail: string | null,
+  contactPhone: string | null,
+  contactTitle: string | null,
+  classifications: string[], // Array of: 'Primary', 'Secondary', 'Leasing', 'Billing'
+  notes: string | null,
+  createdAt: timestamp,
+  updatedAt: timestamp
 }
 ```
 
@@ -475,22 +401,6 @@ This document details the requirements for Phase 1 of the Property Management Pl
 }
 ```
 
-### 7.6 User Schema
-
-```javascript
-{
-  id: string,
-  email: string,
-  displayName: string,
-  role: 'Admin' | 'PropertyManager' | 'Maintenance' | 'Tenant',
-  organizationId: string,
-  assignedProperties: string[], // Array of property IDs
-  isActive: boolean,
-  lastLogin: timestamp | null,
-  createdAt: timestamp,
-  updatedAt: timestamp
-}
-```
 
 ---
 
@@ -536,82 +446,58 @@ This document details the requirements for Phase 1 of the Property Management Pl
 **FR-T1.1: Create Tenant**
 - User can create a tenant record
 - Tenant type determines which fields are shown
-- Form validates required fields
+- Form validates required fields (at least one contact required)
 - Tenant is saved to database with organization association
 
 **FR-T1.2: Edit Tenant**
 - User can edit existing tenant information
-- All fields are editable (based on permissions)
+- All fields are editable
 - Changes are saved and timestamped
 - Tenant history is maintained
 
 **FR-T1.3: View Tenant Details**
 - User can view complete tenant profile
+- Tenant displays all contacts with classifications
 - Tenant displays current occupancies
 - Tenant displays occupancy history
 - Tenant displays associated work orders
-- Tenant displays notes and communication
+- Tenant displays notes
 
-**FR-T1.4: Link Tenant to Property/Unit**
+**FR-T1.4: Manage Tenant Contacts**
+- User can add multiple contacts to a tenant
+- User can assign multiple classifications to each contact
+- User can edit contact information
+- User can remove contacts
+- Contacts can be filtered by classification
+- At least one contact must have "Primary Contact" classification
+
+**FR-T1.5: Link Tenant to Property/Unit**
 - User can create occupancy record
 - User can link tenant to property
 - User can link tenant to specific unit (if applicable)
 - Multiple tenants can be linked to same unit
 - Occupancy status is tracked
 
-**FR-T1.5: Manage Occupancy**
+**FR-T1.6: Manage Occupancy**
 - User can set move-in date
 - User can set move-out date
 - System updates unit status based on occupancy
 - Occupancy history is maintained
-
-### 8.3 User Management
-
-**FR-U1.1: User Registration**
-- New users can register with email and password
-- Email verification is required
-- User is assigned to organization
-- Default role is assigned
-
-**FR-U1.2: User Login**
-- Users can log in with email and password
-- Session is maintained
-- Last login is tracked
-- Failed login attempts are logged
-
-**FR-U1.3: User Profile Management**
-- Users can view their profile
-- Users can update their information
-- Users can change password
-- Users can view their permissions
-
-**FR-U1.4: Role Management (Admin Only)**
-- Admin can assign roles to users
-- Admin can assign properties to users
-- Admin can activate/deactivate users
-- Permission changes take effect immediately
 
 ---
 
 ## 9. Technical Requirements
 
 ### 9.1 Database
-- Firestore collections: `properties`, `buildings`, `units`, `tenants`, `occupancies`, `users`
+- Firestore collections: `properties`, `buildings`, `units`, `tenants`, `tenantContacts`, `occupancies`
 - Proper indexing for queries
 - Data validation rules
-- Organization-level data isolation
+- Organization-level data isolation (for future use)
 
-### 9.2 Authentication
-- Firebase Authentication integration
-- Email/password authentication
-- Session management
-- Password reset functionality
-
-### 9.3 Security
-- Role-based access control
-- Property-level permissions
-- Data isolation by organization
+### 9.2 Security
+- Data validation at form and database level
 - Secure API endpoints
+- Input sanitization
 
 ### 9.4 Performance
 - Efficient queries with proper indexes
@@ -639,23 +525,17 @@ This document details the requirements for Phase 1 of the Property Management Pl
 
 **US-T1:** As a property manager, I want to create tenant records so that I have contact information for all tenants.
 
-**US-T2:** As a property manager, I want to link tenants to properties/units so that I know who occupies which space.
+**US-T2:** As a property manager, I want to add multiple contacts to a tenant so that I can reach the right person for different matters (leasing, billing, etc.).
 
-**US-T3:** As a property manager, I want to view tenant occupancy history so that I can see past and current occupancies.
+**US-T3:** As a property manager, I want to assign contact classifications so that I know which contact to use for primary, secondary, leasing, or billing purposes.
 
-**US-T4:** As a property manager, I want to search for tenants so that I can quickly find tenant information.
+**US-T4:** As a property manager, I want to link tenants to properties/units so that I know who occupies which space.
 
-**US-T5:** As a property manager, I want to update tenant status so that I can track active, past, and prospect tenants.
+**US-T5:** As a property manager, I want to view tenant occupancy history so that I can see past and current occupancies.
 
-### 10.3 User Management
+**US-T6:** As a property manager, I want to search for tenants so that I can quickly find tenant information.
 
-**US-U1:** As a system admin, I want to create user accounts so that team members can access the system.
-
-**US-U2:** As a system admin, I want to assign roles to users so that users have appropriate permissions.
-
-**US-U3:** As a user, I want to log in to the system so that I can access my assigned properties and features.
-
-**US-U4:** As a user, I want to view my profile so that I can see my role and permissions.
+**US-T7:** As a property manager, I want to update tenant status so that I can track active, past, and prospect tenants.
 
 ---
 
@@ -676,11 +556,11 @@ This document details the requirements for Phase 1 of the Property Management Pl
 - ✅ Occupancy history is tracked
 - ✅ Tenant detail view shows all associated data
 
-### 11.3 User Management
-- ✅ Users can register and log in
-- ✅ Roles are enforced
-- ✅ Permissions control access
-- ✅ Organization data is isolated
+### 11.3 Tenant Contact Management
+- ✅ Multiple contacts can be added to tenants
+- ✅ Contact classifications can be assigned (multiple per contact)
+- ✅ At least one primary contact is required
+- ✅ Contacts can be filtered by classification
 
 ---
 
@@ -688,7 +568,8 @@ This document details the requirements for Phase 1 of the Property Management Pl
 
 - Property photos and documents (marked not necessary)
 - Property-specific settings and configurations (marked not necessary)
-- Detailed unit features/layout (deferred)
+- Unit features/amenities (not necessary)
+- User Management & Permissions (internal tool - not needed)
 - Advanced search and filtering
 - Bulk import/export
 - Tenant portal features
@@ -725,9 +606,9 @@ This document details the requirements for Phase 1 of the Property Management Pl
 - 100% of properties have enhanced profiles
 - All multi-unit properties have unit inventory
 - 90% of tenants have records in system
+- 100% of tenants have at least one contact with primary classification
 - 100% of active occupancies are linked
-- User authentication working for all user types
-- Role-based permissions enforced
+- Multiple contacts can be added and classified appropriately
 
 ---
 
