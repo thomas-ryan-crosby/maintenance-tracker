@@ -3054,18 +3054,35 @@ function loadPropertiesForTenantFilter() {
 }
 
 function renderTenantsList(tenants) {
+    // Filter by property if selected
+    if (currentTenantView === 'table') {
+        renderTenantsTableView(tenants);
+    } else {
+        renderTenantsCardView(tenants);
+    }
+}
+
+async function renderTenantsCardView(tenants) {
     const tenantsList = document.getElementById('tenantsList');
+    const tenantsTable = document.getElementById('tenantsTable');
+    
+    if (tenantsList) tenantsList.style.display = 'grid';
+    if (tenantsTable) tenantsTable.style.display = 'none';
+    
     if (!tenantsList) return;
     
     tenantsList.innerHTML = '';
     
-    if (Object.keys(tenants).length === 0) {
-        tenantsList.innerHTML = '<p style="color: #999; text-align: center; padding: 40px; grid-column: 1 / -1;">No tenants yet. Add one to get started.</p>';
+    // Filter tenants by property if needed
+    const filteredTenants = await filterTenantsByProperty(tenants);
+    
+    if (Object.keys(filteredTenants).length === 0) {
+        tenantsList.innerHTML = '<p class="no-tenants-message">No tenants found. Add one to get started.</p>';
         return;
     }
     
-    Object.keys(tenants).forEach(id => {
-        const tenant = tenants[id];
+    Object.keys(filteredTenants).forEach(id => {
+        const tenant = filteredTenants[id];
         const card = document.createElement('div');
         card.className = 'tenant-card';
         const statusBadge = tenant.status ? `<span class="status-badge status-${tenant.status.toLowerCase()}">${tenant.status}</span>` : '';
@@ -3086,13 +3103,278 @@ function renderTenantsList(tenants) {
                 ${tenant.notes ? `<p><strong>📝 Notes:</strong> ${escapeHtml(tenant.notes.substring(0, 100))}${tenant.notes.length > 100 ? '...' : ''}</p>` : ''}
             </div>
             <div class="tenant-card-actions">
-                <button class="btn-secondary btn-small" onclick="viewTenantDetail('${id}')">View Details</button>
+                <button class="btn-primary btn-small" onclick="viewTenantDetail('${id}')">View Details</button>
                 <button class="btn-secondary btn-small" onclick="editTenant('${id}')">Edit</button>
                 <button class="btn-danger btn-small" onclick="deleteTenant('${id}')">Delete</button>
             </div>
         `;
         tenantsList.appendChild(card);
     });
+}
+
+async function renderTenantsTableView(tenants) {
+    const tenantsList = document.getElementById('tenantsList');
+    const tenantsTable = document.getElementById('tenantsTable');
+    
+    if (tenantsList) tenantsList.style.display = 'none';
+    if (tenantsTable) tenantsTable.style.display = 'block';
+    
+    if (!tenantsTable) return;
+    
+    // Filter tenants by property if needed
+    const filteredTenants = await filterTenantsByProperty(tenants);
+    
+    if (Object.keys(filteredTenants).length === 0) {
+        tenantsTable.innerHTML = '<p class="no-tenants-message">No tenants found. Add one to get started.</p>';
+        return;
+    }
+    
+    // Load occupancies and buildings to group by building
+    const [occupanciesSnapshot, buildingsSnapshot, propertiesSnapshot] = await Promise.all([
+        db.collection('occupancies').get(),
+        db.collection('buildings').get(),
+        db.collection('properties').get()
+    ]);
+    
+    const occupanciesMap = {};
+    occupanciesSnapshot.forEach(doc => {
+        const occ = doc.data();
+        if (!occupanciesMap[occ.tenantId]) {
+            occupanciesMap[occ.tenantId] = [];
+        }
+        occupanciesMap[occ.tenantId].push({ ...occ, id: doc.id });
+    });
+    
+    const buildingsMap = {};
+    buildingsSnapshot.forEach(doc => {
+        buildingsMap[doc.id] = { id: doc.id, ...doc.data() };
+    });
+    
+    const propertiesMap = {};
+    propertiesSnapshot.forEach(doc => {
+        propertiesMap[doc.id] = { id: doc.id, ...doc.data() };
+    });
+    
+    // Group tenants by building
+    const tenantsByBuilding = {};
+    const tenantsWithoutBuilding = [];
+    
+    Object.keys(filteredTenants).forEach(tenantId => {
+        const tenant = filteredTenants[tenantId];
+        const tenantOccupancies = occupanciesMap[tenantId] || [];
+        
+        if (tenantOccupancies.length === 0) {
+            tenantsWithoutBuilding.push({ tenant, occupancies: [] });
+        } else {
+            tenantOccupancies.forEach(occ => {
+                const buildingId = occ.buildingId;
+                if (buildingId && buildingsMap[buildingId]) {
+                    const building = buildingsMap[buildingId];
+                    const buildingKey = building.buildingName || `Building ${buildingId}`;
+                    
+                    if (!tenantsByBuilding[buildingKey]) {
+                        tenantsByBuilding[buildingKey] = {
+                            building: building,
+                            tenants: []
+                        };
+                    }
+                    
+                    // Check if tenant already added to this building
+                    const existing = tenantsByBuilding[buildingKey].tenants.find(t => t.tenant.id === tenantId);
+                    if (!existing) {
+                        tenantsByBuilding[buildingKey].tenants.push({
+                            tenant: tenant,
+                            occupancies: tenantOccupancies.filter(o => o.buildingId === buildingId)
+                        });
+                    }
+                } else {
+                    tenantsWithoutBuilding.push({ tenant, occupancies: tenantOccupancies });
+                }
+            });
+        }
+    });
+    
+    // Build HTML
+    let html = '';
+    
+    // Render grouped by building
+    Object.keys(tenantsByBuilding).sort().forEach(buildingName => {
+        const group = tenantsByBuilding[buildingName];
+        html += `
+            <div class="building-group">
+                <div class="building-group-header">${escapeHtml(buildingName)}</div>
+                <table class="tenants-table">
+                    <thead>
+                        <tr>
+                            <th>Tenant Name</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Contacts</th>
+                            <th>Occupancies</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        group.tenants.forEach(({ tenant, occupancies }) => {
+            const statusBadge = tenant.status ? `<span class="status-badge status-${tenant.status.toLowerCase()}">${tenant.status}</span>` : '';
+            const typeBadge = tenant.tenantType ? `<span class="status-badge type-badge">${tenant.tenantType}</span>` : '';
+            
+            // Occupancies
+            let occupanciesHtml = '<span style="color: #999;">No occupancies</span>';
+            if (occupancies.length > 0) {
+                occupanciesHtml = occupancies.map(occ => {
+                    // We need to get unit info
+                    return `<span class="occupancy-info">Unit</span>`;
+                }).join('');
+            }
+            
+            html += `
+                <tr data-tenant-id="${tenant.id}">
+                    <td class="tenant-name-cell">${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</td>
+                    <td>${typeBadge}</td>
+                    <td class="tenant-status-cell">${statusBadge}</td>
+                    <td class="tenant-contacts-cell"><span style="color: #999;">Loading...</span></td>
+                    <td class="tenant-occupancies-cell">${occupanciesHtml}</td>
+                    <td class="tenant-actions-cell">
+                        <button class="btn-primary btn-small" onclick="viewTenantDetail('${tenant.id}')">View</button>
+                        <button class="btn-secondary btn-small" onclick="editTenant('${tenant.id}')">Edit</button>
+                        <button class="btn-danger btn-small" onclick="deleteTenant('${tenant.id}')">Delete</button>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+    });
+    
+    // Render tenants without building
+    if (tenantsWithoutBuilding.length > 0) {
+        html += `
+            <div class="building-group">
+                <div class="building-group-header">No Building Assigned</div>
+                <table class="tenants-table">
+                    <thead>
+                        <tr>
+                            <th>Tenant Name</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Contacts</th>
+                            <th>Occupancies</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        tenantsWithoutBuilding.forEach(({ tenant, occupancies }) => {
+            const statusBadge = tenant.status ? `<span class="status-badge status-${tenant.status.toLowerCase()}">${tenant.status}</span>` : '';
+            const typeBadge = tenant.tenantType ? `<span class="status-badge type-badge">${tenant.tenantType}</span>` : '';
+            
+            html += `
+                <tr data-tenant-id="${tenant.id}">
+                    <td class="tenant-name-cell">${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</td>
+                    <td>${typeBadge}</td>
+                    <td class="tenant-status-cell">${statusBadge}</td>
+                    <td class="tenant-contacts-cell"><span style="color: #999;">Loading...</span></td>
+                    <td class="tenant-occupancies-cell"><span style="color: #999;">No occupancies</span></td>
+                    <td class="tenant-actions-cell">
+                        <button class="btn-primary btn-small" onclick="viewTenantDetail('${tenant.id}')">View</button>
+                        <button class="btn-secondary btn-small" onclick="editTenant('${tenant.id}')">Edit</button>
+                        <button class="btn-danger btn-small" onclick="deleteTenant('${tenant.id}')">Delete</button>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+    
+    tenantsTable.innerHTML = html;
+    
+    // Load contacts for all tenants
+    loadContactsForTableView(filteredTenants);
+}
+
+async function loadContactsForTableView(tenants) {
+    const tenantIds = Object.keys(tenants);
+    if (tenantIds.length === 0) return;
+    
+    // Firestore 'in' query limit is 10, so we need to batch
+    const allContacts = {};
+    const batchSize = 10;
+    
+    for (let i = 0; i < tenantIds.length; i += batchSize) {
+        const batch = tenantIds.slice(i, i + batchSize);
+        const contactsSnapshot = await db.collection('tenantContacts')
+            .where('tenantId', 'in', batch)
+            .get();
+        
+        contactsSnapshot.forEach(doc => {
+            const contact = doc.data();
+            if (!allContacts[contact.tenantId]) {
+                allContacts[contact.tenantId] = [];
+            }
+            allContacts[contact.tenantId].push(contact);
+        });
+    }
+    
+    // Update table with contact info
+    Object.keys(tenants).forEach(tenantId => {
+        const contacts = allContacts[tenantId] || [];
+        const contactsCell = document.querySelector(`tr[data-tenant-id="${tenantId}"] .tenant-contacts-cell`);
+        if (contactsCell) {
+            if (contacts.length === 0) {
+                contactsCell.innerHTML = '<span style="color: #999;">No contacts</span>';
+            } else {
+                contactsCell.innerHTML = contacts.slice(0, 3).map(contact => {
+                    let html = '';
+                    if (contact.contactEmail) {
+                        html += `<div class="contact-info">✉️ <a href="mailto:${escapeHtml(contact.contactEmail)}">${escapeHtml(contact.contactEmail)}</a></div>`;
+                    }
+                    if (contact.contactPhone) {
+                        html += `<div class="contact-info">📞 <a href="tel:${escapeHtml(contact.contactPhone)}">${escapeHtml(contact.contactPhone)}</a></div>`;
+                    }
+                    return html;
+                }).join('') || '<span style="color: #999;">No contact info</span>';
+            }
+        }
+    });
+}
+
+async function filterTenantsByProperty(tenants) {
+    if (!selectedPropertyForTenants) {
+        return tenants;
+    }
+    
+    // Get occupancies for the selected property
+    const occupanciesSnapshot = await db.collection('occupancies')
+        .where('propertyId', '==', selectedPropertyForTenants)
+        .get();
+    
+    const tenantIdsInProperty = new Set();
+    occupanciesSnapshot.forEach(doc => {
+        tenantIdsInProperty.add(doc.data().tenantId);
+    });
+    
+    // Filter tenants
+    const filtered = {};
+    Object.keys(tenants).forEach(id => {
+        if (tenantIdsInProperty.has(id)) {
+            filtered[id] = tenants[id];
+        }
+    });
+    
+    return filtered;
 }
 
 function showAddTenantForm() {
