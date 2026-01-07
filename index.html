@@ -346,12 +346,65 @@
                 </div>
 
                 <div id="activeTicketsView" class="tickets-view">
-                    <h2>Active Tickets</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                        <h2 style="margin: 0;">Active Tickets</h2>
+                        <div class="ticket-controls" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                            <div class="control-group">
+                                <label for="activeSortBy" style="font-size: 12px; color: #666; margin-right: 5px;">Sort by:</label>
+                                <select id="activeSortBy" class="control-select">
+                                    <option value="dateCreated-desc">Date Created (Newest)</option>
+                                    <option value="dateCreated-asc">Date Created (Oldest)</option>
+                                    <option value="status-asc">Status (A-Z)</option>
+                                    <option value="status-desc">Status (Z-A)</option>
+                                    <option value="assignedTo-asc">Assigned To (A-Z)</option>
+                                    <option value="assignedTo-desc">Assigned To (Z-A)</option>
+                                    <option value="timeAllocated-desc">Time Allocated (High-Low)</option>
+                                    <option value="timeAllocated-asc">Time Allocated (Low-High)</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label for="activeFilterStatus" style="font-size: 12px; color: #666; margin-right: 5px;">Status:</label>
+                                <select id="activeFilterStatus" class="control-select">
+                                    <option value="">All Statuses</option>
+                                    <option value="New (Unassigned)">New (Unassigned)</option>
+                                    <option value="Not Started">Not Started</option>
+                                    <option value="In Progress">In Progress</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label for="activeFilterAssigned" style="font-size: 12px; color: #666; margin-right: 5px;">Assigned To:</label>
+                                <select id="activeFilterAssigned" class="control-select">
+                                    <option value="">All Assignees</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                     <div id="activeTicketsList" class="tickets-list"></div>
                 </div>
 
                 <div id="completedTicketsView" class="tickets-view" style="display: none;">
-                    <h2>Completed Tickets</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                        <h2 style="margin: 0;">Completed Tickets</h2>
+                        <div class="ticket-controls" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                            <div class="control-group">
+                                <label for="completedSortBy" style="font-size: 12px; color: #666; margin-right: 5px;">Sort by:</label>
+                                <select id="completedSortBy" class="control-select">
+                                    <option value="dateCompleted-desc">Date Completed (Newest)</option>
+                                    <option value="dateCompleted-asc">Date Completed (Oldest)</option>
+                                    <option value="completedBy-asc">Completed By (A-Z)</option>
+                                    <option value="completedBy-desc">Completed By (Z-A)</option>
+                                    <option value="timeAllocated-desc">Time Allocated (High-Low)</option>
+                                    <option value="timeAllocated-asc">Time Allocated (Low-High)</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label for="completedFilterAssigned" style="font-size: 12px; color: #666; margin-right: 5px;">Completed By:</label>
+                                <select id="completedFilterAssigned" class="control-select">
+                                    <option value="">All</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                     <div id="completedTicketsList" class="tickets-list"></div>
                 </div>
                 <div id="deletedTicketsView" class="tickets-view" style="display: none;">

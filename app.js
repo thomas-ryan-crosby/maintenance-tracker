@@ -9,6 +9,14 @@ let beforePhotoUrl = null;
 let afterPhotoUrl = null;
 let completionAfterPhotoFile = null;
 
+// Sort and filter state
+let activeSortBy = localStorage.getItem('activeSortBy') || 'dateCreated-desc';
+let activeFilterStatus = localStorage.getItem('activeFilterStatus') || '';
+let activeFilterAssigned = localStorage.getItem('activeFilterAssigned') || '';
+let completedSortBy = localStorage.getItem('completedSortBy') || 'dateCompleted-desc';
+let completedFilterAssigned = localStorage.getItem('completedFilterAssigned') || '';
+let allTickets = {}; // Store all tickets for filtering
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
     // Check if Firebase is initialized
@@ -118,6 +126,58 @@ function setupEventListeners() {
     if (viewActiveBtn) viewActiveBtn.addEventListener('click', () => switchView('active'));
     if (viewCompletedBtn) viewCompletedBtn.addEventListener('click', () => switchView('completed'));
     if (toggleMetricsBtn) toggleMetricsBtn.addEventListener('click', toggleMetrics);
+    
+    // Sort and filter controls
+    const activeSortBySelect = document.getElementById('activeSortBy');
+    const activeFilterStatusSelect = document.getElementById('activeFilterStatus');
+    const activeFilterAssignedSelect = document.getElementById('activeFilterAssigned');
+    const completedSortBySelect = document.getElementById('completedSortBy');
+    const completedFilterAssignedSelect = document.getElementById('completedFilterAssigned');
+    
+    if (activeSortBySelect) {
+        activeSortBySelect.value = activeSortBy;
+        activeSortBySelect.addEventListener('change', (e) => {
+            activeSortBy = e.target.value;
+            localStorage.setItem('activeSortBy', activeSortBy);
+            renderTickets(allTickets);
+        });
+    }
+    
+    if (activeFilterStatusSelect) {
+        activeFilterStatusSelect.value = activeFilterStatus;
+        activeFilterStatusSelect.addEventListener('change', (e) => {
+            activeFilterStatus = e.target.value;
+            localStorage.setItem('activeFilterStatus', activeFilterStatus);
+            renderTickets(allTickets);
+        });
+    }
+    
+    if (activeFilterAssignedSelect) {
+        activeFilterAssignedSelect.value = activeFilterAssigned;
+        activeFilterAssignedSelect.addEventListener('change', (e) => {
+            activeFilterAssigned = e.target.value;
+            localStorage.setItem('activeFilterAssigned', activeFilterAssigned);
+            renderTickets(allTickets);
+        });
+    }
+    
+    if (completedSortBySelect) {
+        completedSortBySelect.value = completedSortBy;
+        completedSortBySelect.addEventListener('change', (e) => {
+            completedSortBy = e.target.value;
+            localStorage.setItem('completedSortBy', completedSortBy);
+            renderTickets(allTickets);
+        });
+    }
+    
+    if (completedFilterAssignedSelect) {
+        completedFilterAssignedSelect.value = completedFilterAssigned;
+        completedFilterAssignedSelect.addEventListener('change', (e) => {
+            completedFilterAssigned = e.target.value;
+            localStorage.setItem('completedFilterAssigned', completedFilterAssigned);
+            renderTickets(allTickets);
+        });
+    }
 
     // Completion modal
     const closeCompletionModalBtn = document.getElementById('closeCompletionModal');
@@ -521,9 +581,60 @@ function loadTickets() {
         snapshot.docs.forEach(doc => {
             tickets[doc.id] = { id: doc.id, ...doc.data() };
         });
+        allTickets = tickets; // Store for filter dropdown population
         renderTickets(tickets);
         updateMetrics(tickets);
+        updateFilterDropdowns(tickets);
     });
+}
+
+// Update filter dropdowns with unique values from tickets
+function updateFilterDropdowns(tickets) {
+    // Get unique assigned to values for active tickets
+    const assignedToSet = new Set();
+    const completedBySet = new Set();
+    
+    Object.values(tickets).forEach(ticket => {
+        // Filter by selected property if one is selected
+        if (selectedPropertyId && ticket.propertyId !== selectedPropertyId) {
+            return;
+        }
+        
+        if (!ticket.deletedAt && ticket.status !== 'Completed' && ticket.assignedTo) {
+            assignedToSet.add(ticket.assignedTo);
+        }
+        if (ticket.status === 'Completed' && ticket.completedBy) {
+            completedBySet.add(ticket.completedBy);
+        }
+    });
+    
+    // Update active filter assigned dropdown
+    const activeFilterAssignedSelect = document.getElementById('activeFilterAssigned');
+    if (activeFilterAssignedSelect) {
+        const currentValue = activeFilterAssignedSelect.value;
+        activeFilterAssignedSelect.innerHTML = '<option value="">All Assignees</option>';
+        Array.from(assignedToSet).sort().forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            activeFilterAssignedSelect.appendChild(option);
+        });
+        activeFilterAssignedSelect.value = currentValue;
+    }
+    
+    // Update completed filter assigned dropdown
+    const completedFilterAssignedSelect = document.getElementById('completedFilterAssigned');
+    if (completedFilterAssignedSelect) {
+        const currentValue = completedFilterAssignedSelect.value;
+        completedFilterAssignedSelect.innerHTML = '<option value="">All</option>';
+        Array.from(completedBySet).sort().forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            completedFilterAssignedSelect.appendChild(option);
+        });
+        completedFilterAssignedSelect.value = currentValue;
+    }
 }
 
 // Metrics Dashboard
@@ -613,22 +724,31 @@ function renderTickets(tickets) {
         if (ticket.deletedAt) {
             deletedTickets.push(ticket);
         } else if (ticket.status === 'Completed') {
+            // Apply filters for completed tickets
+            if (completedFilterAssigned && ticket.completedBy !== completedFilterAssigned) {
+                return;
+            }
             completedTickets.push(ticket);
         } else {
+            // Apply filters for active tickets
+            if (activeFilterStatus && ticket.status !== activeFilterStatus) {
+                return;
+            }
+            if (activeFilterAssigned && ticket.assignedTo !== activeFilterAssigned) {
+                return;
+            }
             activeTickets.push(ticket);
         }
     });
 
-    // Sort by date created (newest first)
+    // Sort active tickets
     activeTickets.sort((a, b) => {
-        const aTime = a.dateCreated?.toMillis ? a.dateCreated.toMillis() : (a.dateCreated || 0);
-        const bTime = b.dateCreated?.toMillis ? b.dateCreated.toMillis() : (b.dateCreated || 0);
-        return bTime - aTime;
+        return sortTickets(a, b, activeSortBy);
     });
+    
+    // Sort completed tickets
     completedTickets.sort((a, b) => {
-        const aTime = a.dateCompleted?.toMillis ? a.dateCompleted.toMillis() : (a.dateCompleted || 0);
-        const bTime = b.dateCompleted?.toMillis ? b.dateCompleted.toMillis() : (b.dateCompleted || 0);
-        return bTime - aTime;
+        return sortTickets(a, b, completedSortBy);
     });
 
     if (activeTickets.length === 0) {
@@ -663,6 +783,42 @@ function renderTickets(tickets) {
             });
         }
     }
+}
+
+// Sort tickets based on sort option
+function sortTickets(a, b, sortOption) {
+    const [field, direction] = sortOption.split('-');
+    const ascending = direction === 'asc';
+    let comparison = 0;
+    
+    switch (field) {
+        case 'dateCreated':
+            const aTime = a.dateCreated?.toMillis ? a.dateCreated.toMillis() : (a.dateCreated || 0);
+            const bTime = b.dateCreated?.toMillis ? b.dateCreated.toMillis() : (b.dateCreated || 0);
+            comparison = aTime - bTime;
+            break;
+        case 'dateCompleted':
+            const aCompleted = a.dateCompleted?.toMillis ? a.dateCompleted.toMillis() : (a.dateCompleted || 0);
+            const bCompleted = b.dateCompleted?.toMillis ? b.dateCompleted.toMillis() : (b.dateCompleted || 0);
+            comparison = aCompleted - bCompleted;
+            break;
+        case 'status':
+            comparison = (a.status || '').localeCompare(b.status || '');
+            break;
+        case 'assignedTo':
+            comparison = (a.assignedTo || '').localeCompare(b.assignedTo || '');
+            break;
+        case 'completedBy':
+            comparison = (a.completedBy || '').localeCompare(b.completedBy || '');
+            break;
+        case 'timeAllocated':
+            comparison = (a.timeAllocated || 0) - (b.timeAllocated || 0);
+            break;
+        default:
+            comparison = 0;
+    }
+    
+    return ascending ? comparison : -comparison;
 }
 
 function createTicketCard(ticket, isDeleted = false) {

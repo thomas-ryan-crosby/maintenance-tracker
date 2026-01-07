@@ -306,6 +306,33 @@ header h1 {
     letter-spacing: 0.3px;
 }
 
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.control-select {
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 13px;
+    background: white;
+    color: #333;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.control-select:hover {
+    border-color: #667eea;
+}
+
+.control-select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
 .ticket-details {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
