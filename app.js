@@ -12,14 +12,19 @@ let completionAfterPhotoFile = null;
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
-    // Check if Firebase is initialized
-    if (typeof firebase === 'undefined' || !db) {
-        console.error('Firebase is not initialized. Check firebase-config.js');
-        alert('Error: Firebase is not properly configured. Please check the browser console.');
-        return;
-    }
-    console.log('Firebase initialized successfully');
-    initializeApp();
+    // Wait a bit for config script to load if it hasn't already
+    const checkFirebase = () => {
+        if (typeof firebase === 'undefined' || typeof db === 'undefined') {
+            console.warn('Firebase not ready yet, waiting...');
+            setTimeout(checkFirebase, 100);
+            return;
+        }
+        console.log('Firebase initialized successfully');
+        initializeApp();
+    };
+    
+    // Start checking
+    checkFirebase();
 });
 
 function initializeApp() {

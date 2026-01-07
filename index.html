@@ -662,6 +662,22 @@
             const configFile = useTestConfig ? 'firebase-config.test.js' : 'firebase-config.js';
             const script = document.createElement('script');
             script.src = configFile;
+            
+            // Wait for config to load before loading app.js
+            script.onload = function() {
+                // Verify db is defined
+                if (typeof db === 'undefined') {
+                    console.error('❌ Firebase db is not defined after loading config');
+                    alert('Error: Firebase configuration did not initialize properly. Please check firebase-config.test.js or firebase-config.js');
+                    return;
+                }
+                
+                // Now load app.js after config is ready
+                const appScript = document.createElement('script');
+                appScript.src = 'app.js?v=2.0';
+                document.head.appendChild(appScript);
+            };
+            
             script.onerror = function() {
                 console.error('❌ Firebase config file not found:', configFile);
                 // Fallback to production config
@@ -669,6 +685,19 @@
                     console.warn('⚠️ Falling back to production config');
                     const fallback = document.createElement('script');
                     fallback.src = 'firebase-config.js';
+                    fallback.onload = function() {
+                        if (typeof db === 'undefined') {
+                            console.error('❌ Firebase db is not defined after loading fallback config');
+                            alert('Error: Firebase configuration did not initialize properly.');
+                            return;
+                        }
+                        const appScript = document.createElement('script');
+                        appScript.src = 'app.js?v=2.0';
+                        document.head.appendChild(appScript);
+                    };
+                    fallback.onerror = function() {
+                        alert('Error: Firebase configuration file is missing. Please check the setup.');
+                    };
                     document.head.appendChild(fallback);
                 } else {
                     alert('Error: Firebase configuration file is missing. Please check the setup.');
@@ -676,27 +705,6 @@
             };
             document.head.appendChild(script);
         })();
-    </script>
-    <script src="app.js?v=2.0"></script>
-    <script>
-        // Fallback if firebase-config.js is missing
-        if (typeof firebase === 'undefined' || typeof db === 'undefined') {
-            document.body.innerHTML = `
-                <div style="padding: 40px; text-align: center; font-family: sans-serif;">
-                    <h1 style="color: #e74c3c;">⚠️ Configuration Missing</h1>
-                    <p style="font-size: 18px; margin: 20px 0;">The <code>firebase-config.js</code> file is missing.</p>
-                    <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; max-width: 600px; margin: 20px auto; text-align: left;">
-                        <h3>To fix this:</h3>
-                        <ol style="line-height: 1.8;">
-                            <li>Copy <code>firebase-config.example.js</code> to <code>firebase-config.js</code></li>
-                            <li>Fill in your Firebase configuration values</li>
-                            <li>Refresh this page</li>
-                        </ol>
-                        <p style="margin-top: 20px;"><strong>Note:</strong> This file is excluded from Git for security reasons.</p>
-                    </div>
-                </div>
-            `;
-        }
     </script>
 </body>
 </html>
