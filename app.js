@@ -3172,29 +3172,47 @@ async function renderTenantsTableView(tenants) {
         if (tenantOccupancies.length === 0) {
             tenantsWithoutBuilding.push({ tenant, occupancies: [] });
         } else {
+            // Group occupancies by building (via unit)
+            const occupanciesByBuilding = {};
+            
             tenantOccupancies.forEach(occ => {
-                const buildingId = occ.buildingId;
-                if (buildingId && buildingsMap[buildingId]) {
-                    const building = buildingsMap[buildingId];
-                    const buildingKey = building.buildingName || `Building ${buildingId}`;
-                    
-                    if (!tenantsByBuilding[buildingKey]) {
-                        tenantsByBuilding[buildingKey] = {
-                            building: building,
-                            tenants: []
-                        };
+                let buildingId = null;
+                let buildingKey = 'No Building Assigned';
+                
+                if (occ.unitId && unitsMap[occ.unitId]) {
+                    const unit = unitsMap[occ.unitId];
+                    buildingId = unit.buildingId;
+                    if (buildingId && buildingsMap[buildingId]) {
+                        const building = buildingsMap[buildingId];
+                        buildingKey = building.buildingName || `Building ${buildingId}`;
                     }
-                    
-                    // Check if tenant already added to this building
-                    const existing = tenantsByBuilding[buildingKey].tenants.find(t => t.tenant.id === tenantId);
-                    if (!existing) {
-                        tenantsByBuilding[buildingKey].tenants.push({
-                            tenant: tenant,
-                            occupancies: tenantOccupancies.filter(o => o.buildingId === buildingId)
-                        });
-                    }
-                } else {
-                    tenantsWithoutBuilding.push({ tenant, occupancies: tenantOccupancies });
+                }
+                
+                if (!occupanciesByBuilding[buildingKey]) {
+                    occupanciesByBuilding[buildingKey] = {
+                        building: buildingId ? buildingsMap[buildingId] : null,
+                        occupancies: []
+                    };
+                }
+                occupanciesByBuilding[buildingKey].occupancies.push(occ);
+            });
+            
+            // Add tenant to each building group
+            Object.keys(occupanciesByBuilding).forEach(buildingKey => {
+                if (!tenantsByBuilding[buildingKey]) {
+                    tenantsByBuilding[buildingKey] = {
+                        building: occupanciesByBuilding[buildingKey].building,
+                        tenants: []
+                    };
+                }
+                
+                // Check if tenant already added to this building
+                const existing = tenantsByBuilding[buildingKey].tenants.find(t => t.tenant.id === tenantId);
+                if (!existing) {
+                    tenantsByBuilding[buildingKey].tenants.push({
+                        tenant: tenant,
+                        occupancies: occupanciesByBuilding[buildingKey].occupancies
+                    });
                 }
             });
         }
@@ -3227,7 +3245,7 @@ async function renderTenantsTableView(tenants) {
             const statusBadge = tenant.status ? `<span class="status-badge status-${tenant.status.toLowerCase()}">${tenant.status}</span>` : '';
             const typeBadge = tenant.tenantType ? `<span class="status-badge type-badge">${tenant.tenantType}</span>` : '';
             
-            // Occupancies
+            // Occupancies - show all occupancies for this tenant in this building
             let occupanciesHtml = '<span style="color: #999;">No occupancies</span>';
             if (occupancies.length > 0) {
                 occupanciesHtml = occupancies.map(occ => {
@@ -3239,7 +3257,7 @@ async function renderTenantsTableView(tenants) {
                     } else {
                         return `<span class="occupancy-info">Property Level</span>`;
                     }
-                }).join('');
+                }).join(' ');
             }
             
             html += `
