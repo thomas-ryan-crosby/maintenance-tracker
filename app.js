@@ -3063,7 +3063,8 @@ function handleTenantSubmit(e) {
     };
     
     const id = document.getElementById('tenantId').value;
-    const tenantName = document.getElementById('tenantName').value.trim();
+    const tenantNameField = document.getElementById('tenantName');
+    const tenantName = tenantNameField ? tenantNameField.value.trim() : '';
     const tenantType = document.getElementById('tenantType').value;
     const status = document.getElementById('tenantStatus').value;
     const mailingAddress = document.getElementById('tenantMailingAddress').value.trim();
@@ -3079,10 +3080,19 @@ function handleTenantSubmit(e) {
     const dateOfBirthStr = document.getElementById('tenantDateOfBirth')?.value || null;
     const dateOfBirth = dateOfBirthStr ? firebase.firestore.Timestamp.fromDate(new Date(dateOfBirthStr)) : null;
     
-    // Validation
-    if (!tenantName) {
+    // Validation - check if field exists and has value
+    if (!tenantNameField) {
+        console.error('Tenant name field not found');
+        alert('Error: Tenant name field not found. Please refresh the page.');
+        resetButtonState();
+        return;
+    }
+    
+    if (!tenantName || tenantName.length === 0) {
+        console.error('Tenant name is empty. Field value:', tenantNameField.value);
         alert('Tenant name is required');
         resetButtonState();
+        tenantNameField.focus();
         return;
     }
     
