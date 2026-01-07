@@ -1,0 +1,1894 @@
+{
+  "metadata": {
+    "sourceFile": "c:\\Users\\thoma\\Downloads\\Sanctuary Office Park_CONTROLLER_Source - Office Park Controller (2).csv",
+    "generatedAt": "2026-01-06T23:18:35.248427",
+    "totalTenants": 38,
+    "note": "This JSON file should be reviewed before importing into Firestore. Property IDs and Unit IDs will need to be resolved during import."
+  },
+  "tenants": [
+    {
+      "tenantName": "Law Offices of Rebecca Gofolth Bush",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Common Name: Travelers Legal\nformently\nLaw Office of Dwayne Marcle\nMiracle & Associates\nLease Expiration: 4/30/2029\nRemaining Options: 1 (5) year option\nInsurance Valid Through: 07/01/2025\nInsurance Certificate: https://www.dropbox.com/scl/fi/vs2cx96w4zp8poab2oy8j/Insurance-Certificate_Travelers_07_01_2025.pdf?rlkey=tprn5tl4erqufgfxk2057da1x&st=816dg4g0&dl=0",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Michelle Woodall",
+          "contactEmail": "mwoodall@travelers.com",
+          "contactPhone": "(985) 727-5012",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Rebecca Bush",
+          "contactEmail": "rgbush@travelers.com",
+          "contactPhone": "(985) 373-7763",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "TBD",
+          "contactEmail": null,
+          "contactPhone": null,
+          "contactTitle": "Leasing Agent",
+          "classifications": [
+            "Leasing"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Dwayne Maricle",
+          "contactEmail": "gdmaricl@travelers.com",
+          "contactPhone": "(985) 727-5016",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": null,
+          "unitNumber": "202",
+          "moveInDate": "1996-11-15",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 5573, Monthly Rent: $12382.87, Price per SF: $26.66"
+        }
+      ]
+    },
+    {
+      "tenantName": "Bayou CPR",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 12/31/2025\nRemaining Options: 3% esc/auto renew\nRequired Notice Days: 180",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Michael Brown",
+          "contactEmail": "contactnirvanamt@gmail.com",
+          "contactPhone": "8071036",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": null,
+          "unitNumber": "301A",
+          "moveInDate": null,
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 400, Monthly Rent: $652.39, Price per SF: $19.57"
+        }
+      ]
+    },
+    {
+      "tenantName": "Acorn Adoption",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 3/1/2026\nRemaining Options: auto renew\nRequired Notice Days: 90\nInsurance Valid Through: 10/19/2025\nInsurance Certificate: https://www.dropbox.com/scl/fi/dcu247r69d9l1fjlviafx/Insurance-Certificate_AcornAdoption_10_19_2025.pdf?rlkey=iaa2rl9m6ra8qq2j21pj9axu6&st=n4h6sf6m&dl=0",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Danita",
+          "contactEmail": "rdholladay@juno.com",
+          "contactPhone": "6263800",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": null,
+          "unitNumber": "301B",
+          "moveInDate": null,
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 300, Monthly Rent: $424.36, Price per SF: $16.97"
+        }
+      ]
+    },
+    {
+      "tenantName": "Energy Properties,INC",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 4/30/2026\nRemaining Options: auto renew\n90 day/3%\nRequired Notice Days: 90",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Wiley Conn",
+          "contactEmail": "wileyc@e-connenergy.com",
+          "contactPhone": "50483545465047227860",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": null,
+          "unitNumber": "300",
+          "moveInDate": null,
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 1170, Monthly Rent: $2085.01, Price per SF: $21.38"
+        }
+      ]
+    },
+    {
+      "tenantName": "Mandeville Technology",
+      "tenantType": "Commercial",
+      "status": "Past",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 4/1/2026\nRemaining Options: Auto renew\n90 Day/3%\nRequired Notice Days: 90",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "TBD",
+          "contactEmail": "mark@nocomputertroubles.com",
+          "contactPhone": null,
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": null,
+          "unitNumber": "300A",
+          "moveInDate": null,
+          "moveOutDate": null,
+          "status": "Past",
+          "notes": "Rentable SF: 275, Monthly Rent: $490.06, Price per SF: $21.38"
+        }
+      ]
+    },
+    {
+      "tenantName": "Security National Life",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 6/30/2026\nRemaining Options: 3% auto renew\nRequired Notice Days: 180",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Guy Winstead",
+          "contactEmail": "guyw@securitynational.com",
+          "contactPhone": "(601) 408-9161",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": null,
+          "unitNumber": "302",
+          "moveInDate": "2015-07-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 1125, Monthly Rent: $2209.96, Price per SF: $23.57"
+        },
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": null,
+          "unitNumber": "303",
+          "moveInDate": "2015-07-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 1125, Monthly Rent: $2209.96, Price per SF: $23.57"
+        }
+      ]
+    },
+    {
+      "tenantName": "Rose Mountain",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 9/30/2024\nRemaining Options: 3% auto renew\nRequired Notice Days: 60",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Max Rosenberg",
+          "contactEmail": "maxwellcrosenberg@gmail.com",
+          "contactPhone": "(518) 275-9707",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Bailey Maloney",
+          "contactEmail": "bailey@baileyroseevents.com",
+          "contactPhone": "(985) 807-5692",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": null,
+          "unitNumber": "302A",
+          "moveInDate": "2024-10-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 250, Monthly Rent: $479.16, Price per SF: $23.0"
+        }
+      ]
+    },
+    {
+      "tenantName": "Nirvana Massage Therapy",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 12/31/2025\nRemaining Options: 3% auto renew\nRequired Notice Days: 180\nInsurance Valid Through: 07/06/2025\nInsurance Certificate: https://www.dropbox.com/scl/fi/gck5dzggmauza0j1xip9m/Insurance-Certificate_Nirvana_07_06_2025.PDF?rlkey=ho3lxbs4gu9a9q7pl5eiyt8mo&st=nhck12u9&dl=0",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Michael Brown",
+          "contactEmail": "contactnirvanamt@gmail.com",
+          "contactPhone": "8071036",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Kathleen Brown",
+          "contactEmail": "contactnirvanamt@gmail.com",
+          "contactPhone": "(985) 273-0730",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": null,
+          "unitNumber": "306",
+          "moveInDate": null,
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 610, Monthly Rent: $1255.21, Price per SF: $24.69"
+        }
+      ]
+    },
+    {
+      "tenantName": "Goodreau",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Remaining Options: 3% auto renwew",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Judy Goodreay",
+          "contactEmail": "goodreauent@gmail.com",
+          "contactPhone": "(985) 789-1394",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": null,
+          "unitNumber": "305B",
+          "moveInDate": "2022-03-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 300, Monthly Rent: $503.93, Price per SF: $20.16"
+        }
+      ]
+    },
+    {
+      "tenantName": "Skin Solutions",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Remaining Options: auto renew",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Jete Crosby",
+          "contactEmail": "jete@crosbydevelopment.com",
+          "contactPhone": "(985) 789-4155",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": null,
+          "unitNumber": "305A",
+          "moveInDate": null,
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 265, Monthly Rent: $250.0, Price per SF: $11.32"
+        }
+      ]
+    },
+    {
+      "tenantName": "SIA Investments",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 2/28/2026\nRemaining Options: (1) 2 yr option\nEscalations: 3%\nRequired Notice Days: 6\nInsurance Valid Through: 10/01/2025\nInsurance Certificate: https://www.dropbox.com/scl/fi/4321sephs80k4kk3f01to/Insurance-Certificate_SIA_10_01_2025.pdf?rlkey=q8qeaylbe0gcpul0odpngpbmo&st=9u5mfmdo&dl=0",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Stefanie Childs",
+          "contactEmail": "stefanie@siainvestments.com",
+          "contactPhone": "(985) 778-2802",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Margie Benjamin",
+          "contactEmail": "margie@siainvestments.com",
+          "contactPhone": null,
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "2",
+          "unitNumber": "100",
+          "moveInDate": "2021-03-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 1240, Monthly Rent: $2021.54, Price per SF: $19.56"
+        }
+      ]
+    },
+    {
+      "tenantName": "Wells Fargo Advisors",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 3/31/2027\nRemaining Options: (2) 3yr option\nEscalations: 3.00%\nRequired Notice Days: 6\nInsurance Valid Through: 4/30/2026\nInsurance Certificate: https://www.dropbox.com/scl/fi/njqxbwgt3eyjunbl25q6i/Insurance-Certificate_WellsFargo_04_30_2026.pdf?rlkey=rphsp63ej6vr7h8mdh1sfqs3s&st=86c1ufr4&dl=0",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Kristina Cummins",
+          "contactEmail": "kristina.cummins@wellsfargoadvisors.com",
+          "contactPhone": "(985) 626-7717",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Andree Fague",
+          "contactEmail": "andree.fangue@wellsfargoadvisors.com",
+          "contactPhone": "(985) 237-9829",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Jon Henderson",
+          "contactEmail": "jon.henderson@wellsfargoadvisors.com",
+          "contactPhone": null,
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "2",
+          "unitNumber": "101",
+          "moveInDate": "2010-04-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 2500, Monthly Rent: $4375.0, Price per SF: $21.0"
+        }
+      ]
+    },
+    {
+      "tenantName": "Central Title",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 8/31/2027\nRemaining Options: Auto renew\n1 year\nEscalations: 3.00%\nRequired Notice Days: 90\nInsurance Valid Through: 02/27/2026\nInsurance Certificate: https://www.dropbox.com/scl/fi/rwmz9m0b20nfes88frpyq/Insurance-Certificate_CentralTitle_02_27_2026.pdf?rlkey=7sh7a01g4l1u44b6uozp2mvpq&st=5k1hojns&dl=0",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Greg Callihan",
+          "contactEmail": "callihan@callihanlaw.com",
+          "contactPhone": "(225) 261-6929",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "2",
+          "unitNumber": "102",
+          "moveInDate": "2023-09-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 1400, Monthly Rent: $2703.75, Price per SF: $23.18"
+        }
+      ]
+    },
+    {
+      "tenantName": "Judge Penzato",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 2/28/2031\nRemaining Options: (1) 3 yr 10m optin\nEscalations: 3.00%\nRequired Notice Days: 90\nInsurance Valid Through: 07/01/2025\nInsurance Certificate: https://www.dropbox.com/scl/fi/pluvg9x6ahbdp7qidirul/Insurance-Certificate_Penzato_07_01_2025.pdf?rlkey=5t1x8e0s0td51wh8fyc1ym7t9&st=4g0m6c61&dl=0",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Allison Penzato",
+          "contactEmail": "apenzato@la-fcca.org",
+          "contactPhone": "(985) 373-3466",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Jessica Keating",
+          "contactEmail": "jessica.cordelleustis@gmail.com",
+          "contactPhone": "(985) 789-4315",
+          "contactTitle": "Leasing Agent",
+          "classifications": [
+            "Leasing"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "2",
+          "unitNumber": "103",
+          "moveInDate": "2025-03-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 1765, Monthly Rent: $2950.0, Price per SF: $20.06"
+        }
+      ]
+    },
+    {
+      "tenantName": "Standard Mortgage",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Notes: Leasing contact:\nKristie Berggren\nkberggren@stanmor.com\nLease Commencement: 5/27/2014\nLease Expiration: 5/31/2026\nRemaining Options: 3% escalation\nno opions\nRequired Notice Days: 6\nInsurance Valid Through: 05/01/2026\nInsurance Certificate: https://www.dropbox.com/scl/fi/t1w02iysylqlz67m3wt5n/Insurance-Certificate_Standard-Mortgage_05_01_2026.pdf?rlkey=e3hlyiakr55lyz1wm12wv7o83&st=vhw0usfd&dl=0",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Richard Wolcott",
+          "contactEmail": "rwolcott@stanmor.com",
+          "contactPhone": null,
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Eric Weller",
+          "contactEmail": "eweller@stanmor.com",
+          "contactPhone": null,
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Virna Bays",
+          "contactEmail": "vbays@stanmor.com",
+          "contactPhone": null,
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Tiffanie Domil Lapene",
+          "contactEmail": "tdomil@stanmor.com",
+          "contactPhone": "(504) 569-3912",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "2",
+          "unitNumber": "201",
+          "moveInDate": "2014-05-27",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 1690, Monthly Rent: $3077.83, Price per SF: $21.85"
+        }
+      ]
+    },
+    {
+      "tenantName": "Chris Pazos",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 6/14/2026\nRemaining Options: Auto Renew\n1 year\nEscalations: 3.00%\nRequired Notice Days: 90\nInsurance Valid Through: 08/01/2025\nInsurance Certificate: https://www.dropbox.com/scl/fi/19mdsxx381dermrmc2ul6/Insurance-Certificate_Pazos_08_01_2025.pdf?rlkey=69i77yvwo23jvuwdv9n62di7r&st=7lkhpy7z&dl=0",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Chris Pazos",
+          "contactEmail": "chris@pazosagencyllc.com",
+          "contactPhone": "(504) 833-5369",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "2",
+          "unitNumber": "202",
+          "moveInDate": "2021-03-14",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 450, Monthly Rent: $922.4, Price per SF: $24.6"
+        }
+      ]
+    },
+    {
+      "tenantName": "Nationwide",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Commencement: $2,095.83\nLease Expiration: 10/31/2025\nRemaining Options: No remaining options\nEscalations: 3.00%\nRequired Notice Days: 90\nInsurance Valid Through: 01/01/2026\nInsurance Certificate: https://www.dropbox.com/scl/fi/a1qwomthhiw8adzxt99nw/Insurance-Certificate_Nationwide_01_01_2026_Liability.pdf?rlkey=l9hv62z5x5anrq2s7cxjw1402&st=dqtemd8q&dl=0\n\nhttps://www.dropbox.com/scl/fi/l0izks226ua6u2af82hhc/Insurance-Certificate_Nationwide_04_01_2026_Property.pdf?rlkey=x4n9q5xe98fedenn7hmo6fce6&st=8n7c7env&dl=0",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Dan Baggage",
+          "contactEmail": "dan.bagge@nationwide.com",
+          "contactPhone": "67431219853179470",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Lynn Holbrook",
+          "contactEmail": "holbrl2@nationwide.com",
+          "contactPhone": "(614) 249-8514",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "2",
+          "unitNumber": "203",
+          "moveInDate": "2023-10-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 1006, Monthly Rent: $1812.8, Price per SF: $21.62"
+        }
+      ]
+    },
+    {
+      "tenantName": "Cyprss Key Realty",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 12/31/2027\nRemaining Options: (1) 3 yr option\nEscalations: 3.00%\nRequired Notice Days: 6\nInsurance Valid Through: 03/29/2026\nInsurance Certificate: https://www.dropbox.com/scl/fi/mx2rcp64r9cpsup6b2zay/Insurance-Certificate_CypressKey_03_29_26.pdf?rlkey=mo1gkoyw6u91xqcaugmkh7yht&st=pryva1ce&dl=0",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Chris Romero",
+          "contactEmail": "chris@cypresskeyrealty.com",
+          "contactPhone": "(504) 250-4848",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Shawn Burst",
+          "contactEmail": "shawn@theburstgroup.com",
+          "contactPhone": "(985) 705-5626",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "2",
+          "unitNumber": "204",
+          "moveInDate": "2024-01-08",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 700, Monthly Rent: $1312.5, Price per SF: $22.5"
+        }
+      ]
+    },
+    {
+      "tenantName": "Carver Darden Koretzky Tessier Finn Blossman & Areaux LLC",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Common Name: Carver Darden\nLease Expiration: 12/31/2027\nRemaining Options: 2 (3) year options\nEscalations: 3.00%\nRequired Notice Days: 90\nInsurance Valid Through: 7/1/2025\nInsurance Certificate: https://www.dropbox.com/scl/fi/20budh7jln74dgerlizgd/Insurance-Certificate_CarverDarden_7_1_2025.pdf?rlkey=qgei29pilpfqjrkkzaodi9cdb&st=n01zr6sv&dl=0",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "David Landry",
+          "contactEmail": "landry@carverdarden.com",
+          "contactPhone": "(985) 502-4737",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Michelle Pender",
+          "contactEmail": "pender@carverdarden.com",
+          "contactPhone": "(985) 237-8493",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Cathy Alba",
+          "contactEmail": "cathyalba@triplenetleased.com",
+          "contactPhone": "(504) 669-1031",
+          "contactTitle": "Leasing Agent",
+          "classifications": [
+            "Leasing"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Angela Hurley",
+          "contactEmail": "hurley@carverdarden.com",
+          "contactPhone": null,
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "2",
+          "unitNumber": "205",
+          "moveInDate": "2025-01-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 1100, Monthly Rent: $2108.33, Price per SF: $23.0"
+        }
+      ]
+    },
+    {
+      "tenantName": "Assured Partners Gulf Coast",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 6/30/2026\nRemaining Options: (1) 2 year option\nEscalations: 3.00%\nRequired Notice Days: 6",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Joseph (Joey) Ferris",
+          "contactEmail": "joey.ferris@assuredpartners.com",
+          "contactPhone": "(985) 259-5924",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Kathy Mailhes",
+          "contactEmail": "kathy.mailhes@whitneyinsuranceagency.com",
+          "contactPhone": null,
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Richard Judge",
+          "contactEmail": "rjuge@nolacommercial.com",
+          "contactPhone": "(504) 915-8877",
+          "contactTitle": "Leasing Agent",
+          "classifications": [
+            "Leasing"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Cody Warren",
+          "contactEmail": "cody.warren@cbre.com",
+          "contactPhone": "(813) 528-1072",
+          "contactTitle": "Leasing Agent",
+          "classifications": [
+            "Leasing"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "2",
+          "unitNumber": "206",
+          "moveInDate": "2014-07-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 1962, Monthly Rent: $3842.25, Price per SF: $23.5"
+        }
+      ]
+    },
+    {
+      "tenantName": "The Hartford",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 9/30/2026\nRemaining Options: no option\nno escalation\nEscalations: 0.00%\nRequired Notice Days: 3",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Sandra Goulet",
+          "contactEmail": "sandra.goulet@thehartford.com",
+          "contactPhone": "(860) 948-8073",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Bridget Grady",
+          "contactEmail": "bridget.grady@thehartford.com",
+          "contactPhone": "(985) 718-7591",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Jack Sikora",
+          "contactEmail": "jack.sikora@cbre.com",
+          "contactPhone": "(504) 444-8936",
+          "contactTitle": "Leasing Agent",
+          "classifications": [
+            "Leasing"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Bill Brookshire",
+          "contactEmail": "william.brookshire@thehartford.com",
+          "contactPhone": "(860) 626-3771",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "2",
+          "unitNumber": "301",
+          "moveInDate": "2005-08-03",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 2350, Monthly Rent: $4213.62, Price per SF: $21.52"
+        }
+      ]
+    },
+    {
+      "tenantName": "4 Your Eyes, LLC",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 3 MONTH TERMS\nRemaining Options: 90 Day Notice to cancel\nEscalations: 0.00%\nRequired Notice Days: 90\nInsurance Valid Through: 01/10/2026\nInsurance Certificate: https://www.dropbox.com/scl/fi/sp8hcqa0elsrpqh3nr3m2/Insurance-Certificate_EyeCare2020_01_10_2026.pdf?rlkey=pnn6fhzx61x2p5wyxy0m42ew3&st=9f28yf4s&dl=0",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Neil Notaroberto",
+          "contactEmail": null,
+          "contactPhone": "(985) 975-3456",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Desiree Ditoro",
+          "contactEmail": "eyecarecfo@mac.com",
+          "contactPhone": "(504) 228-7964",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "2",
+          "unitNumber": "302A",
+          "moveInDate": "2006-05-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 2250, Monthly Rent: $3724.95, Price per SF: $19.87"
+        },
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "2",
+          "unitNumber": "303",
+          "moveInDate": "2006-05-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 2250, Monthly Rent: $3724.95, Price per SF: $19.87"
+        }
+      ]
+    },
+    {
+      "tenantName": "North Shore Lazer",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 10/14/2025\nRemaining Options: 3% auto 90 days\nRequired Notice Days: 90",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Neil Notaroberto",
+          "contactEmail": null,
+          "contactPhone": "(985) 975-3456",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Desiree Ditoro",
+          "contactEmail": "eyecarecfo@mac.com",
+          "contactPhone": "(504) 228-7964",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "2",
+          "unitNumber": "302",
+          "moveInDate": "2024-10-14",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 180, Monthly Rent: $300.0, Price per SF: $20.0"
+        },
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "2",
+          "unitNumber": "B",
+          "moveInDate": "2024-10-14",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 180, Monthly Rent: $300.0, Price per SF: $20.0"
+        }
+      ]
+    },
+    {
+      "tenantName": "Body Remedy Physical Therapy",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 8/31/2025\nRemaining Options: AUTO RENEW\nEscalations: 3.00%\nRequired Notice Days: 60",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Aimee Ahrons",
+          "contactEmail": "aahrons@yahoo.com",
+          "contactPhone": "(919) 780-7226",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "2",
+          "unitNumber": "302",
+          "moveInDate": "2023-09-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 350, Monthly Rent: $566.5, Price per SF: $19.42"
+        },
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "2",
+          "unitNumber": "C",
+          "moveInDate": "2023-09-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 350, Monthly Rent: $566.5, Price per SF: $19.42"
+        }
+      ]
+    },
+    {
+      "tenantName": "Gary M. Thomas, CPA",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 7/31/2025\nRemaining Options: 1 yr 3%\nRequired Notice Days: 60",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Gary Thomas",
+          "contactEmail": "gmtcpa@bellsouth.net",
+          "contactPhone": "(985) 674-1701",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Meghan Scarlato",
+          "contactEmail": "meghan@gmt-cpa.com",
+          "contactPhone": null,
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "2",
+          "unitNumber": "304",
+          "moveInDate": "2002-07-08",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 1225, Monthly Rent: $1892.1, Price per SF: $18.53"
+        }
+      ]
+    },
+    {
+      "tenantName": "Galloway Johnson",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Notes: Occupancy: 45\nLease Expiration: 11/30/2029\nRequired Notice Days: 6",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Becky Verdin",
+          "contactEmail": "bverdin@gallowaylawfirm.com",
+          "contactPhone": "(985) 612-2724",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Tim Hassinger",
+          "contactEmail": "thassinger@gallowaylawfirm.com",
+          "contactPhone": "(504) 237-5402",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Candice Herrington",
+          "contactEmail": "cherrington@gallowaylawfirm.com",
+          "contactPhone": null,
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Juliana Marengo",
+          "contactEmail": "jmarengo@gallowaylawfirm.com",
+          "contactPhone": null,
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Leigh Ann Clem",
+          "contactEmail": "lclem@gallowaylawfirm.com",
+          "contactPhone": null,
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "3",
+          "unitNumber": "101",
+          "moveInDate": "2004-12-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 13455, Monthly Rent: $25981.97, Price per SF: $23.17"
+        },
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "3",
+          "unitNumber": "102",
+          "moveInDate": "2004-12-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 13455, Monthly Rent: $25981.97, Price per SF: $23.17"
+        },
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "3",
+          "unitNumber": "301",
+          "moveInDate": "2004-12-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 13455, Monthly Rent: $25981.97, Price per SF: $23.17"
+        }
+      ]
+    },
+    {
+      "tenantName": "Baker, Donelson, Bearman, Caldwell & Berkowitz",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Common Name: Baker Donelson\nNotes: Occupancy: 15\nLease Expiration: 5/31/2030\nRemaining Options: (2)5 Yr Option\nat Market Rate\nRequired Notice Days: 6\nInsurance Valid Through: 02/01/2026\nInsurance Certificate: https://www.dropbox.com/scl/fi/033alh874x05xuonvwkjs/Insurance-Certificate_BakerDonelson_02_01_2026.pdf?rlkey=qauwysfvxyz7mj66nd5kompcf&st=cc4szmb5&dl=0",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Mark W. Mercante",
+          "contactEmail": "mmercante@bakerdonelson.com",
+          "contactPhone": "(985) 819-8410",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Jean Leblanc",
+          "contactEmail": "jleblanc@bakerdonelson.com",
+          "contactPhone": "(504) 578-4129",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Greg Riera",
+          "contactEmail": "greg.riera@jll.com",
+          "contactPhone": "(504) 616-8194",
+          "contactTitle": "Leasing Agent",
+          "classifications": [
+            "Leasing"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Gregory McCavera",
+          "contactEmail": "gregory.mccavera@jll.com",
+          "contactPhone": "(202) 550-0767",
+          "contactTitle": "Leasing Agent",
+          "classifications": [
+            "Leasing"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Glenda Houidobre",
+          "contactEmail": "ghouidobre@bakerdonelson.com",
+          "contactPhone": "(985) 819-8409",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "3",
+          "unitNumber": "201",
+          "moveInDate": "2000-03-30",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 6930, Monthly Rent: $13851.55, Price per SF: $23.99"
+        }
+      ]
+    },
+    {
+      "tenantName": "Watch Systems",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Common Name: Watch Systems\nOffender Watch\nNotes: Occupancy: 40\nLease Expiration: 6/30/2026\nRemaining Options: 2 2yr options\n2% escalations\nRequired Notice Days: 3",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Ben Luzynski",
+          "contactEmail": "bluzynski@watchsystems.com",
+          "contactPhone": null,
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Jennifer Wetzel",
+          "contactEmail": "jwetzel@watchsystems.com",
+          "contactPhone": "(985) 801-9996",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Jenny Mutter",
+          "contactEmail": null,
+          "contactPhone": null,
+          "contactTitle": "Leasing Agent",
+          "classifications": [
+            "Leasing"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Phyllis Jomes",
+          "contactEmail": "pjones@watchsystems.com",
+          "contactPhone": null,
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "4",
+          "unitNumber": "101",
+          "moveInDate": "2021-07-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 11850, Monthly Rent: $19636.64, Price per SF: $19.89"
+        },
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "4",
+          "unitNumber": "201",
+          "moveInDate": "2021-07-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 11850, Monthly Rent: $19636.64, Price per SF: $19.89"
+        }
+      ]
+    },
+    {
+      "tenantName": "Edelman Financial Engines",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 11/30/2029\nRemaining Options: (1) 3 year option\nRequired Notice Days: 90\nInsurance Valid Through: 08/01/2025\nInsurance Certificate: https://www.dropbox.com/scl/fi/m8uqoh8bxqjk105d8o5je/Insurance-Certificate_Edelman_08_01_2025.pdf?rlkey=bwvvyyo0wsjyhemoqw27dessc&st=vgmfl9kg&dl=0",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Michael Gavin",
+          "contactEmail": "mgavin@edelmanfinancialengines.com",
+          "contactPhone": "(985) 778-2023",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Jen Gegenheimer",
+          "contactEmail": "jgegenheimer@edelmanfinancialengines.com",
+          "contactPhone": "(985) 727-8171",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Beau Box",
+          "contactEmail": null,
+          "contactPhone": null,
+          "contactTitle": "Leasing Agent",
+          "classifications": [
+            "Leasing"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Jennifer Elmore",
+          "contactEmail": "jelmore@edelmanfinancialengines.com",
+          "contactPhone": "913319810",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "4",
+          "unitNumber": "200",
+          "moveInDate": "2022-12-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 2350, Monthly Rent: $4380.51, Price per SF: $22.37"
+        }
+      ]
+    },
+    {
+      "tenantName": "Detox Management Company, LLC",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Commencement: 08/01/2025",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Roy Viger",
+          "contactEmail": "rviger@contactlake.com",
+          "contactPhone": "(504) 756-9242",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Cassie Guidry",
+          "contactEmail": "cguidry@stepsrecoversolutions.com",
+          "contactPhone": null,
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "4",
+          "unitNumber": "301",
+          "moveInDate": null,
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 1760, Monthly Rent: $3000.0, Price per SF: $20.45"
+        }
+      ]
+    },
+    {
+      "tenantName": "MedSouth",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 6/30/2026\nRemaining Options: Auto renew\nRequired Notice Days: 60",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Marla DeLatte",
+          "contactEmail": "marla@medsouthrecord.com",
+          "contactPhone": "(985) 778-8545",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Shirley TBD",
+          "contactEmail": null,
+          "contactPhone": "(504) 913-3105",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "4",
+          "unitNumber": "302",
+          "moveInDate": null,
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 750, Monthly Rent: $1375.0, Price per SF: $22.0"
+        }
+      ]
+    },
+    {
+      "tenantName": "Menard",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 12/31/2028\nRemaining Options: 1 3yr\nRequired Notice Days: 90",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Jonathan Dwight",
+          "contactEmail": "jdwight@menardusa.com",
+          "contactPhone": "(214) 356-2874",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Chris Rogers",
+          "contactEmail": "chris.rogers@menardusa.com",
+          "contactPhone": "(985) 377-3425",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Timothy Lyons",
+          "contactEmail": "timothy.lyons@menardusa.com",
+          "contactPhone": "(504) 264-6709",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Dylan Person",
+          "contactEmail": "dylan.pearson@menardusa.com",
+          "contactPhone": "(985) 323-6927",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "4",
+          "unitNumber": "304",
+          "moveInDate": "2021-11-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 2640, Monthly Rent: $5220.91, Price per SF: $23.73"
+        }
+      ]
+    },
+    {
+      "tenantName": "Lain St. Paul",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 4/30/2026\nRemaining Options: 1 (1 yr option)\n3%",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Lain St. Paul",
+          "contactEmail": "fc7608@msn.com",
+          "contactPhone": "(985) 502-0834",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "4",
+          "unitNumber": "305",
+          "moveInDate": "2021-05-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 684, Monthly Rent: $1026.46, Price per SF: $18.01"
+        }
+      ]
+    },
+    {
+      "tenantName": "Jefferson Capital Management",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 4/1/2026\nRemaining Options: year/year/auto\n3%\nInsurance Valid Through: 02/07/2026\nInsurance Certificate: https://www.dropbox.com/scl/fi/bwcduv3yjoyl1h4g9116e/Insurance-Certificate_JeffersonCapitalManagement_StateFarm_02_07_2026.pdf?rlkey=ncv7q0mlr9mtx93i3qc83pwh8&st=g2wfb30u&dl=0\n\nhttps://www.dropbox.com/scl/fi/bkgs8b9ne3n4w92scvoyw/Insurance-Certificate_JeffersonCapitalManagement_Citizens_03_14_2026.pdf?rlkey=3fwkbs5v372n87mmyycagkpcr&st=won6auzz&dl=0",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Paul Giffin",
+          "contactEmail": "pgiffin@jeffcap.com",
+          "contactPhone": null,
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "4",
+          "unitNumber": "306",
+          "moveInDate": "2021-03-31",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 250, Monthly Rent: $480.59, Price per SF: $23.07"
+        }
+      ]
+    },
+    {
+      "tenantName": "Monson Law Firm",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Notes: Occupancy: 18\nLease Expiration: 7/30/2027\nRemaining Options: 1 3yr\n1 1/2% esculation\nRequired Notice Days: 90\nInsurance Valid Through: 01/17/2026\nInsurance Certificate: https://www.dropbox.com/scl/fi/r3in357x6ao3zok5m1fef/Insurance-Certificate_Monson_01_17_2026.pdf?rlkey=b54ilh0nmmrltprskqex6inek&st=sv66qo3z&dl=0",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Matthew Monson",
+          "contactEmail": null,
+          "contactPhone": "98577806805042894939",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Nancy Braud",
+          "contactEmail": "nancy@monsonfirm.com",
+          "contactPhone": "(985) 778-0681",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Caroline Wadge",
+          "contactEmail": "cwadge@monsonfirm.com",
+          "contactPhone": "98577806789855024411",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "5",
+          "unitNumber": "101",
+          "moveInDate": "2022-08-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 7385, Monthly Rent: $13313.6, Price per SF: $21.63"
+        },
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "5",
+          "unitNumber": "202",
+          "moveInDate": "2022-08-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 7385, Monthly Rent: $13313.6, Price per SF: $21.63"
+        }
+      ]
+    },
+    {
+      "tenantName": "Mediation Arbitration Professional Systems",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Common Name: MAPS\nLease Expiration: 6/30/2025\nRemaining Options: 1 3yr\n3%\nRequired Notice Days: 90\nInsurance Valid Through: 02/21/2026\nInsurance Certificate: https://www.dropbox.com/scl/fi/4wwcffnrlvs0zy05gamrb/Insurance-Certificate_MAPS_02_21_2026.pdf?rlkey=o38ii1j36kmn6qh4a06mez7et&st=bjvyvo28&dl=0",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Amanda Hurst",
+          "contactEmail": "ahurst@maps-adr.com",
+          "contactPhone": "5048312141104",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Ashley Aguilar",
+          "contactEmail": "aaguilar@maps-adr.com",
+          "contactPhone": "5048312141144",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Corporate Realty Inc.",
+          "contactEmail": null,
+          "contactPhone": null,
+          "contactTitle": "Leasing Agent",
+          "classifications": [
+            "Leasing"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Joe Hassinger",
+          "contactEmail": "joe@maps-adr.com",
+          "contactPhone": null,
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "5",
+          "unitNumber": "103",
+          "moveInDate": "2022-05-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 1830, Monthly Rent: $3183.76, Price per SF: $20.88"
+        }
+      ]
+    },
+    {
+      "tenantName": "CECO",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 12/31/2027\nRemaining Options: 2% esculation\nRequired Notice Days: 90",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Andrew Robertson",
+          "contactEmail": "andrew.robertson@cecoconcrete.com",
+          "contactPhone": "(504) 415-4689",
+          "contactTitle": null,
+          "classifications": [
+            "Primary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Michelle Laporte",
+          "contactEmail": "michelle.laporte@cecoconcrete.com",
+          "contactPhone": null,
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "5",
+          "unitNumber": "201",
+          "moveInDate": "2022-01-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 4845, Monthly Rent: $8997.03, Price per SF: $22.28"
+        }
+      ]
+    },
+    {
+      "tenantName": "Audubon Engineering",
+      "tenantType": "Commercial",
+      "status": "Active",
+      "mailingAddress": null,
+      "notes": "Lease Expiration: 11/30/2025\nRemaining Options: 3% esculation\nRequired Notice Days: 90\nInsurance Valid Through: 08/31/2025\nInsurance Certificate: https://www.dropbox.com/scl/fi/fhpl06pcmh6aaksno7kmm/Insurance-Certificate_Audubon_08_31_2025.pdf?rlkey=hbkr24g7q9yecj717nt7rk183&st=2obns7y7&dl=0",
+      "taxId": null,
+      "businessType": null,
+      "numberOfEmployees": null,
+      "website": null,
+      "contacts": [
+        {
+          "contactName": "Rachel Lorio",
+          "contactEmail": "rlorio@auduboncompanies.com",
+          "contactPhone": "(504) 535-2069",
+          "contactTitle": null,
+          "classifications": [
+            "Secondary"
+          ],
+          "notes": null
+        },
+        {
+          "contactName": "Martin O. Miller",
+          "contactEmail": "momiller@ccim.net",
+          "contactPhone": null,
+          "contactTitle": "Leasing Agent",
+          "classifications": [
+            "Leasing"
+          ],
+          "notes": null
+        }
+      ],
+      "occupancies": [
+        {
+          "propertyName": "Sanctuary Office Park",
+          "buildingNumber": "5",
+          "unitNumber": "300",
+          "moveInDate": "2020-12-01",
+          "moveOutDate": null,
+          "status": "Active",
+          "notes": "Rentable SF: 6507, Monthly Rent: $10527.8, Price per SF: $19.42"
+        }
+      ]
+    }
+  ]
+}
