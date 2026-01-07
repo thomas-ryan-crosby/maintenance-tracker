@@ -317,6 +317,7 @@ function setupEventListeners() {
     
     // Tenant management
     const addTenantBtn = document.getElementById('addTenantBtn');
+    const importTenantsBtn = document.getElementById('importTenantsBtn');
     const tenantForm = document.getElementById('tenantForm');
     const closeTenantModalBtn = document.getElementById('closeTenantModal');
     const cancelTenantFormBtn = document.getElementById('cancelTenantForm');
@@ -326,6 +327,42 @@ function setupEventListeners() {
         addTenantBtn.addEventListener('click', () => {
             showAddTenantForm();
         });
+    }
+    
+    if (importTenantsBtn) {
+        importTenantsBtn.addEventListener('click', async function() {
+            if (!confirm('This will import tenants from sanctuary_office_park_tenants_import.json.\n\nThis will create real data in your database. Continue?')) {
+                return;
+            }
+            
+            // Load and execute import script
+            try {
+                const script = document.createElement('script');
+                script.src = './import_tenants_browser.js';
+                script.onload = function() {
+                    if (window.importTenantsFromJSON) {
+                        window.importTenantsFromJSON().catch(error => {
+                            console.error('Import error:', error);
+                            alert('Import failed: ' + error.message);
+                        });
+                    } else {
+                        alert('Import function not found. Please check the console.');
+                    }
+                };
+                script.onerror = function() {
+                    alert('Could not load import script. Make sure import_tenants_browser.js is in the same directory.');
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                console.error('Error loading import script:', error);
+                alert('Error loading import script: ' + error.message);
+            }
+        });
+        
+        // Show import button (only in test/development)
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            importTenantsBtn.style.display = 'inline-block';
+        }
     }
     if (tenantForm) tenantForm.addEventListener('submit', handleTenantSubmit);
     if (closeTenantModalBtn) closeTenantModalBtn.addEventListener('click', closeTenantModal);
