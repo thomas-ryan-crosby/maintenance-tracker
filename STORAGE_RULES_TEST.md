@@ -34,3 +34,4 @@ service firebase.storage {
 
 For your **production database**, use the secure rules from `STORAGE_RULES.md` which restrict access to the `tickets/` folder.
 
+

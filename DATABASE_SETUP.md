@@ -180,3 +180,4 @@ To verify which database you're connected to:
 2. Check Firestore console for the correct project
 3. Ensure security rules allow read/write operations
 
+

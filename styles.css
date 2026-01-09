@@ -1165,26 +1165,49 @@ hr {
 
 /* Tenants Table View */
 .tenants-table-container {
-    margin-top: 20px;
+    overflow-x: auto;
+    overflow-y: visible;
+    width: 100%;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+}
+
+.tenants-table-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.tenants-table-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.tenants-table-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.tenants-table-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.building-group {
+    margin-bottom: 20px;
     background: white;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.building-group {
-    margin-bottom: 0;
-}
-
 .building-group-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    padding: 15px 20px;
+    padding: 10px 15px;
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 .building-group-header::before {
@@ -1194,8 +1217,13 @@ hr {
 
 .tenants-table {
     width: 100%;
+    min-width: 800px;
     border-collapse: collapse;
-    table-layout: auto;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    table-layout: fixed;
 }
 
 .tenants-table thead {
@@ -1204,14 +1232,39 @@ hr {
 }
 
 .tenants-table th {
-    padding: 15px 20px;
+    padding: 8px 12px;
     text-align: left;
     font-weight: 700;
     color: #333;
-    font-size: 0.9rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     vertical-align: top;
+    white-space: nowrap;
+}
+
+.tenants-table th:first-child {
+    width: 120px;
+}
+
+.tenants-table th:nth-child(2) {
+    width: 120px;
+}
+
+.tenants-table .header-major th {
+    background: #667eea;
+    color: white;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+.tenants-table .header-sub th {
+    background: #f8f9fa;
+    color: #333;
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: none;
 }
 
 .tenants-table tbody tr {
@@ -1228,9 +1281,9 @@ hr {
 }
 
 .tenants-table td {
-    padding: 15px 20px;
+    padding: 8px 12px;
     color: #4a4a4a;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     vertical-align: top;
     text-align: left;
 }
@@ -1239,17 +1292,40 @@ hr {
     font-weight: 600;
     color: #1a1a1a;
     vertical-align: top;
+    width: 150px;
+    max-width: 150px;
+    padding: 8px 8px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.tenant-actions-inline {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-top: 4px;
+}
+
+.tenant-actions-inline .btn-small {
+    width: 100%;
+    padding: 2px 6px;
+    font-size: 0.6rem;
+    text-align: center;
+    min-height: 20px;
 }
 
 .tenants-table .tenant-status-cell {
     vertical-align: top;
 }
 
-.tenants-table .tenant-contacts-cell {
-    min-width: 250px;
-    max-width: 400px;
+.tenants-table .tenant-contact-cell {
+    min-width: 140px;
+    max-width: 160px;
+    width: 140px;
     vertical-align: top;
-    padding: 8px;
+    padding: 3px;
+    word-wrap: break-word;
+    overflow: hidden;
 }
 
 .contacts-container-table {
@@ -1258,34 +1334,176 @@ hr {
     gap: 8px;
 }
 
+/* Remove container since each contact is now in its own column */
+.tenant-contact-cell .contact-card-table {
+    margin-bottom: 0;
+}
+
 .contact-card-table {
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 8px 10px;
+    background-color: #ffffff;
+    font-size: 0.7rem;
+    line-height: 1.4;
+    margin: 0;
+    margin-bottom: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.contact-type-indicators {
+    display: flex;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    justify-content: flex-end;
+    flex-shrink: 0;
+}
+
+.contact-type-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.contact-type-indicator.primary {
+    background-color: #667eea;
+}
+
+.contact-type-indicator.secondary {
+    background-color: #48bb78;
+}
+
+.contact-type-indicator.leasing {
+    background-color: #ed8936;
+}
+
+.contact-type-indicator.billing {
+    background-color: #f56565;
+}
+
+.contact-type-indicator.tenant-rep {
+    background-color: #9f7aea;
+}
+
+.contact-card-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin: 0;
+    margin-top: 4px;
+    padding: 0;
+}
+
+.btn-edit-contact {
+    background: transparent;
     border: none;
+    cursor: pointer;
+    padding: 4px 6px;
+    font-size: 0.75rem;
+    line-height: 1;
     border-radius: 4px;
-    padding: 12px;
-    background-color: #f5f5f5;
-    font-size: 0.9rem;
-    line-height: 1.6;
-    margin-bottom: 8px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    opacity: 0.7;
+}
+
+.btn-edit-contact:hover {
+    background-color: #f7fafc;
+    opacity: 1;
+}
+
+.btn-edit-contact:hover {
+    background-color: #ddd;
+}
+
+.btn-edit-contact span {
+    font-size: 0.7rem;
+    line-height: 1;
+}
+
+.contact-card-table > * {
+    margin: 0;
+    padding: 0;
+}
+
+.contact-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+    margin-bottom: 2px;
+    padding: 0;
+    position: relative;
+    min-height: 0;
+    height: auto;
+    gap: 8px;
+    line-height: 1.2;
 }
 
 .contact-card-name {
     font-weight: 600;
-    font-size: 1rem;
-    color: #000;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
+    font-size: 0.75rem;
+    color: #1a202c;
+    flex: 1;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    padding: 0;
+    margin: 0;
+    line-height: 1.3;
+    min-width: 0;
+    height: auto;
+    letter-spacing: -0.01em;
 }
 
 .contact-card-info {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-    color: #333;
-    font-size: 0.9rem;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    color: #4a5568;
+    font-size: 0.68rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.4;
+    min-width: 0;
+    height: auto;
+}
+
+.contact-card-info:last-child {
+    margin-bottom: 0;
+}
+
+.contact-card-info a,
+.contact-card-info span {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    font-size: 0.6rem;
+    line-height: 1;
+    flex: 1;
+    min-width: 0;
+    display: block;
+    margin: 0;
+    padding: 0;
 }
 
 .contact-card-info:last-child {
@@ -1293,12 +1511,13 @@ hr {
 }
 
 .contact-icon-email {
-    width: 20px;
-    height: 20px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     flex-shrink: 0;
     position: relative;
+    margin: 0;
 }
 
 .contact-icon-email::after {
@@ -1307,20 +1526,21 @@ hr {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 10px;
-    height: 8px;
-    border: 2px solid white;
+    width: 6px;
+    height: 4px;
+    border: 1px solid white;
     border-top: none;
-    border-radius: 0 0 3px 3px;
+    border-radius: 0 0 2px 2px;
 }
 
 .contact-icon-phone {
-    width: 20px;
-    height: 20px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
     background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
     flex-shrink: 0;
     position: relative;
+    margin: 0;
 }
 
 .contact-icon-phone::after {
@@ -1329,36 +1549,43 @@ hr {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 8px;
-    height: 8px;
-    border: 2px solid white;
+    width: 5px;
+    height: 5px;
+    border: 1px solid white;
     border-radius: 50%;
 }
 
 .contact-link-table {
-    color: #333;
+    color: #4299e1;
     text-decoration: none;
-    font-weight: normal;
+    font-weight: 400;
+    transition: color 0.2s ease;
 }
 
 .contact-link-table:hover {
-    color: #667eea;
+    color: #2b6cb0;
     text-decoration: underline;
 }
 
 .contact-no-info {
-    color: #999;
+    color: #a0aec0;
     font-style: italic;
+    font-size: 0.65rem;
 }
 
 .contact-class-badge {
     display: inline-block;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 0.7rem;
+    padding: 1px 3px;
+    border-radius: 2px;
+    font-size: 0.5rem;
     font-weight: 600;
     text-transform: uppercase;
-    margin-left: 6px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    line-height: 1.1;
+    white-space: nowrap;
+    z-index: 1;
 }
 
 .contact-class-badge.primary {
@@ -1389,18 +1616,24 @@ hr {
 
 .tenants-table .tenant-occupancies-cell {
     vertical-align: top;
+    width: 120px;
+    max-width: 120px;
+    padding: 8px 8px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .tenants-table .occupancy-info {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     color: #4a4a4a;
-    padding: 6px 10px;
+    padding: 4px 8px;
     background: #f0f0f0;
-    border-radius: 6px;
-    display: block;
+    border-radius: 4px;
+    display: inline-block;
     font-weight: 500;
     white-space: nowrap;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
+    margin-right: 4px;
 }
 
 .tenants-table .occupancy-info:last-child {
@@ -1410,6 +1643,9 @@ hr {
 .tenants-table .tenant-actions-cell {
     white-space: nowrap;
     vertical-align: top;
+    width: 100px;
+    max-width: 100px;
+    padding: 8px 6px;
 }
 
 .tenants-table .tenant-actions-cell .btn-small {
@@ -1421,11 +1657,12 @@ hr {
 }
 
 .tenants-table .btn-small {
-    padding: 8px 14px;
-    font-size: 0.85rem;
+    padding: 4px 8px;
+    font-size: 0.7rem;
     font-weight: 600;
-    border-radius: 6px;
+    border-radius: 4px;
     transition: all 0.2s;
+    margin-right: 2px;
 }
 
 .tenants-table .btn-primary.btn-small {

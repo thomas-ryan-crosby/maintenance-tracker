@@ -93,3 +93,4 @@ The service account key you provided is for:
 3. Set up Firestore and Storage rules as described above
 4. Test locally to verify connection
 
+

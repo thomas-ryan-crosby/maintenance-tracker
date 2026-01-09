@@ -78,3 +78,4 @@ After setting up rules:
 2. Production database should have secure rules (restricted access)
 3. Both databases should be functional for their respective purposes
 
+

@@ -3224,8 +3224,50 @@ async function renderTenantsTableView(tenants) {
         }
     });
     
-    // Build HTML
+    // First, load contacts to determine max number of contact and broker columns needed
+    const { maxContacts, maxBrokers } = await determineMaxContacts(filteredTenants);
+    
+    // Build HTML with dynamic contact and broker columns
     let html = '';
+    
+    // Add contact type legend
+    html += `
+        <div class="contact-type-legend" style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; display: flex; gap: 20px; flex-wrap: wrap; align-items: center;">
+            <div style="font-weight: 600; font-size: 0.75rem; color: #333; margin-right: 10px;">Contact Types:</div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="contact-type-indicator primary"></span>
+                <span style="font-size: 0.7rem;">Primary</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="contact-type-indicator secondary"></span>
+                <span style="font-size: 0.7rem;">Secondary</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="contact-type-indicator leasing"></span>
+                <span style="font-size: 0.7rem;">Leasing</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="contact-type-indicator billing"></span>
+                <span style="font-size: 0.7rem;">Billing</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="contact-type-indicator tenant-rep"></span>
+                <span style="font-size: 0.7rem;">Tenant Representative</span>
+            </div>
+        </div>
+    `;
+    
+    // Generate contact column subheaders
+    const contactSubHeaders = [];
+    for (let i = 1; i <= maxContacts; i++) {
+        contactSubHeaders.push(`<th>Contact ${i}</th>`);
+    }
+    
+    // Generate broker column subheaders
+    const brokerSubHeaders = [];
+    for (let i = 1; i <= maxBrokers; i++) {
+        brokerSubHeaders.push(`<th>Broker ${i}</th>`);
+    }
     
     // Render grouped by building
     Object.keys(tenantsByBuilding).sort().forEach(buildingName => {
@@ -3235,22 +3277,21 @@ async function renderTenantsTableView(tenants) {
                 <div class="building-group-header">${escapeHtml(buildingName)}</div>
                 <table class="tenants-table">
                     <thead>
-                        <tr>
-                            <th>Tenant Name</th>
-                            <th>Type</th>
-                            <th>Status</th>
-                            <th>Contacts</th>
-                            <th>Occupancies</th>
-                            <th>Actions</th>
+                        <tr class="header-major">
+                            <th rowspan="2">Occupancies</th>
+                            <th rowspan="2">Tenant Name</th>
+                            ${maxContacts > 0 ? `<th colspan="${maxContacts}">Contacts</th>` : ''}
+                            ${maxBrokers > 0 ? `<th colspan="${maxBrokers}">Brokers</th>` : ''}
+                        </tr>
+                        <tr class="header-sub">
+                            ${contactSubHeaders.join('')}
+                            ${brokerSubHeaders.join('')}
                         </tr>
                     </thead>
                     <tbody>
         `;
         
         group.tenants.forEach(({ tenant, occupancies }) => {
-            const statusBadge = tenant.status ? `<span class="status-badge status-${tenant.status.toLowerCase()}">${tenant.status}</span>` : '';
-            const typeBadge = tenant.tenantType ? `<span class="status-badge type-badge">${tenant.tenantType}</span>` : '';
-            
             // Get ALL occupancies for this tenant (not just this building)
             const allTenantOccupancies = occupanciesMap[tenant.id] || [];
             
@@ -3269,18 +3310,31 @@ async function renderTenantsTableView(tenants) {
                 }).join('');
             }
             
+            // Create empty contact cells
+            const contactCells = [];
+            for (let i = 0; i < maxContacts; i++) {
+                contactCells.push(`<td class="tenant-contact-cell" data-contact-index="${i}" data-contact-type="contact" style="vertical-align: top;"><span style="color: #999;">Loading...</span></td>`);
+            }
+            
+            // Create empty broker cells
+            const brokerCells = [];
+            for (let i = 0; i < maxBrokers; i++) {
+                brokerCells.push(`<td class="tenant-contact-cell" data-contact-index="${i}" data-contact-type="broker" style="vertical-align: top;"><span style="color: #999;">Loading...</span></td>`);
+            }
+            
             html += `
                 <tr data-tenant-id="${tenant.id}">
-                    <td class="tenant-name-cell" style="vertical-align: top;">${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</td>
-                    <td style="vertical-align: top;">${typeBadge}</td>
-                    <td class="tenant-status-cell" style="vertical-align: top;">${statusBadge}</td>
-                    <td class="tenant-contacts-cell" style="vertical-align: top;"><span style="color: #999;">Loading...</span></td>
                     <td class="tenant-occupancies-cell" style="vertical-align: top;">${occupanciesHtml}</td>
-                    <td class="tenant-actions-cell" style="vertical-align: top;">
-                        <button class="btn-primary btn-small" onclick="viewTenantDetail('${tenant.id}')">View</button>
-                        <button class="btn-secondary btn-small" onclick="editTenant('${tenant.id}')">Edit</button>
-                        <button class="btn-danger btn-small" onclick="deleteTenant('${tenant.id}')">Delete</button>
+                    <td class="tenant-name-cell" style="vertical-align: top;">
+                        <div style="font-weight: 600; margin-bottom: 4px;">${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</div>
+                        <div class="tenant-actions-inline">
+                            <button class="btn-primary btn-small" onclick="viewTenantDetail('${tenant.id}')">View</button>
+                            <button class="btn-secondary btn-small" onclick="editTenant('${tenant.id}')">Edit</button>
+                            <button class="btn-danger btn-small" onclick="deleteTenant('${tenant.id}')">Delete</button>
+                        </div>
                     </td>
+                    ${contactCells.join('')}
+                    ${brokerCells.join('')}
                 </tr>
             `;
         });
@@ -3299,22 +3353,21 @@ async function renderTenantsTableView(tenants) {
                 <div class="building-group-header">No Building Assigned</div>
                 <table class="tenants-table">
                     <thead>
-                        <tr>
-                            <th>Tenant Name</th>
-                            <th>Type</th>
-                            <th>Status</th>
-                            <th>Contacts</th>
-                            <th>Occupancies</th>
-                            <th>Actions</th>
+                        <tr class="header-major">
+                            <th rowspan="2">Occupancies</th>
+                            <th rowspan="2">Tenant Name</th>
+                            ${maxContacts > 0 ? `<th colspan="${maxContacts}">Contacts</th>` : ''}
+                            ${maxBrokers > 0 ? `<th colspan="${maxBrokers}">Brokers</th>` : ''}
+                        </tr>
+                        <tr class="header-sub">
+                            ${contactSubHeaders.join('')}
+                            ${brokerSubHeaders.join('')}
                         </tr>
                     </thead>
                     <tbody>
         `;
         
         tenantsWithoutBuilding.forEach(({ tenant, occupancies }) => {
-            const statusBadge = tenant.status ? `<span class="status-badge status-${tenant.status.toLowerCase()}">${tenant.status}</span>` : '';
-            const typeBadge = tenant.tenantType ? `<span class="status-badge type-badge">${tenant.tenantType}</span>` : '';
-            
             // Get ALL occupancies for this tenant
             const allTenantOccupancies = occupanciesMap[tenant.id] || [];
             
@@ -3333,18 +3386,31 @@ async function renderTenantsTableView(tenants) {
                 }).join('');
             }
             
+            // Create empty contact cells
+            const contactCells = [];
+            for (let i = 0; i < maxContacts; i++) {
+                contactCells.push(`<td class="tenant-contact-cell" data-contact-index="${i}" data-contact-type="contact" style="vertical-align: top;"><span style="color: #999;">Loading...</span></td>`);
+            }
+            
+            // Create empty broker cells
+            const brokerCells = [];
+            for (let i = 0; i < maxBrokers; i++) {
+                brokerCells.push(`<td class="tenant-contact-cell" data-contact-index="${i}" data-contact-type="broker" style="vertical-align: top;"><span style="color: #999;">Loading...</span></td>`);
+            }
+            
             html += `
                 <tr data-tenant-id="${tenant.id}">
-                    <td class="tenant-name-cell" style="vertical-align: top;">${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</td>
-                    <td style="vertical-align: top;">${typeBadge}</td>
-                    <td class="tenant-status-cell" style="vertical-align: top;">${statusBadge}</td>
-                    <td class="tenant-contacts-cell" style="vertical-align: top;"><span style="color: #999;">Loading...</span></td>
                     <td class="tenant-occupancies-cell" style="vertical-align: top;">${occupanciesHtml}</td>
-                    <td class="tenant-actions-cell" style="vertical-align: top;">
-                        <button class="btn-primary btn-small" onclick="viewTenantDetail('${tenant.id}')">View</button>
-                        <button class="btn-secondary btn-small" onclick="editTenant('${tenant.id}')">Edit</button>
-                        <button class="btn-danger btn-small" onclick="deleteTenant('${tenant.id}')">Delete</button>
+                    <td class="tenant-name-cell" style="vertical-align: top;">
+                        <div style="font-weight: 600; margin-bottom: 4px;">${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</div>
+                        <div class="tenant-actions-inline">
+                            <button class="btn-primary btn-small" onclick="viewTenantDetail('${tenant.id}')">View</button>
+                            <button class="btn-secondary btn-small" onclick="editTenant('${tenant.id}')">Edit</button>
+                            <button class="btn-danger btn-small" onclick="deleteTenant('${tenant.id}')">Delete</button>
+                        </div>
                     </td>
+                    ${contactCells.join('')}
+                    ${brokerCells.join('')}
                 </tr>
             `;
         });
@@ -3358,17 +3424,13 @@ async function renderTenantsTableView(tenants) {
     
     tenantsTable.innerHTML = html;
     
-    // Load contacts for all tenants
-    loadContactsForTableView(filteredTenants);
+    // Load contacts for all tenants and populate individual columns
+    loadContactsForTableView(filteredTenants, maxContacts, maxBrokers);
 }
 
-async function loadContactsForTableView(tenants) {
+async function determineMaxContacts(tenants) {
     const tenantIds = Object.keys(tenants);
-    if (tenantIds.length === 0) return;
-    
-    // Check if leasing contacts should be shown
-    const showLeasingCheckbox = document.getElementById('showLeasingContacts');
-    const showLeasing = showLeasingCheckbox ? showLeasingCheckbox.checked : false;
+    if (tenantIds.length === 0) return { maxContacts: 0, maxBrokers: 0 };
     
     // Firestore 'in' query limit is 10, so we need to batch
     const allContacts = {};
@@ -3389,81 +3451,353 @@ async function loadContactsForTableView(tenants) {
         });
     }
     
-    // Update table with contact info
+    // Find maximum number of contacts and brokers across all tenants
+    let maxContacts = 0;
+    let maxBrokers = 0;
     Object.keys(tenants).forEach(tenantId => {
         const contacts = allContacts[tenantId] || [];
-        const contactsCell = document.querySelector(`tr[data-tenant-id="${tenantId}"] .tenant-contacts-cell`);
-        if (contactsCell) {
-            if (contacts.length === 0) {
-                contactsCell.innerHTML = '<span style="color: #999;">No contacts</span>';
-            } else {
-                // Filter and organize contacts
-                const filteredContacts = filterContactsForTableView(contacts, showLeasing);
-                
-                if (filteredContacts.length === 0) {
-                    contactsCell.innerHTML = '<span style="color: #999;">No contacts to display</span>';
-                } else {
-                    // Create Excel-like table format with contact cards
-                    const contactCardsHtml = filteredContacts.map(contact => {
-                        const classifications = contact.classifications || [];
-                        const isPrimary = classifications.includes('Primary');
-                        const isSecondary = classifications.includes('Secondary');
-                        const isLeasing = classifications.includes('Leasing');
-                        const isRealtor = classifications.includes('Realtor') || 
-                                         (contact.contactTitle && contact.contactTitle.toLowerCase().includes('realtor'));
-                        
-                        let classificationLabel = '';
-                        if (isPrimary) classificationLabel = '<span class="contact-class-badge primary">Primary</span>';
-                        else if (isSecondary) classificationLabel = '<span class="contact-class-badge secondary">Secondary</span>';
-                        else if (isLeasing) classificationLabel = '<span class="contact-class-badge leasing">Leasing</span>';
-                        else if (isRealtor) classificationLabel = '<span class="contact-class-badge realtor">Realtor</span>';
-                        
-                        return `
-                            <div class="contact-card-table">
-                                <div class="contact-card-name">${escapeHtml(contact.contactName || 'Unnamed')}${classificationLabel ? ' ' + classificationLabel : ''}</div>
-                                ${contact.contactEmail ? `
-                                    <div class="contact-card-info">
-                                        <div class="contact-icon-email"></div>
-                                        <a href="mailto:${escapeHtml(contact.contactEmail)}" class="contact-link-table">${escapeHtml(contact.contactEmail)}</a>
-                                    </div>
-                                ` : ''}
-                                <div class="contact-card-info">
-                                    <div class="contact-icon-phone"></div>
-                                    ${contact.contactPhone ? `<a href="tel:${escapeHtml(contact.contactPhone)}" class="contact-link-table">${escapeHtml(contact.contactPhone)}</a>` : '<span class="contact-no-info">no phone number provided</span>'}
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
+        const separated = filterContactsForTableView(contacts, false);
+        maxContacts = Math.max(maxContacts, separated.contacts.length);
+        maxBrokers = Math.max(maxBrokers, separated.brokers.length);
+    });
+    
+    // Store contacts for later use
+    window._cachedContacts = allContacts;
+    
+    return {
+        maxContacts: Math.max(1, maxContacts), // At least 1 column
+        maxBrokers: Math.max(0, maxBrokers) // Can be 0
+    };
+}
+
+function rebuildTableWithContactColumns(tenantsByBuilding, tenantsWithoutBuilding, occupanciesMap, unitsMap, maxContacts) {
+    let html = '';
+    
+    // Generate contact column headers
+    const contactHeaders = [];
+    for (let i = 1; i <= maxContacts; i++) {
+        contactHeaders.push(`<th>Contact ${i}</th>`);
+    }
+    
+    // Render grouped by building
+    Object.keys(tenantsByBuilding).sort().forEach(buildingName => {
+        const group = tenantsByBuilding[buildingName];
+        html += `
+            <div class="building-group">
+                <div class="building-group-header">${escapeHtml(buildingName)}</div>
+                <table class="tenants-table">
+                    <thead>
+                        <tr class="header-major">
+                            <th rowspan="2">Occupancies</th>
+                            <th rowspan="2">Tenant Name</th>
+                            ${maxContacts > 0 ? `<th colspan="${maxContacts}">Contacts</th>` : ''}
+                            ${maxBrokers > 0 ? `<th colspan="${maxBrokers}">Brokers</th>` : ''}
+                        </tr>
+                        <tr class="header-sub">
+                            ${contactSubHeaders.join('')}
+                            ${brokerSubHeaders.join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        group.tenants.forEach(({ tenant, occupancies }) => {
+            // Get ALL occupancies for this tenant (not just this building)
+            const allTenantOccupancies = occupanciesMap[tenant.id] || [];
+            
+            // Occupancies - show all occupancies for this tenant
+            let occupanciesHtml = '<span style="color: #999;">No occupancies</span>';
+            if (allTenantOccupancies.length > 0) {
+                occupanciesHtml = allTenantOccupancies.map(occ => {
+                    if (occ.unitId && unitsMap[occ.unitId]) {
+                        const unit = unitsMap[occ.unitId];
+                        return `<span class="occupancy-info">Unit ${escapeHtml(unit.unitNumber || 'N/A')}</span>`;
+                    } else if (occ.unitId) {
+                        return `<span class="occupancy-info">Unit (ID: ${occ.unitId.substring(0, 8)}...)</span>`;
+                    } else {
+                        return `<span class="occupancy-info">Property Level</span>`;
+                    }
+                }).join('');
+            }
+            
+            // Create empty contact cells
+            const contactCells = [];
+            for (let i = 0; i < maxContacts; i++) {
+                contactCells.push(`<td class="tenant-contact-cell" data-contact-index="${i}" data-contact-type="contact" style="vertical-align: top;"><span style="color: #999;">Loading...</span></td>`);
+            }
+            
+            // Create empty broker cells
+            const brokerCells = [];
+            for (let i = 0; i < maxBrokers; i++) {
+                brokerCells.push(`<td class="tenant-contact-cell" data-contact-index="${i}" data-contact-type="broker" style="vertical-align: top;"><span style="color: #999;">Loading...</span></td>`);
+            }
+            
+            html += `
+                <tr data-tenant-id="${tenant.id}">
+                    <td class="tenant-occupancies-cell" style="vertical-align: top;">${occupanciesHtml}</td>
+                    <td class="tenant-name-cell" style="vertical-align: top;">
+                        <div style="font-weight: 600; margin-bottom: 4px;">${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</div>
+                        <div class="tenant-actions-inline">
+                            <button class="btn-primary btn-small" onclick="viewTenantDetail('${tenant.id}')">View</button>
+                            <button class="btn-secondary btn-small" onclick="editTenant('${tenant.id}')">Edit</button>
+                            <button class="btn-danger btn-small" onclick="deleteTenant('${tenant.id}')">Delete</button>
+                        </div>
+                    </td>
+                    ${contactCells.join('')}
+                    ${brokerCells.join('')}
+                </tr>
+            `;
+        });
+        
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+    });
+    
+    // Render tenants without building
+    if (tenantsWithoutBuilding.length > 0) {
+        html += `
+            <div class="building-group">
+                <div class="building-group-header">No Building Assigned</div>
+                <table class="tenants-table">
+                    <thead>
+                        <tr class="header-major">
+                            <th rowspan="2">Occupancies</th>
+                            <th rowspan="2">Tenant Name</th>
+                            ${maxContacts > 0 ? `<th colspan="${maxContacts}">Contacts</th>` : ''}
+                            ${maxBrokers > 0 ? `<th colspan="${maxBrokers}">Brokers</th>` : ''}
+                        </tr>
+                        <tr class="header-sub">
+                            ${contactSubHeaders.join('')}
+                            ${brokerSubHeaders.join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        tenantsWithoutBuilding.forEach(({ tenant, occupancies }) => {
+            // Get ALL occupancies for this tenant
+            const allTenantOccupancies = occupanciesMap[tenant.id] || [];
+            
+            // Occupancies
+            let occupanciesHtml = '<span style="color: #999;">No occupancies</span>';
+            if (allTenantOccupancies.length > 0) {
+                occupanciesHtml = allTenantOccupancies.map(occ => {
+                    if (occ.unitId && unitsMap[occ.unitId]) {
+                        const unit = unitsMap[occ.unitId];
+                        return `<span class="occupancy-info">Unit ${escapeHtml(unit.unitNumber || 'N/A')}</span>`;
+                    } else if (occ.unitId) {
+                        return `<span class="occupancy-info">Unit (ID: ${occ.unitId.substring(0, 8)}...)</span>`;
+                    } else {
+                        return `<span class="occupancy-info">Property Level</span>`;
+                    }
+                }).join('');
+            }
+            
+            // Create empty contact cells
+            const contactCells = [];
+            for (let i = 0; i < maxContacts; i++) {
+                contactCells.push(`<td class="tenant-contact-cell" data-contact-index="${i}" data-contact-type="contact" style="vertical-align: top;"><span style="color: #999;">Loading...</span></td>`);
+            }
+            
+            // Create empty broker cells
+            const brokerCells = [];
+            for (let i = 0; i < maxBrokers; i++) {
+                brokerCells.push(`<td class="tenant-contact-cell" data-contact-index="${i}" data-contact-type="broker" style="vertical-align: top;"><span style="color: #999;">Loading...</span></td>`);
+            }
+            
+            html += `
+                <tr data-tenant-id="${tenant.id}">
+                    <td class="tenant-occupancies-cell" style="vertical-align: top;">${occupanciesHtml}</td>
+                    <td class="tenant-name-cell" style="vertical-align: top;">
+                        <div style="font-weight: 600; margin-bottom: 4px;">${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</div>
+                        <div class="tenant-actions-inline">
+                            <button class="btn-primary btn-small" onclick="viewTenantDetail('${tenant.id}')">View</button>
+                            <button class="btn-secondary btn-small" onclick="editTenant('${tenant.id}')">Edit</button>
+                            <button class="btn-danger btn-small" onclick="deleteTenant('${tenant.id}')">Delete</button>
+                        </div>
+                    </td>
+                    ${contactCells.join('')}
+                    ${brokerCells.join('')}
+                </tr>
+            `;
+        });
+        
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+    
+    return html;
+}
+
+async function loadContactsForTableView(tenants, maxContacts, maxBrokers) {
+    const tenantIds = Object.keys(tenants);
+    if (tenantIds.length === 0) return;
+    
+    // Use cached contacts if available, otherwise load them
+    let allContacts = window._cachedContacts;
+    if (!allContacts) {
+        allContacts = {};
+        const batchSize = 10;
+        
+        for (let i = 0; i < tenantIds.length; i += batchSize) {
+            const batch = tenantIds.slice(i, i + batchSize);
+            const contactsSnapshot = await db.collection('tenantContacts')
+                .where('tenantId', 'in', batch)
+                .get();
+            
+            contactsSnapshot.forEach(doc => {
+                const contact = { id: doc.id, ...doc.data() };
+                if (!allContacts[contact.tenantId]) {
+                    allContacts[contact.tenantId] = [];
+                }
+                allContacts[contact.tenantId].push(contact);
+            });
+        }
+    }
+    
+    // Update table with contact info in individual columns - show ALL contacts and brokers
+    Object.keys(tenants).forEach(tenantId => {
+        const contacts = allContacts[tenantId] || [];
+        const separated = filterContactsForTableView(contacts, false);
+        const sortedContacts = separated.contacts;
+        const brokers = separated.brokers;
+        
+        // Populate each contact column
+        for (let i = 0; i < maxContacts; i++) {
+            const contactCell = document.querySelector(`tr[data-tenant-id="${tenantId}"] td[data-contact-type="contact"][data-contact-index="${i}"]`);
+            if (contactCell) {
+                if (i < sortedContacts.length) {
+                    const contact = sortedContacts[i];
+                    const classifications = contact.classifications || [];
+                    const isPrimary = classifications.includes('Primary');
+                    const isSecondary = classifications.includes('Secondary');
+                    const isLeasing = classifications.includes('Leasing');
+                    const isBilling = classifications.includes('Billing');
                     
-                    contactsCell.innerHTML = `<div class="contacts-container-table">${contactCardsHtml}</div>`;
+                    // Create type indicator circles
+                    let typeIndicators = '<div class="contact-type-indicators">';
+                    if (isPrimary) typeIndicators += '<span class="contact-type-indicator primary" title="Primary"></span>';
+                    if (isSecondary) typeIndicators += '<span class="contact-type-indicator secondary" title="Secondary"></span>';
+                    if (isLeasing) typeIndicators += '<span class="contact-type-indicator leasing" title="Leasing"></span>';
+                    if (isBilling) typeIndicators += '<span class="contact-type-indicator billing" title="Billing"></span>';
+                    typeIndicators += '</div>';
+                    
+                    contactCell.innerHTML = `
+                        <div class="contact-card-table">
+                            <div class="contact-card-header">
+                                <div class="contact-card-name">${escapeHtml(contact.contactName || 'Unnamed')}</div>
+                                ${typeIndicators}
+                            </div>
+                            ${contact.contactEmail ? `
+                                <div class="contact-card-info">
+                                    <div class="contact-icon-email"></div>
+                                    <a href="mailto:${escapeHtml(contact.contactEmail)}" class="contact-link-table">${escapeHtml(contact.contactEmail)}</a>
+                                </div>
+                            ` : ''}
+                            <div class="contact-card-info">
+                                <div class="contact-icon-phone"></div>
+                                ${contact.contactPhone ? `<a href="tel:${escapeHtml(contact.contactPhone)}" class="contact-link-table">${escapeHtml(contact.contactPhone)}</a>` : '<span class="contact-no-info">no phone number provided</span>'}
+                            </div>
+                            <div class="contact-card-actions">
+                                <button class="btn-edit-contact" onclick="editContactFromTable('${contact.id}')" title="Edit contact">
+                                    <span>✏️</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    contactCell.innerHTML = ''; // Empty cell if no contact for this position
+                }
+            }
+        }
+        
+        // Populate each broker column
+        for (let i = 0; i < maxBrokers; i++) {
+            const brokerCell = document.querySelector(`tr[data-tenant-id="${tenantId}"] td[data-contact-type="broker"][data-contact-index="${i}"]`);
+            if (brokerCell) {
+                if (i < brokers.length) {
+                    const contact = brokers[i];
+                    const classifications = contact.classifications || [];
+                    const isTenantRepresentative = classifications.includes('Tenant Representative');
+                    
+                    // Create type indicator circle for tenant representative
+                    let typeIndicators = '<div class="contact-type-indicators">';
+                    if (isTenantRepresentative) typeIndicators += '<span class="contact-type-indicator tenant-rep" title="Tenant Representative"></span>';
+                    typeIndicators += '</div>';
+                    
+                    brokerCell.innerHTML = `
+                        <div class="contact-card-table">
+                            <div class="contact-card-header">
+                                <div class="contact-card-name">${escapeHtml(contact.contactName || 'Unnamed')}</div>
+                                ${typeIndicators}
+                            </div>
+                            ${contact.contactEmail ? `
+                                <div class="contact-card-info">
+                                    <div class="contact-icon-email"></div>
+                                    <a href="mailto:${escapeHtml(contact.contactEmail)}" class="contact-link-table">${escapeHtml(contact.contactEmail)}</a>
+                                </div>
+                            ` : ''}
+                            <div class="contact-card-info">
+                                <div class="contact-icon-phone"></div>
+                                ${contact.contactPhone ? `<a href="tel:${escapeHtml(contact.contactPhone)}" class="contact-link-table">${escapeHtml(contact.contactPhone)}</a>` : '<span class="contact-no-info">no phone number provided</span>'}
+                            </div>
+                            <div class="contact-card-actions">
+                                <button class="btn-edit-contact" onclick="editContactFromTable('${contact.id}')" title="Edit contact">
+                                    <span>✏️</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    brokerCell.innerHTML = ''; // Empty cell if no broker for this position
                 }
             }
         }
     });
+    
+    // Clear cached contacts
+    delete window._cachedContacts;
 }
 
 function filterContactsForTableView(contacts, showLeasing) {
-    // Separate contacts by classification
-    let primaryContact = null;
-    let secondaryContact = null;
-    const leasingContacts = [];
-    const realtorContacts = [];
-    const otherContacts = [];
+    // Separate contacts into regular contacts and brokers
+    const regularContacts = [];
+    const brokers = [];
     
     contacts.forEach(contact => {
+        const classifications = contact.classifications || [];
+        const isTenantRepresentative = classifications.includes('Tenant Representative');
+        
+        if (isTenantRepresentative) {
+            brokers.push(contact);
+        } else {
+            regularContacts.push(contact);
+        }
+    });
+    
+    // Sort regular contacts by priority: Primary, Secondary, Leasing, then others
+    const sortedRegularContacts = [];
+    const primaryContacts = [];
+    const secondaryContacts = [];
+    const leasingContacts = [];
+    const otherContacts = [];
+    
+    regularContacts.forEach(contact => {
         const classifications = contact.classifications || [];
         const isPrimary = classifications.includes('Primary');
         const isSecondary = classifications.includes('Secondary');
         const isLeasing = classifications.includes('Leasing');
-        const isRealtor = classifications.includes('Realtor') || 
-                         (contact.contactTitle && contact.contactTitle.toLowerCase().includes('realtor'));
         
-        if (isPrimary && !primaryContact) {
-            primaryContact = contact;
-        } else if (isSecondary && !secondaryContact) {
-            secondaryContact = contact;
-        } else if (isRealtor) {
-            realtorContacts.push(contact);
+        if (isPrimary) {
+            primaryContacts.push(contact);
+        } else if (isSecondary) {
+            secondaryContacts.push(contact);
         } else if (isLeasing) {
             leasingContacts.push(contact);
         } else {
@@ -3471,24 +3805,19 @@ function filterContactsForTableView(contacts, showLeasing) {
         }
     });
     
-    // Build result array: Primary, Secondary, Realtor(s), Leasing (if enabled), then others
-    const result = [];
-    if (primaryContact) result.push(primaryContact);
-    if (secondaryContact) result.push(secondaryContact);
-    result.push(...realtorContacts); // Show all realtors by default
-    if (showLeasing) {
-        result.push(...leasingContacts);
-    }
-    // Optionally add first other contact if we have space
-    if (result.length < 3 && otherContacts.length > 0) {
-        result.push(otherContacts[0]);
-    }
+    sortedRegularContacts.push(...primaryContacts);
+    sortedRegularContacts.push(...secondaryContacts);
+    sortedRegularContacts.push(...leasingContacts);
+    sortedRegularContacts.push(...otherContacts);
     
-    return result;
+    return {
+        contacts: sortedRegularContacts,
+        brokers: brokers
+    };
 }
 
 function refreshContactsTableView() {
-    // Reload tenants to refresh contact display
+    // Reload tenants to refresh contact display (will rebuild table with new contact columns)
     db.collection('tenants').get().then((snapshot) => {
         const tenants = {};
         snapshot.forEach((doc) => {
@@ -3898,6 +4227,13 @@ window.addContact = function(tenantId) {
     }, 100);
 };
 
+window.editContactFromTable = function(contactId, event) {
+    if (event) {
+        event.stopPropagation();
+    }
+    editContact(contactId);
+};
+
 window.editContact = function(contactId) {
     db.collection('tenantContacts').doc(contactId).get().then((doc) => {
         const contact = doc.data();
@@ -3917,6 +4253,7 @@ window.editContact = function(contactId) {
             document.getElementById('contactSecondary').checked = classifications.includes('Secondary');
             document.getElementById('contactLeasing').checked = classifications.includes('Leasing');
             document.getElementById('contactBilling').checked = classifications.includes('Billing');
+            document.getElementById('contactTenantRepresentative').checked = classifications.includes('Tenant Representative');
             
             const submitBtn = document.querySelector('#contactForm button[type="submit"]');
             if (submitBtn) {
@@ -3997,6 +4334,7 @@ function handleContactSubmit(e) {
     if (document.getElementById('contactSecondary').checked) classifications.push('Secondary');
     if (document.getElementById('contactLeasing').checked) classifications.push('Leasing');
     if (document.getElementById('contactBilling').checked) classifications.push('Billing');
+    if (document.getElementById('contactTenantRepresentative').checked) classifications.push('Tenant Representative');
     
     if (!contactName) {
         alert('Contact name is required');
@@ -4052,6 +4390,16 @@ function handleContactSubmit(e) {
             if (currentTenantIdForDetail) {
                 loadContacts(currentTenantIdForDetail);
             }
+            // Refresh table view if we're in table view
+            if (currentTenantView === 'table') {
+                db.collection('tenants').get().then((snapshot) => {
+                    const tenants = {};
+                    snapshot.forEach((doc) => {
+                        tenants[doc.id] = { id: doc.id, ...doc.data() };
+                    });
+                    renderTenantsList(tenants);
+                });
+            }
         }).catch((error) => {
             clearTimeout(timeoutId);
             console.error('Error updating contact:', error);
@@ -4068,6 +4416,16 @@ function handleContactSubmit(e) {
                 closeContactModal();
                 if (currentTenantIdForDetail) {
                     loadContacts(currentTenantIdForDetail);
+                }
+                // Refresh table view if we're in table view
+                if (currentTenantView === 'table') {
+                    db.collection('tenants').get().then((snapshot) => {
+                        const tenants = {};
+                        snapshot.forEach((doc) => {
+                            tenants[doc.id] = { id: doc.id, ...doc.data() };
+                        });
+                        renderTenantsList(tenants);
+                    });
                 }
             })
             .catch((error) => {

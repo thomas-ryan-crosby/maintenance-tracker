@@ -34,3 +34,4 @@ Once pushed, you can:
 
 **Important:** Remember to add your `firebase-config.js` file with your actual Firebase credentials after deploying, or set it up as a GitHub Secret if you want to keep it private.
 
+
