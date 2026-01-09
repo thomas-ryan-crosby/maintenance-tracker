@@ -634,6 +634,12 @@
                                     <span>📊</span> Table
                                 </button>
                             </div>
+                            <div class="table-view-options" id="tableViewOptions" style="display: none;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: normal; margin-left: 15px;">
+                                    <input type="checkbox" id="showLeasingContacts" onchange="refreshContactsTableView()">
+                                    <span>Show Leasing Contacts</span>
+                                </label>
+                            </div>
                         </div>
                         <div id="tenantsList" class="tenants-grid"></div>
                         <div id="tenantsTable" class="tenants-table-container" style="display: none;"></div>

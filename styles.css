@@ -1246,31 +1246,145 @@ hr {
 }
 
 .tenants-table .tenant-contacts-cell {
-    min-width: 200px;
+    min-width: 250px;
+    max-width: 400px;
     vertical-align: top;
+    padding: 8px;
 }
 
-.tenants-table .contact-info {
+.contacts-container-table {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.contact-card-table {
+    border: none;
+    border-radius: 4px;
+    padding: 12px;
+    background-color: #f5f5f5;
     font-size: 0.9rem;
-    color: #4a4a4a;
-    margin-bottom: 6px;
-    line-height: 1.5;
-    white-space: nowrap;
+    line-height: 1.6;
+    margin-bottom: 8px;
 }
 
-.tenants-table .contact-info:last-child {
+.contact-card-name {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #000;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.contact-card-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.contact-card-info:last-child {
     margin-bottom: 0;
 }
 
-.tenants-table .contact-info a {
-    color: #667eea;
-    text-decoration: none;
-    font-weight: 500;
+.contact-icon-email {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    flex-shrink: 0;
+    position: relative;
 }
 
-.tenants-table .contact-info a:hover {
-    color: #764ba2;
+.contact-icon-email::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 8px;
+    border: 2px solid white;
+    border-top: none;
+    border-radius: 0 0 3px 3px;
+}
+
+.contact-icon-phone {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    flex-shrink: 0;
+    position: relative;
+}
+
+.contact-icon-phone::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    border: 2px solid white;
+    border-radius: 50%;
+}
+
+.contact-link-table {
+    color: #333;
+    text-decoration: none;
+    font-weight: normal;
+}
+
+.contact-link-table:hover {
+    color: #667eea;
     text-decoration: underline;
+}
+
+.contact-no-info {
+    color: #999;
+    font-style: italic;
+}
+
+.contact-class-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-left: 6px;
+}
+
+.contact-class-badge.primary {
+    background-color: #667eea;
+    color: white;
+}
+
+.contact-class-badge.secondary {
+    background-color: #48bb78;
+    color: white;
+}
+
+.contact-class-badge.leasing {
+    background-color: #ed8936;
+    color: white;
+}
+
+.contact-class-badge.realtor {
+    background-color: #9f7aea;
+    color: white;
+}
+
+.table-view-options {
+    display: flex;
+    align-items: center;
+    margin-left: 15px;
 }
 
 .tenants-table .tenant-occupancies-cell {

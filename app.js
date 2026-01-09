@@ -338,6 +338,9 @@ function setupEventListeners() {
             currentTenantView = 'cards';
             viewCardsBtn.classList.add('active');
             viewTableBtn.classList.remove('active');
+            // Hide table view options
+            const tableViewOptions = document.getElementById('tableViewOptions');
+            if (tableViewOptions) tableViewOptions.style.display = 'none';
             // Reload tenants to render in card view
             db.collection('tenants').get().then((snapshot) => {
                 const tenants = {};
@@ -354,6 +357,9 @@ function setupEventListeners() {
             currentTenantView = 'table';
             viewTableBtn.classList.add('active');
             viewCardsBtn.classList.remove('active');
+            // Show table view options
+            const tableViewOptions = document.getElementById('tableViewOptions');
+            if (tableViewOptions) tableViewOptions.style.display = 'flex';
             // Reload tenants to render in table view
             db.collection('tenants').get().then((snapshot) => {
                 const tenants = {};
@@ -3360,6 +3366,10 @@ async function loadContactsForTableView(tenants) {
     const tenantIds = Object.keys(tenants);
     if (tenantIds.length === 0) return;
     
+    // Check if leasing contacts should be shown
+    const showLeasingCheckbox = document.getElementById('showLeasingContacts');
+    const showLeasing = showLeasingCheckbox ? showLeasingCheckbox.checked : false;
+    
     // Firestore 'in' query limit is 10, so we need to batch
     const allContacts = {};
     const batchSize = 10;
@@ -3371,7 +3381,7 @@ async function loadContactsForTableView(tenants) {
             .get();
         
         contactsSnapshot.forEach(doc => {
-            const contact = doc.data();
+            const contact = { id: doc.id, ...doc.data() };
             if (!allContacts[contact.tenantId]) {
                 allContacts[contact.tenantId] = [];
             }
@@ -3387,27 +3397,104 @@ async function loadContactsForTableView(tenants) {
             if (contacts.length === 0) {
                 contactsCell.innerHTML = '<span style="color: #999;">No contacts</span>';
             } else {
-                // Show all contacts with email and phone on separate lines
-                const contactItems = [];
-                contacts.forEach(contact => {
-                    if (contact.contactEmail) {
-                        contactItems.push(`<div class="contact-info">✉️ <a href="mailto:${escapeHtml(contact.contactEmail)}">${escapeHtml(contact.contactEmail)}</a></div>`);
-                    }
-                    if (contact.contactPhone) {
-                        contactItems.push(`<div class="contact-info">📞 <a href="tel:${escapeHtml(contact.contactPhone)}">${escapeHtml(contact.contactPhone)}</a></div>`);
-                    }
-                });
+                // Filter and organize contacts
+                const filteredContacts = filterContactsForTableView(contacts, showLeasing);
                 
-                contactsCell.innerHTML = contactItems.length > 0 
-                    ? contactItems.join('') 
-                    : '<span style="color: #999;">No contacts</span>';
-                
-                // Remove any flex display that might interfere
-                contactsCell.style.display = '';
-                contactsCell.style.flexDirection = '';
-                contactsCell.style.gap = '';
+                if (filteredContacts.length === 0) {
+                    contactsCell.innerHTML = '<span style="color: #999;">No contacts to display</span>';
+                } else {
+                    // Create Excel-like table format with contact cards
+                    const contactCardsHtml = filteredContacts.map(contact => {
+                        const classifications = contact.classifications || [];
+                        const isPrimary = classifications.includes('Primary');
+                        const isSecondary = classifications.includes('Secondary');
+                        const isLeasing = classifications.includes('Leasing');
+                        const isRealtor = classifications.includes('Realtor') || 
+                                         (contact.contactTitle && contact.contactTitle.toLowerCase().includes('realtor'));
+                        
+                        let classificationLabel = '';
+                        if (isPrimary) classificationLabel = '<span class="contact-class-badge primary">Primary</span>';
+                        else if (isSecondary) classificationLabel = '<span class="contact-class-badge secondary">Secondary</span>';
+                        else if (isLeasing) classificationLabel = '<span class="contact-class-badge leasing">Leasing</span>';
+                        else if (isRealtor) classificationLabel = '<span class="contact-class-badge realtor">Realtor</span>';
+                        
+                        return `
+                            <div class="contact-card-table">
+                                <div class="contact-card-name">${escapeHtml(contact.contactName || 'Unnamed')}${classificationLabel ? ' ' + classificationLabel : ''}</div>
+                                ${contact.contactEmail ? `
+                                    <div class="contact-card-info">
+                                        <div class="contact-icon-email"></div>
+                                        <a href="mailto:${escapeHtml(contact.contactEmail)}" class="contact-link-table">${escapeHtml(contact.contactEmail)}</a>
+                                    </div>
+                                ` : ''}
+                                <div class="contact-card-info">
+                                    <div class="contact-icon-phone"></div>
+                                    ${contact.contactPhone ? `<a href="tel:${escapeHtml(contact.contactPhone)}" class="contact-link-table">${escapeHtml(contact.contactPhone)}</a>` : '<span class="contact-no-info">no phone number provided</span>'}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    contactsCell.innerHTML = `<div class="contacts-container-table">${contactCardsHtml}</div>`;
+                }
             }
         }
+    });
+}
+
+function filterContactsForTableView(contacts, showLeasing) {
+    // Separate contacts by classification
+    let primaryContact = null;
+    let secondaryContact = null;
+    const leasingContacts = [];
+    const realtorContacts = [];
+    const otherContacts = [];
+    
+    contacts.forEach(contact => {
+        const classifications = contact.classifications || [];
+        const isPrimary = classifications.includes('Primary');
+        const isSecondary = classifications.includes('Secondary');
+        const isLeasing = classifications.includes('Leasing');
+        const isRealtor = classifications.includes('Realtor') || 
+                         (contact.contactTitle && contact.contactTitle.toLowerCase().includes('realtor'));
+        
+        if (isPrimary && !primaryContact) {
+            primaryContact = contact;
+        } else if (isSecondary && !secondaryContact) {
+            secondaryContact = contact;
+        } else if (isRealtor) {
+            realtorContacts.push(contact);
+        } else if (isLeasing) {
+            leasingContacts.push(contact);
+        } else {
+            otherContacts.push(contact);
+        }
+    });
+    
+    // Build result array: Primary, Secondary, Realtor(s), Leasing (if enabled), then others
+    const result = [];
+    if (primaryContact) result.push(primaryContact);
+    if (secondaryContact) result.push(secondaryContact);
+    result.push(...realtorContacts); // Show all realtors by default
+    if (showLeasing) {
+        result.push(...leasingContacts);
+    }
+    // Optionally add first other contact if we have space
+    if (result.length < 3 && otherContacts.length > 0) {
+        result.push(otherContacts[0]);
+    }
+    
+    return result;
+}
+
+function refreshContactsTableView() {
+    // Reload tenants to refresh contact display
+    db.collection('tenants').get().then((snapshot) => {
+        const tenants = {};
+        snapshot.forEach((doc) => {
+            tenants[doc.id] = { id: doc.id, ...doc.data() };
+        });
+        renderTenantsList(tenants);
     });
 }
 
