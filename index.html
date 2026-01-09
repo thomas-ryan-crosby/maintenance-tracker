@@ -761,6 +761,49 @@
                 </div>
             </div>
             
+            <!-- Send Email Modal -->
+            <div id="sendEmailModal" class="modal">
+                <div class="modal-content" style="max-width: 700px;">
+                    <div class="modal-header">
+                        <h2>Send Email</h2>
+                        <button class="close-btn" id="closeSendEmailModal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Select Recipients:</label>
+                            <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 10px;">
+                                <div>
+                                    <label style="font-weight: 600; margin-bottom: 8px; display: block;">Buildings:</label>
+                                    <div id="buildingCheckboxes" style="max-height: 150px; overflow-y: auto; border: 1px solid #e0e0e0; padding: 10px; border-radius: 4px;">
+                                        <p style="color: #999; font-style: italic;">Loading buildings...</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="font-weight: 600; margin-bottom: 8px; display: block;">Tenants:</label>
+                                    <div id="tenantCheckboxes" style="max-height: 200px; overflow-y: auto; border: 1px solid #e0e0e0; padding: 10px; border-radius: 4px;">
+                                        <p style="color: #999; font-style: italic;">Loading tenants...</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="font-weight: 600; margin-bottom: 8px; display: block;">Individual Contacts:</label>
+                                    <div id="contactCheckboxes" style="max-height: 200px; overflow-y: auto; border: 1px solid #e0e0e0; padding: 10px; border-radius: 4px;">
+                                        <p style="color: #999; font-style: italic;">Loading contacts...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>Selected Recipients:</strong> <span id="selectedRecipientsCount">0</span>
+                                </div>
+                                <button type="button" class="btn-primary" id="openEmailClientBtn">Open Email Client</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Contact Modal -->
             <div id="contactModal" class="modal">
                 <div class="modal-content" style="max-width: 600px;">
@@ -951,7 +994,7 @@
                     
                     // Now load app.js after config is ready
                     const appScript = document.createElement('script');
-                    appScript.src = 'app.js?v=2.9';
+                    appScript.src = 'app.js?v=3.0';
                     appScript.onload = function() {
                         console.log('✅ app.js loaded successfully');
                     };
@@ -977,7 +1020,7 @@
                             return;
                         }
                         const appScript = document.createElement('script');
-                        appScript.src = 'app.js?v=2.9';
+                        appScript.src = 'app.js?v=3.0';
                         document.head.appendChild(appScript);
                     };
                     fallback.onerror = function() {

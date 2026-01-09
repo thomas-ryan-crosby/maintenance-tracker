@@ -321,6 +321,11 @@ function setupEventListeners() {
     const closeTenantModalBtn = document.getElementById('closeTenantModal');
     const cancelTenantFormBtn = document.getElementById('cancelTenantForm');
     const tenantTypeSelect = document.getElementById('tenantType');
+    const closeSendEmailModalBtn = document.getElementById('closeSendEmailModal');
+    
+    if (closeSendEmailModalBtn) {
+        closeSendEmailModalBtn.addEventListener('click', closeSendEmailModal);
+    }
     
     if (addTenantBtn) {
         addTenantBtn.addEventListener('click', () => {
@@ -3230,30 +3235,37 @@ async function renderTenantsTableView(tenants) {
     // Build HTML with dynamic contact and broker columns
     let html = '';
     
-    // Add contact type legend
+    // Add contact type legend with toggle and send email button
     html += `
-        <div class="contact-type-legend" style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; display: flex; gap: 20px; flex-wrap: wrap; align-items: center;">
-            <div style="font-weight: 600; font-size: 0.75rem; color: #333; margin-right: 10px;">Contact Types:</div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-                <span class="contact-type-indicator primary"></span>
-                <span style="font-size: 0.7rem;">Primary</span>
+        <div class="contact-type-legend" style="margin-bottom: 15px; padding: 12px; background: #f8f9fa; border-radius: 6px; display: flex; gap: 20px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: center;">
+                <div style="font-weight: 600; font-size: 0.75rem; color: #333; margin-right: 10px;">Contact Types:</div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="contact-type-indicator primary"></span>
+                    <span style="font-size: 0.7rem;">Primary</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="contact-type-indicator secondary"></span>
+                    <span style="font-size: 0.7rem;">Secondary</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="contact-type-indicator leasing"></span>
+                    <span style="font-size: 0.7rem;">Leasing</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="contact-type-indicator billing"></span>
+                    <span style="font-size: 0.7rem;">Billing</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="contact-type-indicator tenant-rep"></span>
+                    <span style="font-size: 0.7rem;">Tenant Representative</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-left: 10px; padding-left: 10px; border-left: 1px solid #ddd;">
+                    <input type="checkbox" id="showBrokersToggle" style="cursor: pointer;">
+                    <label for="showBrokersToggle" style="font-size: 0.7rem; cursor: pointer; user-select: none;">Show Brokers</label>
+                </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-                <span class="contact-type-indicator secondary"></span>
-                <span style="font-size: 0.7rem;">Secondary</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-                <span class="contact-type-indicator leasing"></span>
-                <span style="font-size: 0.7rem;">Leasing</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-                <span class="contact-type-indicator billing"></span>
-                <span style="font-size: 0.7rem;">Billing</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-                <span class="contact-type-indicator tenant-rep"></span>
-                <span style="font-size: 0.7rem;">Tenant Representative</span>
-            </div>
+            <button class="btn-primary" id="sendEmailBtn" style="padding: 6px 12px; font-size: 0.75rem; white-space: nowrap;">📧 Send Email</button>
         </div>
     `;
     
@@ -3424,9 +3436,265 @@ async function renderTenantsTableView(tenants) {
     
     tenantsTable.innerHTML = html;
     
+    // Set up broker toggle (default to hidden)
+    const showBrokersToggle = document.getElementById('showBrokersToggle');
+    if (showBrokersToggle) {
+        showBrokersToggle.checked = false; // Default to hidden
+        toggleBrokerColumns(false); // Hide brokers initially
+        
+        showBrokersToggle.addEventListener('change', function() {
+            toggleBrokerColumns(this.checked);
+        });
+    }
+    
+    // Set up send email button
+    const sendEmailBtn = document.getElementById('sendEmailBtn');
+    if (sendEmailBtn) {
+        sendEmailBtn.addEventListener('click', function() {
+            openSendEmailModal(filteredTenants);
+        });
+    }
+    
     // Load contacts for all tenants and populate individual columns
     loadContactsForTableView(filteredTenants, maxContacts, maxBrokers);
 }
+
+function toggleBrokerColumns(show) {
+    // Hide/show broker header columns by checking text content
+    const majorHeaders = document.querySelectorAll('.tenants-table .header-major th');
+    majorHeaders.forEach(header => {
+        if (header.textContent.trim() === 'Brokers') {
+            header.style.display = show ? '' : 'none';
+            const colspan = parseInt(header.getAttribute('colspan')) || 0;
+            const headerIndex = Array.from(header.parentElement.querySelectorAll('th')).indexOf(header);
+            
+            // Hide/show corresponding subheaders
+            const subHeaderRow = header.parentElement.nextElementSibling;
+            if (subHeaderRow) {
+                const subHeaders = Array.from(subHeaderRow.querySelectorAll('th'));
+                for (let i = 0; i < colspan; i++) {
+                    if (subHeaders[headerIndex + i]) {
+                        subHeaders[headerIndex + i].style.display = show ? '' : 'none';
+                    }
+                }
+            }
+        }
+    });
+    
+    // Hide/show broker data cells
+    const brokerCells = document.querySelectorAll('td[data-contact-type="broker"]');
+    brokerCells.forEach(cell => {
+        cell.style.display = show ? '' : 'none';
+    });
+}
+
+async function openSendEmailModal(tenants) {
+    const modal = document.getElementById('sendEmailModal');
+    if (!modal) return;
+    
+    modal.classList.add('show');
+    
+    // Load all data needed for selection
+    const buildings = {};
+    const allContacts = {};
+    const tenantIds = Object.keys(tenants);
+    
+    // Load buildings
+    const buildingsSnapshot = await db.collection('buildings').get();
+    buildingsSnapshot.forEach(doc => {
+        buildings[doc.id] = { id: doc.id, ...doc.data() };
+    });
+    
+    // Load all contacts
+    const batchSize = 10;
+    for (let i = 0; i < tenantIds.length; i += batchSize) {
+        const batch = tenantIds.slice(i, i + batchSize);
+        const contactsSnapshot = await db.collection('tenantContacts')
+            .where('tenantId', 'in', batch)
+            .get();
+        
+        contactsSnapshot.forEach(doc => {
+            const contact = { id: doc.id, ...doc.data() };
+            if (!allContacts[contact.tenantId]) {
+                allContacts[contact.tenantId] = [];
+            }
+            allContacts[contact.tenantId].push(contact);
+        });
+    }
+    
+    // Populate building checkboxes
+    const buildingCheckboxes = document.getElementById('buildingCheckboxes');
+    if (buildingCheckboxes) {
+        const buildingList = Object.values(buildings).sort((a, b) => (a.buildingName || '').localeCompare(b.buildingName || ''));
+        if (buildingList.length === 0) {
+            buildingCheckboxes.innerHTML = '<p style="color: #999; font-style: italic;">No buildings found</p>';
+        } else {
+            buildingCheckboxes.innerHTML = buildingList.map(building => `
+                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; cursor: pointer;">
+                    <input type="checkbox" class="building-checkbox" data-building-id="${building.id}" value="${building.id}">
+                    <span>${escapeHtml(building.buildingName || 'Unnamed Building')}</span>
+                </label>
+            `).join('');
+        }
+    }
+    
+    // Populate tenant checkboxes
+    const tenantCheckboxes = document.getElementById('tenantCheckboxes');
+    if (tenantCheckboxes) {
+        const tenantList = Object.values(tenants).sort((a, b) => (a.tenantName || '').localeCompare(b.tenantName || ''));
+        if (tenantList.length === 0) {
+            tenantCheckboxes.innerHTML = '<p style="color: #999; font-style: italic;">No tenants found</p>';
+        } else {
+            tenantCheckboxes.innerHTML = tenantList.map(tenant => `
+                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; cursor: pointer;">
+                    <input type="checkbox" class="tenant-checkbox" data-tenant-id="${tenant.id}" value="${tenant.id}">
+                    <span>${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</span>
+                </label>
+            `).join('');
+        }
+    }
+    
+    // Populate contact checkboxes
+    const contactCheckboxes = document.getElementById('contactCheckboxes');
+    if (contactCheckboxes) {
+        const contactList = [];
+        Object.keys(allContacts).forEach(tenantId => {
+            allContacts[tenantId].forEach(contact => {
+                if (contact.contactEmail) {
+                    contactList.push({
+                        ...contact,
+                        tenantId: tenantId,
+                        tenantName: tenants[tenantId]?.tenantName || 'Unknown Tenant'
+                    });
+                }
+            });
+        });
+        contactList.sort((a, b) => (a.contactName || '').localeCompare(b.contactName || ''));
+        
+        if (contactList.length === 0) {
+            contactCheckboxes.innerHTML = '<p style="color: #999; font-style: italic;">No contacts with email addresses found</p>';
+        } else {
+            contactCheckboxes.innerHTML = contactList.map(contact => `
+                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; cursor: pointer;">
+                    <input type="checkbox" class="contact-checkbox" data-contact-id="${contact.id}" data-email="${escapeHtml(contact.contactEmail)}" value="${contact.id}">
+                    <span>${escapeHtml(contact.contactName || 'Unnamed')} (${escapeHtml(contact.tenantName)}) - ${escapeHtml(contact.contactEmail)}</span>
+                </label>
+            `).join('');
+        }
+    }
+    
+    // Update recipient count
+    updateRecipientCount();
+    
+    // Add event listeners for checkboxes
+    document.querySelectorAll('.building-checkbox, .tenant-checkbox, .contact-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', updateRecipientCount);
+    });
+    
+    // Set up open email client button
+    const openEmailClientBtn = document.getElementById('openEmailClientBtn');
+    if (openEmailClientBtn) {
+        openEmailClientBtn.onclick = async function() {
+            await compileAndOpenEmail(tenants, buildings, allContacts);
+        };
+    }
+    
+    // Store data for later use
+    window._sendEmailData = { tenants, buildings, allContacts };
+}
+
+function updateRecipientCount() {
+    const selectedBuildings = document.querySelectorAll('.building-checkbox:checked').length;
+    const selectedTenants = document.querySelectorAll('.tenant-checkbox:checked').length;
+    const selectedContacts = document.querySelectorAll('.contact-checkbox:checked').length;
+    const total = selectedBuildings + selectedTenants + selectedContacts;
+    
+    const countElement = document.getElementById('selectedRecipientsCount');
+    if (countElement) {
+        countElement.textContent = total;
+    }
+}
+
+async function compileAndOpenEmail(tenants, buildings, allContacts) {
+    const selectedBuildings = Array.from(document.querySelectorAll('.building-checkbox:checked')).map(cb => cb.value);
+    const selectedTenants = Array.from(document.querySelectorAll('.tenant-checkbox:checked')).map(cb => cb.value);
+    const selectedContactIds = Array.from(document.querySelectorAll('.contact-checkbox:checked')).map(cb => cb.getAttribute('data-email'));
+    
+    const emailSet = new Set();
+    
+    // Add emails from selected buildings (find tenants via occupancies and units)
+    if (selectedBuildings.length > 0) {
+        // Get all units in selected buildings
+        const unitsSnapshot = await db.collection('units').get();
+        const unitIdsInBuildings = new Set();
+        
+        unitsSnapshot.forEach(doc => {
+            const unit = doc.data();
+            if (unit.buildingId && selectedBuildings.includes(unit.buildingId)) {
+                unitIdsInBuildings.add(doc.id);
+            }
+        });
+        
+        // Get all occupancies for units in selected buildings
+        const occupanciesSnapshot = await db.collection('occupancies').get();
+        const tenantIdsInBuildings = new Set();
+        
+        occupanciesSnapshot.forEach(doc => {
+            const occ = doc.data();
+            if (occ.unitId && unitIdsInBuildings.has(occ.unitId)) {
+                tenantIdsInBuildings.add(occ.tenantId);
+            }
+        });
+        
+        // Add emails for tenants in selected buildings
+        tenantIdsInBuildings.forEach(tenantId => {
+            if (allContacts[tenantId]) {
+                allContacts[tenantId].forEach(contact => {
+                    if (contact.contactEmail) {
+                        emailSet.add(contact.contactEmail);
+                    }
+                });
+            }
+        });
+    }
+    
+    // Add emails from selected tenants
+    selectedTenants.forEach(tenantId => {
+        if (allContacts[tenantId]) {
+            allContacts[tenantId].forEach(contact => {
+                if (contact.contactEmail) {
+                    emailSet.add(contact.contactEmail);
+                }
+            });
+        }
+    });
+    
+    // Add individually selected contacts
+    selectedContactIds.forEach(email => {
+        if (email) {
+            emailSet.add(email);
+        }
+    });
+    
+    const emailList = Array.from(emailSet);
+    
+    if (emailList.length === 0) {
+        alert('Please select at least one recipient.');
+        return;
+    }
+    
+    // Open email client with mailto: link
+    const mailtoLink = `mailto:${emailList.join(',')}`;
+    window.location.href = mailtoLink;
+}
+
+// Close send email modal
+window.closeSendEmailModal = function() {
+    const modal = document.getElementById('sendEmailModal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+};
 
 async function determineMaxContacts(tenants) {
     const tenantIds = Object.keys(tenants);
