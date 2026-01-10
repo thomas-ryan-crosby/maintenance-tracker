@@ -1353,12 +1353,26 @@ hr {
     box-sizing: border-box;
     word-wrap: break-word;
     overflow-wrap: break-word;
-    overflow: hidden;
+    overflow: visible;
     position: relative;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     display: flex;
     flex-direction: column;
     gap: 6px;
+}
+
+.email-select-building,
+.email-select-tenant,
+.email-select-contact {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #667eea;
+}
+
+.building-group-header {
+    display: flex;
+    align-items: center;
 }
 
 .contact-type-indicators {

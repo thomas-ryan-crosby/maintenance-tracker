@@ -3265,7 +3265,12 @@ async function renderTenantsTableView(tenants) {
                     <label for="showBrokersToggle" style="font-size: 0.7rem; cursor: pointer; user-select: none;">Show Brokers</label>
                 </div>
             </div>
-            <button class="btn-primary" id="sendEmailBtn" style="padding: 6px 12px; font-size: 0.75rem; white-space: nowrap;">📧 Send Email</button>
+            <button class="btn-primary" id="startEmailSelectionBtn" style="padding: 6px 12px; font-size: 0.75rem; white-space: nowrap;">📧 Select Recipients</button>
+            <div id="emailSelectionActions" style="display: none; gap: 10px; align-items: center;">
+                <button class="btn-secondary" id="doneSelectingBtn" style="padding: 6px 12px; font-size: 0.75rem;">Done Selecting</button>
+                <button class="btn-primary" id="draftEmailBtn" style="padding: 6px 12px; font-size: 0.75rem;">Draft Email</button>
+                <span id="selectedCount" style="font-size: 0.7rem; color: #666;">0 selected</span>
+            </div>
         </div>
     `;
     
@@ -3286,7 +3291,10 @@ async function renderTenantsTableView(tenants) {
         const group = tenantsByBuilding[buildingName];
         html += `
             <div class="building-group">
-                <div class="building-group-header">${escapeHtml(buildingName)}</div>
+                <div class="building-group-header">
+                    <input type="checkbox" class="email-select-building" data-building-id="${group.building?.id || ''}" data-building-name="${escapeHtml(buildingName)}" style="display: none; margin-right: 8px; cursor: pointer;">
+                    <span>${escapeHtml(buildingName)}</span>
+                </div>
                 <table class="tenants-table">
                     <thead>
                         <tr class="header-major">
@@ -3338,7 +3346,10 @@ async function renderTenantsTableView(tenants) {
                 <tr data-tenant-id="${tenant.id}">
                     <td class="tenant-occupancies-cell" style="vertical-align: top;">${occupanciesHtml}</td>
                     <td class="tenant-name-cell" style="vertical-align: top;">
-                        <div style="font-weight: 600; margin-bottom: 4px;">${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</div>
+                        <div style="font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                            <input type="checkbox" class="email-select-tenant" data-tenant-id="${tenant.id}" style="display: none; cursor: pointer;">
+                            <span>${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</span>
+                        </div>
                         <div class="tenant-actions-inline">
                             <button class="btn-primary btn-small" onclick="viewTenantDetail('${tenant.id}')">View</button>
                             <button class="btn-secondary btn-small" onclick="editTenant('${tenant.id}')">Edit</button>
@@ -3362,7 +3373,10 @@ async function renderTenantsTableView(tenants) {
     if (tenantsWithoutBuilding.length > 0) {
         html += `
             <div class="building-group">
-                <div class="building-group-header">No Building Assigned</div>
+                <div class="building-group-header">
+                    <input type="checkbox" class="email-select-building" data-building-id="" data-building-name="No Building Assigned" style="display: none; margin-right: 8px; cursor: pointer;">
+                    <span>No Building Assigned</span>
+                </div>
                 <table class="tenants-table">
                     <thead>
                         <tr class="header-major">
@@ -3414,7 +3428,10 @@ async function renderTenantsTableView(tenants) {
                 <tr data-tenant-id="${tenant.id}">
                     <td class="tenant-occupancies-cell" style="vertical-align: top;">${occupanciesHtml}</td>
                     <td class="tenant-name-cell" style="vertical-align: top;">
-                        <div style="font-weight: 600; margin-bottom: 4px;">${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</div>
+                        <div style="font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                            <input type="checkbox" class="email-select-tenant" data-tenant-id="${tenant.id}" style="display: none; cursor: pointer;">
+                            <span>${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</span>
+                        </div>
                         <div class="tenant-actions-inline">
                             <button class="btn-primary btn-small" onclick="viewTenantDetail('${tenant.id}')">View</button>
                             <button class="btn-secondary btn-small" onclick="editTenant('${tenant.id}')">Edit</button>
@@ -3447,11 +3464,27 @@ async function renderTenantsTableView(tenants) {
         });
     }
     
-    // Set up send email button
-    const sendEmailBtn = document.getElementById('sendEmailBtn');
-    if (sendEmailBtn) {
-        sendEmailBtn.addEventListener('click', function() {
-            openSendEmailModal(filteredTenants);
+    // Set up email selection buttons
+    const startEmailSelectionBtn = document.getElementById('startEmailSelectionBtn');
+    const doneSelectingBtn = document.getElementById('doneSelectingBtn');
+    const draftEmailBtn = document.getElementById('draftEmailBtn');
+    const emailSelectionActions = document.getElementById('emailSelectionActions');
+    
+    if (startEmailSelectionBtn) {
+        startEmailSelectionBtn.addEventListener('click', function() {
+            enableEmailSelectionMode();
+        });
+    }
+    
+    if (doneSelectingBtn) {
+        doneSelectingBtn.addEventListener('click', function() {
+            disableEmailSelectionMode();
+        });
+    }
+    
+    if (draftEmailBtn) {
+        draftEmailBtn.addEventListener('click', async function() {
+            await compileAndDraftEmail(filteredTenants);
         });
     }
     
@@ -3486,6 +3519,156 @@ function toggleBrokerColumns(show) {
     brokerCells.forEach(cell => {
         cell.style.display = show ? '' : 'none';
     });
+}
+
+function enableEmailSelectionMode() {
+    // Show all checkboxes
+    document.querySelectorAll('.email-select-building, .email-select-tenant, .email-select-contact').forEach(cb => {
+        cb.style.display = 'block';
+    });
+    
+    // Show selection action buttons
+    const emailSelectionActions = document.getElementById('emailSelectionActions');
+    const startEmailSelectionBtn = document.getElementById('startEmailSelectionBtn');
+    if (emailSelectionActions) emailSelectionActions.style.display = 'flex';
+    if (startEmailSelectionBtn) startEmailSelectionBtn.style.display = 'none';
+    
+    // Add event listeners for checkboxes
+    document.querySelectorAll('.email-select-building, .email-select-tenant, .email-select-contact').forEach(checkbox => {
+        checkbox.addEventListener('change', updateEmailSelectionCount);
+    });
+    
+    updateEmailSelectionCount();
+}
+
+function disableEmailSelectionMode() {
+    // Hide all checkboxes
+    document.querySelectorAll('.email-select-building, .email-select-tenant, .email-select-contact').forEach(cb => {
+        cb.style.display = 'none';
+        cb.checked = false;
+    });
+    
+    // Hide selection action buttons
+    const emailSelectionActions = document.getElementById('emailSelectionActions');
+    const startEmailSelectionBtn = document.getElementById('startEmailSelectionBtn');
+    if (emailSelectionActions) emailSelectionActions.style.display = 'none';
+    if (startEmailSelectionBtn) startEmailSelectionBtn.style.display = 'block';
+    
+    // Update count
+    const selectedCount = document.getElementById('selectedCount');
+    if (selectedCount) selectedCount.textContent = '0 selected';
+}
+
+function updateEmailSelectionCount() {
+    const selectedBuildings = document.querySelectorAll('.email-select-building:checked').length;
+    const selectedTenants = document.querySelectorAll('.email-select-tenant:checked').length;
+    const selectedContacts = document.querySelectorAll('.email-select-contact:checked').length;
+    const total = selectedBuildings + selectedTenants + selectedContacts;
+    
+    const selectedCount = document.getElementById('selectedCount');
+    if (selectedCount) {
+        selectedCount.textContent = `${total} selected`;
+    }
+}
+
+async function compileAndDraftEmail(tenants) {
+    const selectedBuildings = Array.from(document.querySelectorAll('.email-select-building:checked')).map(cb => ({
+        id: cb.getAttribute('data-building-id'),
+        name: cb.getAttribute('data-building-name')
+    }));
+    const selectedTenants = Array.from(document.querySelectorAll('.email-select-tenant:checked')).map(cb => cb.getAttribute('data-tenant-id'));
+    const selectedContacts = Array.from(document.querySelectorAll('.email-select-contact:checked')).map(cb => ({
+        id: cb.getAttribute('data-contact-id'),
+        email: cb.getAttribute('data-email'),
+        tenantId: cb.getAttribute('data-tenant-id')
+    }));
+    
+    const emailSet = new Set();
+    
+    // Add emails from selected buildings (find tenants via occupancies and units)
+    if (selectedBuildings.length > 0) {
+        const buildingIds = selectedBuildings.map(b => b.id).filter(id => id);
+        
+        if (buildingIds.length > 0) {
+            // Get all units in selected buildings
+            const unitsSnapshot = await db.collection('units').get();
+            const unitIdsInBuildings = new Set();
+            
+            unitsSnapshot.forEach(doc => {
+                const unit = doc.data();
+                if (unit.buildingId && buildingIds.includes(unit.buildingId)) {
+                    unitIdsInBuildings.add(doc.id);
+                }
+            });
+            
+            // Get all occupancies for units in selected buildings
+            const occupanciesSnapshot = await db.collection('occupancies').get();
+            const tenantIdsInBuildings = new Set();
+            
+            occupanciesSnapshot.forEach(doc => {
+                const occ = doc.data();
+                if (occ.unitId && unitIdsInBuildings.has(occ.unitId)) {
+                    tenantIdsInBuildings.add(occ.tenantId);
+                }
+            });
+            
+            // Get contacts for tenants in selected buildings
+            const allTenantIds = Array.from(tenantIdsInBuildings);
+            const batchSize = 10;
+            for (let i = 0; i < allTenantIds.length; i += batchSize) {
+                const batch = allTenantIds.slice(i, i + batchSize);
+                const contactsSnapshot = await db.collection('tenantContacts')
+                    .where('tenantId', 'in', batch)
+                    .get();
+                
+                contactsSnapshot.forEach(doc => {
+                    const contact = doc.data();
+                    if (contact.contactEmail) {
+                        emailSet.add(contact.contactEmail);
+                    }
+                });
+            }
+        }
+    }
+    
+    // Add emails from selected tenants
+    if (selectedTenants.length > 0) {
+        const batchSize = 10;
+        for (let i = 0; i < selectedTenants.length; i += batchSize) {
+            const batch = selectedTenants.slice(i, i + batchSize);
+            const contactsSnapshot = await db.collection('tenantContacts')
+                .where('tenantId', 'in', batch)
+                .get();
+            
+            contactsSnapshot.forEach(doc => {
+                const contact = doc.data();
+                if (contact.contactEmail) {
+                    emailSet.add(contact.contactEmail);
+                }
+            });
+        }
+    }
+    
+    // Add individually selected contacts
+    selectedContacts.forEach(contact => {
+        if (contact.email) {
+            emailSet.add(contact.email);
+        }
+    });
+    
+    const emailList = Array.from(emailSet);
+    
+    if (emailList.length === 0) {
+        alert('Please select at least one recipient.');
+        return;
+    }
+    
+    // Open email client with mailto: link
+    const mailtoLink = `mailto:${emailList.join(',')}`;
+    window.location.href = mailtoLink;
+    
+    // Disable selection mode after sending
+    disableEmailSelectionMode();
 }
 
 async function openSendEmailModal(tenants) {
@@ -3752,7 +3935,10 @@ function rebuildTableWithContactColumns(tenantsByBuilding, tenantsWithoutBuildin
         const group = tenantsByBuilding[buildingName];
         html += `
             <div class="building-group">
-                <div class="building-group-header">${escapeHtml(buildingName)}</div>
+                <div class="building-group-header">
+                    <input type="checkbox" class="email-select-building" data-building-id="${group.building?.id || ''}" data-building-name="${escapeHtml(buildingName)}" style="display: none; margin-right: 8px; cursor: pointer;">
+                    <span>${escapeHtml(buildingName)}</span>
+                </div>
                 <table class="tenants-table">
                     <thead>
                         <tr class="header-major">
@@ -3804,7 +3990,10 @@ function rebuildTableWithContactColumns(tenantsByBuilding, tenantsWithoutBuildin
                 <tr data-tenant-id="${tenant.id}">
                     <td class="tenant-occupancies-cell" style="vertical-align: top;">${occupanciesHtml}</td>
                     <td class="tenant-name-cell" style="vertical-align: top;">
-                        <div style="font-weight: 600; margin-bottom: 4px;">${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</div>
+                        <div style="font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                            <input type="checkbox" class="email-select-tenant" data-tenant-id="${tenant.id}" style="display: none; cursor: pointer;">
+                            <span>${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</span>
+                        </div>
                         <div class="tenant-actions-inline">
                             <button class="btn-primary btn-small" onclick="viewTenantDetail('${tenant.id}')">View</button>
                             <button class="btn-secondary btn-small" onclick="editTenant('${tenant.id}')">Edit</button>
@@ -3828,7 +4017,10 @@ function rebuildTableWithContactColumns(tenantsByBuilding, tenantsWithoutBuildin
     if (tenantsWithoutBuilding.length > 0) {
         html += `
             <div class="building-group">
-                <div class="building-group-header">No Building Assigned</div>
+                <div class="building-group-header">
+                    <input type="checkbox" class="email-select-building" data-building-id="" data-building-name="No Building Assigned" style="display: none; margin-right: 8px; cursor: pointer;">
+                    <span>No Building Assigned</span>
+                </div>
                 <table class="tenants-table">
                     <thead>
                         <tr class="header-major">
@@ -3880,7 +4072,10 @@ function rebuildTableWithContactColumns(tenantsByBuilding, tenantsWithoutBuildin
                 <tr data-tenant-id="${tenant.id}">
                     <td class="tenant-occupancies-cell" style="vertical-align: top;">${occupanciesHtml}</td>
                     <td class="tenant-name-cell" style="vertical-align: top;">
-                        <div style="font-weight: 600; margin-bottom: 4px;">${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</div>
+                        <div style="font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                            <input type="checkbox" class="email-select-tenant" data-tenant-id="${tenant.id}" style="display: none; cursor: pointer;">
+                            <span>${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</span>
+                        </div>
                         <div class="tenant-actions-inline">
                             <button class="btn-primary btn-small" onclick="viewTenantDetail('${tenant.id}')">View</button>
                             <button class="btn-secondary btn-small" onclick="editTenant('${tenant.id}')">Edit</button>
@@ -3958,6 +4153,9 @@ async function loadContactsForTableView(tenants, maxContacts, maxBrokers) {
                     
                     contactCell.innerHTML = `
                         <div class="contact-card-table">
+                            <div style="position: absolute; top: 4px; left: 4px; z-index: 10;">
+                                <input type="checkbox" class="email-select-contact" data-contact-id="${contact.id}" data-email="${escapeHtml(contact.contactEmail || '')}" data-tenant-id="${tenantId}" style="display: none; cursor: pointer;">
+                            </div>
                             <div class="contact-card-header">
                                 <div class="contact-card-name">${escapeHtml(contact.contactName || 'Unnamed')}</div>
                                 ${typeIndicators}
@@ -4001,6 +4199,9 @@ async function loadContactsForTableView(tenants, maxContacts, maxBrokers) {
                     
                     brokerCell.innerHTML = `
                         <div class="contact-card-table">
+                            <div style="position: absolute; top: 4px; left: 4px; z-index: 10;">
+                                <input type="checkbox" class="email-select-contact" data-contact-id="${contact.id}" data-email="${escapeHtml(contact.contactEmail || '')}" data-tenant-id="${tenantId}" style="display: none; cursor: pointer;">
+                            </div>
                             <div class="contact-card-header">
                                 <div class="contact-card-name">${escapeHtml(contact.contactName || 'Unnamed')}</div>
                                 ${typeIndicators}
