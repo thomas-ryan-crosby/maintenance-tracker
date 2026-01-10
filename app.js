@@ -3722,20 +3722,6 @@ function deleteOrphanContact(contactId) {
     }
 }
 
-function deleteOrphanContact(contactId) {
-    if (confirm('Are you sure you want to delete this orphan contact?')) {
-        db.collection('tenantContacts').doc(contactId).delete()
-            .then(() => {
-                console.log('Orphan contact deleted');
-                loadTenants(); // Refresh the view
-            })
-            .catch(error => {
-                console.error('Error deleting orphan contact:', error);
-                alert('Error deleting contact: ' + error.message);
-            });
-}
-
-
 function toggleBrokerColumns(show) {
     // Hide/show broker header columns by checking text content
     const majorHeaders = document.querySelectorAll('.tenants-table .header-major th');
