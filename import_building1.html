@@ -166,10 +166,59 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
-    <script src="firebase-config.js"></script>
+    <!-- Firebase SDK - Compat Mode (matches main app) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Config - Auto-selects test or production based on environment -->
+    <script>
+        // Auto-detect environment and load appropriate Firebase config (matches main app logic)
+        (function() {
+            const isLocal = window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1';
+            const urlParams = new URLSearchParams(window.location.search);
+            const forceTest = urlParams.get('test') === 'true';
+            const forceProd = urlParams.get('prod') === 'true';
+            
+            // Determine which config to use
+            let useTestConfig = false;
+            
+            if (forceProd) {
+                useTestConfig = false;
+                console.log('🔵 Using PRODUCTION database (forced via ?prod=true)');
+            } else if (forceTest) {
+                useTestConfig = true;
+                console.log('🟡 Using TEST database (forced via ?test=true)');
+            } else if (isLocal) {
+                // Local development defaults to test database
+                useTestConfig = true;
+                console.log('🟡 Using TEST database (localhost detected)');
+            } else {
+                // Production/GitHub Pages defaults to production
+                useTestConfig = false;
+                console.log('🔵 Using PRODUCTION database (production environment)');
+            }
+            
+            const configFile = useTestConfig ? 'firebase-config.test.js' : 'firebase-config.js';
+            const script = document.createElement('script');
+            script.src = configFile;
+            
+            script.onload = function() {
+                console.log('✓ Firebase config loaded');
+                // Initialize db if not already done by config file
+                if (typeof db === 'undefined' && typeof firebase !== 'undefined') {
+                    window.db = firebase.firestore();
+                }
+            };
+            
+            script.onerror = function() {
+                console.error('Error loading Firebase config file:', configFile);
+                alert('Error: Firebase configuration file not found. Please ensure ' + configFile + ' exists.');
+            };
+            
+            document.head.appendChild(script);
+        })();
+    </script>
     
     <!-- Import Script -->
     <script src="import_building1_tenants.js"></script>
@@ -269,10 +318,21 @@
             statusDiv.style.display = 'block';
         }
         
-        // Initialize Firebase
-        if (typeof firebase !== 'undefined' && typeof db === 'undefined') {
-            db = firebase.firestore();
+        // Wait for Firebase to initialize
+        function waitForFirebase(callback) {
+            if (typeof firebase !== 'undefined' && typeof db !== 'undefined') {
+                callback();
+            } else {
+                setTimeout(() => waitForFirebase(callback), 100);
+            }
         }
+        
+        waitForFirebase(function() {
+            console.log('✓ Firebase initialized and ready');
+            document.getElementById('status').textContent = 'Ready to import. Load a CSV file to begin.';
+            document.getElementById('status').className = 'status info';
+            document.getElementById('status').style.display = 'block';
+        });
     </script>
 </body>
 </html>
