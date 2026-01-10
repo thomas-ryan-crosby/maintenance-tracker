@@ -237,17 +237,22 @@ async function importBuilding1Tenants() {
         const tenants = [];
         let inBuilding1 = false;
         let currentBuilding = null;
+        let buildingHeaderFound = false;
         
         for (let i = 0; i < rows.length; i++) {
             const row = rows[i];
             if (row.length === 0) continue;
             
-            // Check for building header
-            if (row[0] && row[0].includes('Building #')) {
-                const buildingMatch = row[0].match(/Building #(\d+)/);
+            // Check for building header (more flexible matching)
+            if (row[0] && row[0].toLowerCase().includes('building')) {
+                const buildingMatch = row[0].match(/Building\s*#?\s*(\d+)/i);
                 if (buildingMatch) {
                     currentBuilding = buildingMatch[1];
                     inBuilding1 = currentBuilding === CONFIG.buildingNumber;
+                    if (inBuilding1) {
+                        buildingHeaderFound = true;
+                        console.log(`  → Found Building #${currentBuilding} header at row ${i + 1}: "${row[0]}"`);
+                    }
                     continue;
                 }
             }
@@ -262,6 +267,8 @@ async function importBuilding1Tenants() {
             
             const companyName = row[0]?.trim();
             if (!companyName || companyName === '-') continue;
+            
+            console.log(`  → Parsing tenant: ${companyName}`);
             
             // Parse tenant data
             const commonName = row[1]?.trim() || null;
@@ -383,11 +390,15 @@ async function importBuilding1Tenants() {
         const existingTenants = {};
         existingTenantsSnapshot.forEach(doc => {
             const data = doc.data();
-            existingTenants[data.tenantName?.toLowerCase().trim()] = {
-                id: doc.id,
-                ...data
-            };
+            const key = data.tenantName?.toLowerCase().trim();
+            if (key) {
+                existingTenants[key] = {
+                    id: doc.id,
+                    ...data
+                };
+            }
         });
+        console.log(`  → Found ${Object.keys(existingTenants).length} existing tenants in database`);
         
         // Get existing units
         const existingUnitsSnapshot = await db.collection('units')
@@ -404,6 +415,7 @@ async function importBuilding1Tenants() {
                 };
             }
         });
+        console.log(`  → Found ${Object.keys(existingUnits).length} existing units for Building #1`);
         
         // Step 6: Import tenants
         console.log('\nStep 6: Importing tenants, contacts, units, and occupancies...');
