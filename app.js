@@ -3382,8 +3382,8 @@ async function renderTenantsTableView(tenants) {
         html += `
             <div class="building-group">
                 <div class="building-group-header">
-                    <input type="checkbox" class="email-select-building" data-building-id="" data-building-name="No Building Assigned" style="display: none; margin-right: 8px; cursor: pointer;">
-                    <span>No Building Assigned</span>
+                    <input type="checkbox" class="email-select-building" data-building-id="" data-building-name="Orphan Tenants" style="display: none; margin-right: 8px; cursor: pointer;">
+                    <span style="font-weight: 600; color: #e65100;">⚠️ Orphan Tenants</span>
                 </div>
                 <table class="tenants-table">
                     <thead>
@@ -3506,7 +3506,221 @@ async function renderTenantsTableView(tenants) {
     
     // Load contacts for all tenants and populate individual columns
     loadContactsForTableView(filteredTenants, maxContacts, maxBrokers);
+    
+    // Load and display orphan contacts (contacts without tenants)
+    loadOrphanContacts(maxContacts, maxBrokers);
 }
+
+async function loadOrphanContacts(maxContacts, maxBrokers) {
+    try {
+        // Get all contacts
+        const allContactsSnapshot = await db.collection('tenantContacts').get();
+        
+        // Get all tenant IDs
+        const allTenantsSnapshot = await db.collection('tenants').get();
+        const tenantIds = new Set();
+        allTenantsSnapshot.forEach(doc => tenantIds.add(doc.id));
+        
+        // Find orphan contacts (contacts whose tenantId doesn't exist)
+        const orphanContacts = [];
+        allContactsSnapshot.forEach(doc => {
+            const contact = doc.data();
+            if (!tenantIds.has(contact.tenantId)) {
+                orphanContacts.push({ id: doc.id, ...contact });
+            }
+        });
+        
+        if (orphanContacts.length === 0) {
+            return; // No orphan contacts
+        }
+        
+        // Separate regular contacts and brokers
+        const regularOrphans = [];
+        const brokerOrphans = [];
+        
+        orphanContacts.forEach(contact => {
+            const isBroker = contact.classifications && contact.classifications.includes('Tenant Representative');
+            if (isBroker) {
+                brokerOrphans.push(contact);
+            } else {
+                regularOrphans.push(contact);
+            }
+        });
+        
+        // Sort by name
+        regularOrphans.sort((a, b) => (a.contactName || '').localeCompare(b.contactName || ''));
+        brokerOrphans.sort((a, b) => (a.contactName || '').localeCompare(b.contactName || ''));
+        
+        // Render orphan contacts section
+        const tenantsTable = document.getElementById('tenantsTable');
+        if (!tenantsTable) return;
+        
+        let orphanHtml = `
+            <div class="building-group" style="border-left: 3px solid #f44336; margin-top: 30px;">
+                <div class="building-group-header" style="background: #ffebee;">
+                    <span style="font-weight: 600; color: #c62828;">⚠️ Orphan Contacts (${orphanContacts.length})</span>
+                    <span style="font-size: 0.75rem; color: #666; margin-left: 10px;">Contacts without associated tenants</span>
+                </div>
+                <table class="tenants-table">
+                    <thead>
+                        <tr class="header-major">
+                            <th rowspan="2">Contact Name</th>
+                            ${maxContacts > 0 ? `<th colspan="${maxContacts}">Contacts</th>` : ''}
+                            ${maxBrokers > 0 ? `<th colspan="${maxBrokers}">Brokers</th>` : ''}
+                        </tr>
+                        <tr class="header-sub">
+        `;
+        
+        // Generate contact column headers
+        for (let i = 1; i <= maxContacts; i++) {
+            orphanHtml += `<th>Contact ${i}</th>`;
+        }
+        for (let i = 1; i <= maxBrokers; i++) {
+            orphanHtml += `<th>Broker ${i}</th>`;
+        }
+        
+        orphanHtml += `
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="font-weight: 600; color: #c62828;">Orphan Contacts</td>
+        `;
+        
+        // Fill contact columns
+        for (let i = 0; i < maxContacts; i++) {
+            if (i < regularOrphans.length) {
+                const contact = regularOrphans[i];
+                orphanHtml += `
+                    <td class="tenant-contact-cell" data-contact-type="contact">
+                        <div class="contact-card-table">
+                            <div class="contact-card-header">
+                                <div class="contact-card-name">${escapeHtml(contact.contactName || 'Unknown')}</div>
+                                <div class="contact-type-indicators">
+                `;
+                
+                // Add type indicators
+                if (contact.classifications) {
+                    contact.classifications.forEach(cls => {
+                        const clsLower = cls.toLowerCase().replace(/\s+/g, '-');
+                        orphanHtml += `<span class="contact-type-indicator ${clsLower}" title="${escapeHtml(cls)}"></span>`;
+                    });
+                }
+                
+                orphanHtml += `
+                                </div>
+                            </div>
+                            <div class="contact-card-info">
+                `;
+                
+                if (contact.contactEmail) {
+                    orphanHtml += `
+                        <div class="contact-info-item">
+                            <span class="contact-icon-email">✉️</span>
+                            <a href="mailto:${escapeHtml(contact.contactEmail)}" style="color: #2563eb; text-decoration: none; font-size: 0.65rem;">${escapeHtml(contact.contactEmail)}</a>
+                        </div>
+                    `;
+                }
+                
+                if (contact.contactPhone) {
+                    orphanHtml += `
+                        <div class="contact-info-item">
+                            <span class="contact-icon-phone">📞</span>
+                            <a href="tel:${escapeHtml(contact.contactPhone)}" style="color: #2563eb; text-decoration: none; font-size: 0.65rem;">${escapeHtml(contact.contactPhone)}</a>
+                        </div>
+                    `;
+                }
+                
+                if (!contact.contactEmail && !contact.contactPhone) {
+                    orphanHtml += `<div style="color: #999; font-size: 0.65rem;">No contact information</div>`;
+                }
+                
+                orphanHtml += `
+                            </div>
+                            <div style="text-align: right; margin-top: 4px;">
+                                <button class="btn-edit-contact" onclick="deleteOrphanContact('${contact.id}')" title="Delete Orphan Contact">🗑️</button>
+                            </div>
+                        </div>
+                    </td>
+                `;
+            } else {
+                orphanHtml += `<td class="tenant-contact-cell" data-contact-type="contact"></td>`;
+            }
+        }
+        
+        // Fill broker columns
+        for (let i = 0; i < maxBrokers; i++) {
+            if (i < brokerOrphans.length) {
+                const contact = brokerOrphans[i];
+                orphanHtml += `
+                    <td class="tenant-contact-cell" data-contact-type="broker">
+                        <div class="contact-card-table">
+                            <div class="contact-card-header">
+                                <div class="contact-card-name">${escapeHtml(contact.contactName || 'Unknown')}</div>
+                                <div class="contact-type-indicators">
+                                    <span class="contact-type-indicator tenant-rep" title="Tenant Representative"></span>
+                                </div>
+                            </div>
+                            <div class="contact-card-info">
+                `;
+                
+                if (contact.contactEmail) {
+                    orphanHtml += `
+                        <div class="contact-info-item">
+                            <span class="contact-icon-email">✉️</span>
+                            <a href="mailto:${escapeHtml(contact.contactEmail)}" style="color: #2563eb; text-decoration: none; font-size: 0.65rem;">${escapeHtml(contact.contactEmail)}</a>
+                        </div>
+                    `;
+                }
+                
+                if (contact.contactPhone) {
+                    orphanHtml += `
+                        <div class="contact-info-item">
+                            <span class="contact-icon-phone">📞</span>
+                            <a href="tel:${escapeHtml(contact.contactPhone)}" style="color: #2563eb; text-decoration: none; font-size: 0.65rem;">${escapeHtml(contact.contactPhone)}</a>
+                        </div>
+                    `;
+                }
+                
+                orphanHtml += `
+                            </div>
+                            <div style="text-align: right; margin-top: 4px;">
+                                <button class="btn-edit-contact" onclick="deleteOrphanContact('${contact.id}')" title="Delete Orphan Contact">🗑️</button>
+                            </div>
+                        </div>
+                    </td>
+                `;
+            } else {
+                orphanHtml += `<td class="tenant-contact-cell" data-contact-type="broker"></td>`;
+            }
+        }
+        
+        orphanHtml += `
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        tenantsTable.insertAdjacentHTML('beforeend', orphanHtml);
+    } catch (error) {
+        console.error('Error loading orphan contacts:', error);
+    }
+}
+
+function deleteOrphanContact(contactId) {
+    if (confirm('Are you sure you want to delete this orphan contact?')) {
+        db.collection('tenantContacts').doc(contactId).delete()
+            .then(() => {
+                console.log('Orphan contact deleted');
+                loadTenants(); // Refresh the view
+            })
+            .catch(error => {
+                console.error('Error deleting orphan contact:', error);
+                alert('Error deleting contact: ' + error.message);
+            });
+}
+
 
 function toggleBrokerColumns(show) {
     // Hide/show broker header columns by checking text content
@@ -4224,8 +4438,8 @@ function rebuildTableWithContactColumns(tenantsByBuilding, tenantsWithoutBuildin
         html += `
             <div class="building-group">
                 <div class="building-group-header">
-                    <input type="checkbox" class="email-select-building" data-building-id="" data-building-name="No Building Assigned" style="display: none; margin-right: 8px; cursor: pointer;">
-                    <span>No Building Assigned</span>
+                    <input type="checkbox" class="email-select-building" data-building-id="" data-building-name="Orphan Tenants" style="display: none; margin-right: 8px; cursor: pointer;">
+                    <span style="font-weight: 600; color: #e65100;">⚠️ Orphan Tenants</span>
                 </div>
                 <table class="tenants-table">
                     <thead>
