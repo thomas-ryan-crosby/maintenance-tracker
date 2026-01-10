@@ -165,12 +165,43 @@ async function importBuilding1Tenants() {
         // Step 2: Find or create Building #1
         console.log('\nStep 2: Finding or creating Building #1...');
         let buildingId;
-        const buildingsSnapshot = await db.collection('buildings')
+        
+        // First, let's check what buildings exist for this property
+        const allBuildingsSnapshot = await db.collection('buildings')
             .where('propertyId', '==', propertyId)
-            .where('buildingName', '==', `Building ${CONFIG.buildingNumber}`)
             .get();
         
-        if (buildingsSnapshot.empty) {
+        console.log(`Found ${allBuildingsSnapshot.size} existing building(s) for this property:`);
+        allBuildingsSnapshot.forEach(doc => {
+            const data = doc.data();
+            console.log(`  - ${data.buildingName} (ID: ${doc.id})`);
+        });
+        
+        // Try to find Building #1 (try different formats)
+        const buildingNameVariants = [
+            `Building ${CONFIG.buildingNumber}`,
+            `Building #${CONFIG.buildingNumber}`,
+            `Building${CONFIG.buildingNumber}`,
+            `Building  ${CONFIG.buildingNumber}` // with extra space
+        ];
+        
+        let foundBuilding = null;
+        for (const variant of buildingNameVariants) {
+            const buildingsSnapshot = await db.collection('buildings')
+                .where('propertyId', '==', propertyId)
+                .where('buildingName', '==', variant)
+                .get();
+            
+            if (!buildingsSnapshot.empty) {
+                foundBuilding = buildingsSnapshot.docs[0];
+                console.log(`✓ Found Building #1 with name "${variant}": ${foundBuilding.id}`);
+                break;
+            }
+        }
+        
+        if (foundBuilding) {
+            buildingId = foundBuilding.id;
+        } else {
             if (CONFIG.performImport) {
                 const buildingRef = await db.collection('buildings').add({
                     propertyId: propertyId,
@@ -184,9 +215,6 @@ async function importBuilding1Tenants() {
                 console.log('Would create Building #1');
                 buildingId = 'DRY_RUN_BUILDING_ID';
             }
-        } else {
-            buildingId = buildingsSnapshot.docs[0].id;
-            console.log(`✓ Found Building #1: ${buildingId}`);
         }
         
         // Step 3: Load and parse CSV
