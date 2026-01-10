@@ -3346,14 +3346,22 @@ async function renderTenantsTableView(tenants) {
                 <tr data-tenant-id="${tenant.id}">
                     <td class="tenant-occupancies-cell" style="vertical-align: top;">${occupanciesHtml}</td>
                     <td class="tenant-name-cell" style="vertical-align: top;">
-                        <div style="font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                            <input type="checkbox" class="email-select-tenant" data-tenant-id="${tenant.id}" style="display: none; cursor: pointer;">
-                            <span>${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</span>
-                        </div>
-                        <div class="tenant-actions-inline">
-                            <button class="btn-primary btn-small" onclick="viewTenantDetail('${tenant.id}')">View</button>
-                            <button class="btn-secondary btn-small" onclick="editTenant('${tenant.id}')">Edit</button>
-                            <button class="btn-danger btn-small" onclick="deleteTenant('${tenant.id}')">Delete</button>
+                        <div class="tenant-name-wrapper">
+                            <div class="tenant-name-header">
+                                <input type="checkbox" class="email-select-tenant" data-tenant-id="${tenant.id}" style="display: none; cursor: pointer;">
+                                <span class="tenant-name-text">${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</span>
+                            </div>
+                            <div class="tenant-actions-compact">
+                                <button class="btn-action btn-view" onclick="viewTenantDetail('${tenant.id}')" title="View Details">
+                                    <span class="btn-icon">👁️</span>
+                                </button>
+                                <button class="btn-action btn-edit" onclick="editTenant('${tenant.id}')" title="Edit">
+                                    <span class="btn-icon">✏️</span>
+                                </button>
+                                <button class="btn-action btn-delete" onclick="deleteTenant('${tenant.id}')" title="Delete">
+                                    <span class="btn-icon">🗑️</span>
+                                </button>
+                            </div>
                         </div>
                     </td>
                     ${contactCells.join('')}
@@ -3428,14 +3436,22 @@ async function renderTenantsTableView(tenants) {
                 <tr data-tenant-id="${tenant.id}">
                     <td class="tenant-occupancies-cell" style="vertical-align: top;">${occupanciesHtml}</td>
                     <td class="tenant-name-cell" style="vertical-align: top;">
-                        <div style="font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                            <input type="checkbox" class="email-select-tenant" data-tenant-id="${tenant.id}" style="display: none; cursor: pointer;">
-                            <span>${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</span>
-                        </div>
-                        <div class="tenant-actions-inline">
-                            <button class="btn-primary btn-small" onclick="viewTenantDetail('${tenant.id}')">View</button>
-                            <button class="btn-secondary btn-small" onclick="editTenant('${tenant.id}')">Edit</button>
-                            <button class="btn-danger btn-small" onclick="deleteTenant('${tenant.id}')">Delete</button>
+                        <div class="tenant-name-wrapper">
+                            <div class="tenant-name-header">
+                                <input type="checkbox" class="email-select-tenant" data-tenant-id="${tenant.id}" style="display: none; cursor: pointer;">
+                                <span class="tenant-name-text">${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</span>
+                            </div>
+                            <div class="tenant-actions-compact">
+                                <button class="btn-action btn-view" onclick="viewTenantDetail('${tenant.id}')" title="View Details">
+                                    <span class="btn-icon">👁️</span>
+                                </button>
+                                <button class="btn-action btn-edit" onclick="editTenant('${tenant.id}')" title="Edit">
+                                    <span class="btn-icon">✏️</span>
+                                </button>
+                                <button class="btn-action btn-delete" onclick="deleteTenant('${tenant.id}')" title="Delete">
+                                    <span class="btn-icon">🗑️</span>
+                                </button>
+                            </div>
                         </div>
                     </td>
                     ${contactCells.join('')}
@@ -4163,14 +4179,22 @@ function rebuildTableWithContactColumns(tenantsByBuilding, tenantsWithoutBuildin
                 <tr data-tenant-id="${tenant.id}">
                     <td class="tenant-occupancies-cell" style="vertical-align: top;">${occupanciesHtml}</td>
                     <td class="tenant-name-cell" style="vertical-align: top;">
-                        <div style="font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                            <input type="checkbox" class="email-select-tenant" data-tenant-id="${tenant.id}" style="display: none; cursor: pointer;">
-                            <span>${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</span>
-                        </div>
-                        <div class="tenant-actions-inline">
-                            <button class="btn-primary btn-small" onclick="viewTenantDetail('${tenant.id}')">View</button>
-                            <button class="btn-secondary btn-small" onclick="editTenant('${tenant.id}')">Edit</button>
-                            <button class="btn-danger btn-small" onclick="deleteTenant('${tenant.id}')">Delete</button>
+                        <div class="tenant-name-wrapper">
+                            <div class="tenant-name-header">
+                                <input type="checkbox" class="email-select-tenant" data-tenant-id="${tenant.id}" style="display: none; cursor: pointer;">
+                                <span class="tenant-name-text">${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</span>
+                            </div>
+                            <div class="tenant-actions-compact">
+                                <button class="btn-action btn-view" onclick="viewTenantDetail('${tenant.id}')" title="View Details">
+                                    <span class="btn-icon">👁️</span>
+                                </button>
+                                <button class="btn-action btn-edit" onclick="editTenant('${tenant.id}')" title="Edit">
+                                    <span class="btn-icon">✏️</span>
+                                </button>
+                                <button class="btn-action btn-delete" onclick="deleteTenant('${tenant.id}')" title="Delete">
+                                    <span class="btn-icon">🗑️</span>
+                                </button>
+                            </div>
                         </div>
                     </td>
                     ${contactCells.join('')}
@@ -4245,14 +4269,22 @@ function rebuildTableWithContactColumns(tenantsByBuilding, tenantsWithoutBuildin
                 <tr data-tenant-id="${tenant.id}">
                     <td class="tenant-occupancies-cell" style="vertical-align: top;">${occupanciesHtml}</td>
                     <td class="tenant-name-cell" style="vertical-align: top;">
-                        <div style="font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                            <input type="checkbox" class="email-select-tenant" data-tenant-id="${tenant.id}" style="display: none; cursor: pointer;">
-                            <span>${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</span>
-                        </div>
-                        <div class="tenant-actions-inline">
-                            <button class="btn-primary btn-small" onclick="viewTenantDetail('${tenant.id}')">View</button>
-                            <button class="btn-secondary btn-small" onclick="editTenant('${tenant.id}')">Edit</button>
-                            <button class="btn-danger btn-small" onclick="deleteTenant('${tenant.id}')">Delete</button>
+                        <div class="tenant-name-wrapper">
+                            <div class="tenant-name-header">
+                                <input type="checkbox" class="email-select-tenant" data-tenant-id="${tenant.id}" style="display: none; cursor: pointer;">
+                                <span class="tenant-name-text">${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</span>
+                            </div>
+                            <div class="tenant-actions-compact">
+                                <button class="btn-action btn-view" onclick="viewTenantDetail('${tenant.id}')" title="View Details">
+                                    <span class="btn-icon">👁️</span>
+                                </button>
+                                <button class="btn-action btn-edit" onclick="editTenant('${tenant.id}')" title="Edit">
+                                    <span class="btn-icon">✏️</span>
+                                </button>
+                                <button class="btn-action btn-delete" onclick="deleteTenant('${tenant.id}')" title="Delete">
+                                    <span class="btn-icon">🗑️</span>
+                                </button>
+                            </div>
                         </div>
                     </td>
                     ${contactCells.join('')}
