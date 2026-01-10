@@ -3621,6 +3621,10 @@ function handleTenantCheckboxChange(tenantCheckbox, updateCount = true) {
     const tenantId = tenantCheckbox.getAttribute('data-tenant-id');
     const isChecked = tenantCheckbox.checked;
     
+    // Check if brokers are visible
+    const showBrokersToggle = document.getElementById('showBrokersToggle');
+    const brokersVisible = showBrokersToggle && showBrokersToggle.checked;
+    
     if (isChecked) {
         // Remove from manually unchecked if it was there
         window._manuallyUncheckedItems.tenants.delete(tenantId);
@@ -3628,6 +3632,21 @@ function handleTenantCheckboxChange(tenantCheckbox, updateCount = true) {
         // Find all contacts for this tenant
         const contactCheckboxes = document.querySelectorAll(`.email-select-contact[data-tenant-id="${tenantId}"]`);
         contactCheckboxes.forEach(contactCb => {
+            // Check if this is a broker contact
+            const contactCell = contactCb.closest('td[data-contact-type]');
+            const isBroker = contactCell && contactCell.getAttribute('data-contact-type') === 'broker';
+            
+            // Only select broker contacts if brokers are visible
+            if (isBroker && !brokersVisible) {
+                return; // Skip this broker contact
+            }
+            
+            // Check if the contact cell is visible
+            const cellDisplay = contactCell ? window.getComputedStyle(contactCell).display : 'block';
+            if (cellDisplay === 'none') {
+                return; // Skip hidden contacts
+            }
+            
             const contactId = contactCb.getAttribute('data-contact-id');
             // Only check if not manually unchecked
             if (!window._manuallyUncheckedItems.contacts.has(contactId)) {
@@ -3638,10 +3657,14 @@ function handleTenantCheckboxChange(tenantCheckbox, updateCount = true) {
         // Mark as manually unchecked
         window._manuallyUncheckedItems.tenants.add(tenantId);
         
-        // Uncheck all contacts for this tenant
+        // Uncheck all contacts for this tenant (only visible ones)
         const contactCheckboxes = document.querySelectorAll(`.email-select-contact[data-tenant-id="${tenantId}"]`);
         contactCheckboxes.forEach(contactCb => {
-            contactCb.checked = false;
+            const contactCell = contactCb.closest('td[data-contact-type]');
+            const cellDisplay = contactCell ? window.getComputedStyle(contactCell).display : 'block';
+            if (cellDisplay !== 'none') {
+                contactCb.checked = false;
+            }
         });
     }
     
