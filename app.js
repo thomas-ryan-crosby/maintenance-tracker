@@ -268,26 +268,7 @@ function setupEventListeners() {
     if (closeBuildingModalBtn) closeBuildingModalBtn.addEventListener('click', closeBuildingModal);
     if (cancelBuildingFormBtn) cancelBuildingFormBtn.addEventListener('click', closeBuildingModal);
     
-    // Tab switching for property detail view
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    tabButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const tabName = this.getAttribute('data-tab');
-            
-            // Remove active class from all tabs and tab contents
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
-            // Add active class to clicked tab
-            this.classList.add('active');
-            
-            // Show corresponding tab content
-            const tabContent = document.getElementById(tabName + 'Tab');
-            if (tabContent) {
-                tabContent.classList.add('active');
-            }
-        });
-    });
+    // Tab switching removed - now using single table view
     
     // Unit management
     const addUnitBtn = document.getElementById('addUnitBtn');
