@@ -1526,16 +1526,68 @@ window.editUnit = function(unitId) {
     });
 };
 
-window.deleteUnit = function(unitId) {
-    if (!confirm('Are you sure you want to delete this unit? This action cannot be undone.')) {
+window.deleteUnit = async function(unitId) {
+    // First, check if there are any occupancies linked to this unit
+    const occupanciesSnapshot = await db.collection('occupancies')
+        .where('unitId', '==', unitId)
+        .get();
+    
+    const linkedOccupancies = [];
+    occupanciesSnapshot.forEach(doc => {
+        linkedOccupancies.push({ id: doc.id, ...doc.data() });
+    });
+    
+    // Get tenant names for the warning message
+    let warningMessage = 'Are you sure you want to delete this unit?';
+    if (linkedOccupancies.length > 0) {
+        const tenantIds = [...new Set(linkedOccupancies.map(occ => occ.tenantId))];
+        const tenantNames = [];
+        
+        // Fetch tenant names
+        for (const tenantId of tenantIds) {
+            try {
+                const tenantDoc = await db.collection('tenants').doc(tenantId).get();
+                if (tenantDoc.exists()) {
+                    tenantNames.push(tenantDoc.data().tenantName || 'Unknown Tenant');
+                }
+            } catch (error) {
+                console.error('Error fetching tenant:', error);
+            }
+        }
+        
+        warningMessage = `⚠️ WARNING: Deleting this unit will orphan ${linkedOccupancies.length} occupancy record(s) for ${tenantNames.length} tenant(s):\n\n${tenantNames.join(', ')}\n\nThese tenants will be moved to "Orphan Tenants" section. Do you want to proceed?`;
+    } else {
+        warningMessage += ' This action cannot be undone.';
+    }
+    
+    if (!confirm(warningMessage)) {
         return;
     }
     
+    // If there are linked occupancies, remove the unitId from them (orphan them)
+    if (linkedOccupancies.length > 0) {
+        const batch = db.batch();
+        linkedOccupancies.forEach(occ => {
+            const occRef = db.collection('occupancies').doc(occ.id);
+            batch.update(occRef, {
+                unitId: null,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        });
+        await batch.commit();
+        console.log(`Orphaned ${linkedOccupancies.length} occupancy record(s)`);
+    }
+    
+    // Now delete the unit
     db.collection('units').doc(unitId).delete()
         .then(() => {
             console.log('Unit deleted successfully');
             if (currentPropertyIdForDetail) {
                 loadBuildingsAndUnitsTable(currentPropertyIdForDetail);
+            }
+            // Also refresh tenants if on tenants page
+            if (document.getElementById('tenantsPage') && document.getElementById('tenantsPage').style.display !== 'none') {
+                loadTenants();
             }
         })
         .catch((error) => {
@@ -3826,7 +3878,8 @@ async function renderTenantsTableView(tenants) {
                         const unit = unitsMap[occ.unitId];
                         return `<span class="occupancy-info">Unit ${escapeHtml(unit.unitNumber || 'N/A')}</span>`;
                     } else if (occ.unitId) {
-                        return `<span class="occupancy-info">Unit (ID: ${occ.unitId.substring(0, 8)}...)</span>`;
+                        // Unit was deleted but occupancy still references it
+                        return `<span class="occupancy-info" style="color: #dc2626; font-style: italic;">Unit (Deleted)</span>`;
                     } else {
                         return `<span class="occupancy-info">Property Level</span>`;
                     }
@@ -3965,7 +4018,8 @@ async function renderTenantsTableView(tenants) {
                             const unit = unitsMap[occ.unitId];
                             unitDisplay = `Unit ${escapeHtml(unit.unitNumber || 'N/A')}`;
                         } else if (occ.unitId) {
-                            unitDisplay = `Unit (ID: ${occ.unitId.substring(0, 8)}...)`;
+                            // Unit was deleted but occupancy still references it
+                            unitDisplay = `<span style="color: #dc2626; font-style: italic;">Unit (Deleted)</span>`;
                         } else {
                             unitDisplay = 'Property Level';
                         }
@@ -4295,7 +4349,8 @@ async function loadMovedOutTenantsSection(movedOutTenants, occupanciesMap, units
                             const unit = unitsMap[occ.unitId];
                             unitDisplay = `Unit ${escapeHtml(unit.unitNumber || 'N/A')}`;
                         } else if (occ.unitId) {
-                            unitDisplay = `Unit (ID: ${occ.unitId.substring(0, 8)}...)`;
+                            // Unit was deleted but occupancy still references it
+                            unitDisplay = `<span style="color: #dc2626; font-style: italic;">Unit (Deleted)</span>`;
                         } else {
                             unitDisplay = 'Property Level';
                         }
@@ -5052,7 +5107,8 @@ function rebuildTableWithContactColumns(tenantsByBuilding, tenantsWithoutBuildin
                         const unit = unitsMap[occ.unitId];
                         return `<span class="occupancy-info">Unit ${escapeHtml(unit.unitNumber || 'N/A')}</span>`;
                     } else if (occ.unitId) {
-                        return `<span class="occupancy-info">Unit (ID: ${occ.unitId.substring(0, 8)}...)</span>`;
+                        // Unit was deleted but occupancy still references it
+                        return `<span class="occupancy-info" style="color: #dc2626; font-style: italic;">Unit (Deleted)</span>`;
                     } else {
                         return `<span class="occupancy-info">Property Level</span>`;
                     }
@@ -5151,7 +5207,8 @@ function rebuildTableWithContactColumns(tenantsByBuilding, tenantsWithoutBuildin
                             const unit = unitsMap[occ.unitId];
                             unitDisplay = `Unit ${escapeHtml(unit.unitNumber || 'N/A')}`;
                         } else if (occ.unitId) {
-                            unitDisplay = `Unit (ID: ${occ.unitId.substring(0, 8)}...)`;
+                            // Unit was deleted but occupancy still references it
+                            unitDisplay = `<span style="color: #dc2626; font-style: italic;">Unit (Deleted)</span>`;
                         } else {
                             unitDisplay = 'Property Level';
                         }
