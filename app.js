@@ -3696,7 +3696,7 @@ async function renderTenantsTableView(tenants) {
         return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
     });
     
-    // Render grouped by building (sorted by unit number)
+    // Render grouped by building (sorted by building number)
     sortedBuildingNames.forEach(buildingName => {
         const group = tenantsByBuilding[buildingName];
         html += `
@@ -3721,14 +3721,61 @@ async function renderTenantsTableView(tenants) {
                     <tbody>
         `;
         
-        group.tenants.forEach(({ tenant, occupancies }) => {
+        // Sort tenants within this building by their lowest unit number
+        const sortedTenants = [...group.tenants].sort((a, b) => {
+            const occupanciesA = occupanciesMap[a.tenant.id] || [];
+            const occupanciesB = occupanciesMap[b.tenant.id] || [];
+            
+            // Get unit numbers for tenant A (only units in this building)
+            const unitNumbersA = occupanciesA
+                .filter(occ => occ.unitId && unitsMap[occ.unitId] && unitsMap[occ.unitId].buildingId === group.building?.id)
+                .map(occ => unitsMap[occ.unitId].unitNumber || '')
+                .filter(num => num);
+            
+            // Get unit numbers for tenant B (only units in this building)
+            const unitNumbersB = occupanciesB
+                .filter(occ => occ.unitId && unitsMap[occ.unitId] && unitsMap[occ.unitId].buildingId === group.building?.id)
+                .map(occ => unitsMap[occ.unitId].unitNumber || '')
+                .filter(num => num);
+            
+            // If no unit numbers, sort by tenant name
+            if (unitNumbersA.length === 0 && unitNumbersB.length === 0) {
+                return (a.tenant.tenantName || '').localeCompare(b.tenant.tenantName || '', undefined, { numeric: true, sensitivity: 'base' });
+            }
+            if (unitNumbersA.length === 0) return 1;
+            if (unitNumbersB.length === 0) return -1;
+            
+            // Sort by minimum unit number (numeric-aware)
+            unitNumbersA.sort((x, y) => x.localeCompare(y, undefined, { numeric: true, sensitivity: 'base' }));
+            unitNumbersB.sort((x, y) => x.localeCompare(y, undefined, { numeric: true, sensitivity: 'base' }));
+            
+            return unitNumbersA[0].localeCompare(unitNumbersB[0], undefined, { numeric: true, sensitivity: 'base' });
+        });
+        
+        sortedTenants.forEach(({ tenant, occupancies }) => {
             // Get ALL occupancies for this tenant (not just this building)
             const allTenantOccupancies = occupanciesMap[tenant.id] || [];
             
-            // Occupancies - show all occupancies for this tenant
+            // Occupancies - show all occupancies for this tenant, sorted by unit number
             let occupanciesHtml = '<span style="color: #999;">No occupancies</span>';
             if (allTenantOccupancies.length > 0) {
-                occupanciesHtml = allTenantOccupancies.map(occ => {
+                // Sort occupancies by unit number (numeric-aware)
+                const sortedOccupancies = [...allTenantOccupancies].sort((occA, occB) => {
+                    const unitA = occA.unitId && unitsMap[occA.unitId] ? unitsMap[occA.unitId] : null;
+                    const unitB = occB.unitId && unitsMap[occB.unitId] ? unitsMap[occB.unitId] : null;
+                    
+                    // Units without unitId go to end
+                    if (!unitA && !unitB) return 0;
+                    if (!unitA) return 1;
+                    if (!unitB) return -1;
+                    
+                    // Sort by unit number (numeric-aware)
+                    const numA = unitA.unitNumber || '';
+                    const numB = unitB.unitNumber || '';
+                    return numA.localeCompare(numB, undefined, { numeric: true, sensitivity: 'base' });
+                });
+                
+                occupanciesHtml = sortedOccupancies.map(occ => {
                     if (occ.unitId && unitsMap[occ.unitId]) {
                         const unit = unitsMap[occ.unitId];
                         return `<span class="occupancy-info">Unit ${escapeHtml(unit.unitNumber || 'N/A')}</span>`;
