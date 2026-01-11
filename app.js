@@ -51,6 +51,7 @@ function initializeApp() {
     loadProperties();
     loadTickets();
     showPage(currentPage);
+    updateFABsVisibility();
 }
 
 // Navigation
@@ -108,6 +109,9 @@ function showPage(page) {
     } else if (page === 'maintenance') {
         loadTickets();
     }
+    
+    // Update FAB visibility
+    updateFABsVisibility();
 }
 
 // Event Listeners
@@ -326,12 +330,19 @@ function setupEventListeners() {
     
     if (fabAddContact) {
         fabAddContact.addEventListener('click', () => {
-            window.addContact();
+            if (currentTenantIdForDetail) {
+                window.addContact(currentTenantIdForDetail);
+            } else {
+                const tenantDetailView = document.getElementById('tenantDetailView');
+                if (tenantDetailView) {
+                    const tenantId = tenantDetailView.getAttribute('data-tenant-id');
+                    if (tenantId) {
+                        window.addContact(tenantId);
+                    }
+                }
+            }
         });
     }
-    
-    // Show/hide FABs based on current page/view
-    updateFABsVisibility();
     
     // Tenant view toggle
     const viewCardsBtn = document.getElementById('viewCardsBtn');
@@ -453,6 +464,8 @@ function setupEventListeners() {
             if (tabContent) {
                 tabContent.classList.add('active');
             }
+            
+            updateFABsVisibility();
         });
     });
     
@@ -5622,6 +5635,7 @@ window.viewTenantDetail = function(tenantId) {
         loadContacts(tenantId);
         loadOccupancies(tenantId);
     }
+    updateFABsVisibility();
 };
 
 window.backToTenants = function() {
