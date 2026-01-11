@@ -314,6 +314,25 @@ function setupEventListeners() {
         });
     }
     
+    // Floating action buttons
+    const fabAddTenant = document.getElementById('fabAddTenant');
+    const fabAddContact = document.getElementById('fabAddContact');
+    
+    if (fabAddTenant) {
+        fabAddTenant.addEventListener('click', () => {
+            showAddTenantForm();
+        });
+    }
+    
+    if (fabAddContact) {
+        fabAddContact.addEventListener('click', () => {
+            window.addContact();
+        });
+    }
+    
+    // Show/hide FABs based on current page/view
+    updateFABsVisibility();
+    
     // Tenant view toggle
     const viewCardsBtn = document.getElementById('viewCardsBtn');
     const viewTableBtn = document.getElementById('viewTableBtn');
@@ -5610,6 +5629,7 @@ window.backToTenants = function() {
     const tenantDetailView = document.getElementById('tenantDetailView');
     if (tenantsList) tenantsList.style.display = 'block';
     if (tenantDetailView) tenantDetailView.style.display = 'none';
+    updateFABsVisibility();
 };
 
 // Contact Management

@@ -606,7 +606,7 @@
         <div id="tenantsPage" class="page" style="display: none;">
             <header>
                 <h2>Tenant Management</h2>
-                <div class="header-actions">
+                <div class="header-actions" style="display: none;">
                     <button id="addTenantBtn" class="btn-primary">+ Add Tenant</button>
                 </div>
             </header>
@@ -785,7 +785,7 @@
                 <div id="contactsTab" class="tab-content active">
                     <div class="section-header">
                         <h4>Contacts</h4>
-                        <button id="addContactBtn" class="btn-primary btn-small">+ Add Contact</button>
+                        <button id="addContactBtn" class="btn-primary btn-small" style="display: none;">+ Add Contact</button>
                     </div>
                     <div id="contactsList" class="contacts-list"></div>
                 </div>
@@ -1031,7 +1031,7 @@
                     
                     // Now load app.js after config is ready
                     const appScript = document.createElement('script');
-                    appScript.src = 'app.js?v=4.6';
+                    appScript.src = 'app.js?v=4.7';
                     appScript.onload = function() {
                         console.log('✅ app.js loaded successfully');
                     };
@@ -1057,7 +1057,7 @@
                             return;
                         }
                         const appScript = document.createElement('script');
-                        appScript.src = 'app.js?v=4.6';
+                        appScript.src = 'app.js?v=4.7';
                         document.head.appendChild(appScript);
                     };
                     fallback.onerror = function() {
