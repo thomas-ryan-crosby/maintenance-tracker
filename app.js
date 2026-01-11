@@ -4137,7 +4137,15 @@ async function loadOrphanContacts(maxContacts, maxBrokers) {
                     const classifications = contact.classifications || [];
                     const classificationBadges = classifications.map(cls => {
                         const clsLower = cls.toLowerCase().replace(/\s+/g, '-');
-                        return `<span class="contact-type-indicator ${clsLower}" title="${escapeHtml(cls)}"></span>`;
+                        // Map classification to icon
+                        let icon = '';
+                        if (cls === 'Primary') icon = '#1';
+                        else if (cls === 'Secondary') icon = '#2';
+                        else if (cls === 'Billing') icon = '$';
+                        else if (cls === 'Leasing') icon = 'L';
+                        else if (cls === 'Tenant Representative') icon = 'TR';
+                        else icon = cls.charAt(0).toUpperCase(); // Fallback to first letter
+                        return `<span class="contact-type-indicator ${clsLower}" title="${escapeHtml(cls)}">${icon}</span>`;
                     }).join(' ');
                     
                     orphanHtml += `
@@ -5252,9 +5260,9 @@ async function loadContactsForTableView(tenants, maxContacts, maxBrokers) {
                     const classifications = contact.classifications || [];
                     const isTenantRepresentative = classifications.includes('Tenant Representative');
                     
-                    // Create type indicator circle for tenant representative
+                    // Create type indicator icon for tenant representative
                     let typeIndicators = '<div class="contact-type-indicators">';
-                    if (isTenantRepresentative) typeIndicators += '<span class="contact-type-indicator tenant-rep" title="Tenant Representative"></span>';
+                    if (isTenantRepresentative) typeIndicators += '<span class="contact-type-indicator tenant-rep" title="Tenant Representative">TR</span>';
                     typeIndicators += '</div>';
                     
                     brokerCell.innerHTML = `
