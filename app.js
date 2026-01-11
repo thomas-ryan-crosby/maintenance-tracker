@@ -3404,41 +3404,49 @@ async function renderTenantsTableView(tenants) {
             `;
         });
         
-        html += `
-                    </tbody>
-                </table>
-        `;
-        
-        // Add units section for this building
+        // Add rows for vacant units in this building
         const buildingId = group.building?.id;
         if (buildingId && unitsByBuilding[buildingId] && unitsByBuilding[buildingId].length > 0) {
-            html += `
-                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px;">
-                    <h4 style="margin: 0 0 12px 0; font-size: 0.9rem; font-weight: 600; color: #333;">All Units</h4>
-                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-            `;
-            
             unitsByBuilding[buildingId].forEach(unit => {
                 const isOccupied = occupanciesByUnitId[unit.id] && occupanciesByUnitId[unit.id].length > 0;
-                const statusText = isOccupied ? 'Occupied' : 'Vacant';
-                const statusColor = isOccupied ? '#10b981' : '#6b7280';
-                const statusBg = isOccupied ? '#d1fae5' : '#f3f4f6';
                 
-                html += `
-                    <div style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: ${statusBg}; border: 1px solid ${statusColor}40; border-radius: 4px; font-size: 0.75rem;">
-                        <span style="font-weight: 600; color: #333;">${escapeHtml(unit.unitNumber || 'N/A')}</span>
-                        <span style="padding: 2px 6px; background: ${statusColor}; color: white; border-radius: 3px; font-size: 0.65rem; font-weight: 600;">${statusText}</span>
-                    </div>
-                `;
+                // Only render vacant units as rows
+                if (!isOccupied) {
+                    // Create empty contact cells
+                    const contactCells = [];
+                    for (let i = 0; i < maxContacts; i++) {
+                        contactCells.push(`<td class="tenant-contact-cell" data-contact-index="${i}" data-contact-type="contact" style="vertical-align: top;"></td>`);
+                    }
+                    
+                    // Create empty broker cells
+                    const brokerCells = [];
+                    for (let i = 0; i < maxBrokers; i++) {
+                        brokerCells.push(`<td class="tenant-contact-cell" data-contact-index="${i}" data-contact-type="broker" style="vertical-align: top;"></td>`);
+                    }
+                    
+                    html += `
+                        <tr data-unit-id="${unit.id}" data-vacant="true">
+                            <td class="tenant-occupancies-cell" style="vertical-align: top;">
+                                <span class="occupancy-info">Unit ${escapeHtml(unit.unitNumber || 'N/A')}</span>
+                            </td>
+                            <td class="tenant-name-cell" style="vertical-align: top;">
+                                <div class="tenant-name-wrapper">
+                                    <div class="tenant-name-header">
+                                        <span class="tenant-name-text" style="color: #6b7280; font-style: italic;">Vacant</span>
+                                    </div>
+                                </div>
+                            </td>
+                            ${contactCells.join('')}
+                            ${brokerCells.join('')}
+                        </tr>
+                    `;
+                }
             });
-            
-            html += `
-                    </div>
-                </div>
-            `;
         }
         
         html += `
+                    </tbody>
+                </table>
             </div>
         `;
     });
