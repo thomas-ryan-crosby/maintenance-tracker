@@ -370,17 +370,16 @@ function setupEventListeners() {
     
     if (fabAddContact) {
         fabAddContact.addEventListener('click', () => {
-            if (currentTenantIdForDetail) {
-                window.addContact(currentTenantIdForDetail);
-            } else {
+            // Try to get tenant ID from detail view, otherwise allow creating orphan contact
+            let tenantId = currentTenantIdForDetail;
+            if (!tenantId) {
                 const tenantDetailView = document.getElementById('tenantDetailView');
-                if (tenantDetailView) {
-                    const tenantId = tenantDetailView.getAttribute('data-tenant-id');
-                    if (tenantId) {
-                        window.addContact(tenantId);
-                    }
+                if (tenantDetailView && tenantDetailView.style.display !== 'none') {
+                    tenantId = tenantDetailView.getAttribute('data-tenant-id');
                 }
             }
+            // Allow null/undefined tenantId to create orphan contact
+            window.addContact(tenantId || null);
         });
     }
     
@@ -5743,8 +5742,13 @@ window.addContact = function(tenantId) {
     editingContactId = null;
     document.getElementById('contactModalTitle').textContent = 'Add Contact';
     document.getElementById('contactId').value = '';
-    document.getElementById('contactTenantId').value = tenantId;
+    document.getElementById('contactTenantId').value = tenantId || '';
     document.getElementById('contactForm').reset();
+    
+    // If no tenantId, set it to empty string (will create orphan contact)
+    if (!tenantId) {
+        document.getElementById('contactTenantId').value = '';
+    }
     
     const submitBtn = document.querySelector('#contactForm button[type="submit"]');
     if (submitBtn) {
@@ -5880,11 +5884,8 @@ function handleContactSubmit(e) {
         return;
     }
     
-    if (!tenantId) {
-        alert('Tenant ID is missing');
-        resetButtonState();
-        return;
-    }
+    // Allow empty tenantId to create orphan contact
+    // tenantId can be empty string or null/undefined
     
     if (submitBtn) {
         submitBtn.disabled = true;
@@ -5899,7 +5900,7 @@ function handleContactSubmit(e) {
     }, 30000);
     
     const contactData = {
-        tenantId,
+        tenantId: tenantId || null, // Allow null for orphan contacts
         contactName,
         contactEmail: contactEmail || null,
         contactPhone: contactPhone || null,
