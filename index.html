@@ -977,6 +977,18 @@
         </div>
     </div>
 
+    <!-- Floating Action Buttons -->
+    <div class="fab-container">
+        <button id="fabAddTenant" class="fab" title="Add Tenant" style="display: none;">
+            <span class="fab-icon">+</span>
+            <span class="fab-label">Add Tenant</span>
+        </button>
+        <button id="fabAddContact" class="fab" title="Add Contact" style="display: none;">
+            <span class="fab-icon">+</span>
+            <span class="fab-label">Add Contact</span>
+        </button>
+    </div>
+
     <!-- Firebase Config - Automatically selects test or production based on environment -->
     <script>
         // Auto-detect environment and load appropriate Firebase config
@@ -1031,7 +1043,7 @@
                     
                     // Now load app.js after config is ready
                     const appScript = document.createElement('script');
-                    appScript.src = 'app.js?v=4.9';
+                    appScript.src = 'app.js?v=5.0';
                     appScript.onload = function() {
                         console.log('✅ app.js loaded successfully');
                     };
@@ -1057,7 +1069,7 @@
                             return;
                         }
                         const appScript = document.createElement('script');
-                        appScript.src = 'app.js?v=4.9';
+                        appScript.src = 'app.js?v=5.0';
                         document.head.appendChild(appScript);
                     };
                     fallback.onerror = function() {

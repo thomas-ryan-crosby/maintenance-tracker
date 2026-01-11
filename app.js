@@ -25,7 +25,7 @@ function updateFABsVisibility() {
     
     // Show Add Tenant FAB when on tenants page and detail view is hidden
     if (fabAddTenant && tenantsPage) {
-        const isTenantsPageVisible = tenantsPage.style.display !== 'none' && tenantsPage.classList.contains('active');
+        const isTenantsPageVisible = tenantsPage.style.display !== 'none';
         const isDetailViewVisible = tenantDetailView && tenantDetailView.style.display !== 'none';
         fabAddTenant.style.display = (isTenantsPageVisible && !isDetailViewVisible) ? 'flex' : 'none';
     }
