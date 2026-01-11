@@ -1474,10 +1474,9 @@ hr {
 }
 
 .contact-type-indicator {
-    width: 10px;
-    height: 10px;
     min-width: 10px;
-    min-height: 10px;
+    height: 10px;
+    padding: 0 2px;
     border-radius: 3px;
     display: inline-flex;
     align-items: center;
@@ -1489,8 +1488,8 @@ hr {
     line-height: 1;
     color: white;
     text-align: center;
-    padding: 0;
     overflow: hidden;
+    white-space: nowrap;
 }
 
 .contact-type-indicator.primary {
