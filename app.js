@@ -5481,30 +5481,57 @@ function closeTenantModal() {
 }
 
 window.editTenant = function(tenantId) {
+    // First, ensure form is reset and modal is ready
+    const tenantForm = document.getElementById('tenantForm');
+    if (tenantForm) {
+        tenantForm.reset();
+    }
+    document.getElementById('tenantId').value = '';
+    editingTenantId = null;
+    
     db.collection('tenants').doc(tenantId).get().then((doc) => {
         const tenant = doc.data();
         if (tenant) {
             editingTenantId = tenantId;
             document.getElementById('tenantModalTitle').textContent = 'Edit Tenant';
             document.getElementById('tenantId').value = tenantId;
-            document.getElementById('tenantName').value = tenant.tenantName || '';
-            document.getElementById('tenantType').value = tenant.tenantType || '';
-            document.getElementById('tenantStatus').value = tenant.status || 'Active';
-            document.getElementById('tenantMailingAddress').value = tenant.mailingAddress || '';
-            document.getElementById('tenantNotes').value = tenant.notes || '';
+            
+            // Set basic fields
+            const tenantNameField = document.getElementById('tenantName');
+            const tenantTypeField = document.getElementById('tenantType');
+            const tenantStatusField = document.getElementById('tenantStatus');
+            const tenantMailingAddressField = document.getElementById('tenantMailingAddress');
+            const tenantNotesField = document.getElementById('tenantNotes');
+            
+            if (tenantNameField) tenantNameField.value = tenant.tenantName || '';
+            if (tenantTypeField) tenantTypeField.value = tenant.tenantType || '';
+            if (tenantStatusField) tenantStatusField.value = tenant.status || 'Active';
+            if (tenantMailingAddressField) tenantMailingAddressField.value = tenant.mailingAddress || '';
+            if (tenantNotesField) tenantNotesField.value = tenant.notes || '';
+            
+            // Update field visibility based on tenant type BEFORE setting type-specific fields
+            updateTenantTypeFields();
             
             // Commercial fields
-            document.getElementById('tenantTaxId').value = tenant.taxId || '';
-            document.getElementById('tenantBusinessType').value = tenant.businessType || '';
-            document.getElementById('tenantNumberOfEmployees').value = tenant.numberOfEmployees || '';
-            document.getElementById('tenantWebsite').value = tenant.website || '';
+            const tenantTaxIdField = document.getElementById('tenantTaxId');
+            const tenantBusinessTypeField = document.getElementById('tenantBusinessType');
+            const tenantNumberOfEmployeesField = document.getElementById('tenantNumberOfEmployees');
+            const tenantWebsiteField = document.getElementById('tenantWebsite');
+            
+            if (tenantTaxIdField) tenantTaxIdField.value = tenant.taxId || '';
+            if (tenantBusinessTypeField) tenantBusinessTypeField.value = tenant.businessType || '';
+            if (tenantNumberOfEmployeesField) tenantNumberOfEmployeesField.value = tenant.numberOfEmployees || '';
+            if (tenantWebsiteField) tenantWebsiteField.value = tenant.website || '';
             
             // Residential fields
-            if (tenant.dateOfBirth) {
-                const dob = tenant.dateOfBirth.toDate ? tenant.dateOfBirth.toDate() : new Date(tenant.dateOfBirth);
-                document.getElementById('tenantDateOfBirth').value = dob.toISOString().split('T')[0];
-            } else {
-                document.getElementById('tenantDateOfBirth').value = '';
+            const tenantDateOfBirthField = document.getElementById('tenantDateOfBirth');
+            if (tenantDateOfBirthField) {
+                if (tenant.dateOfBirth) {
+                    const dob = tenant.dateOfBirth.toDate ? tenant.dateOfBirth.toDate() : new Date(tenant.dateOfBirth);
+                    tenantDateOfBirthField.value = dob.toISOString().split('T')[0];
+                } else {
+                    tenantDateOfBirthField.value = '';
+                }
             }
             
             // Reset button state
@@ -5515,12 +5542,10 @@ window.editTenant = function(tenantId) {
                 submitBtn.classList.remove('saving');
             }
             
-            // Update field visibility
-            updateTenantTypeFields();
-            
+            // Show modal
             document.getElementById('tenantModal').classList.add('show');
             setTimeout(() => {
-                document.getElementById('tenantName').focus();
+                if (tenantNameField) tenantNameField.focus();
             }, 100);
         }
     }).catch((error) => {
