@@ -4059,6 +4059,12 @@ async function renderTenantsTableView(tenants) {
                         } else if (occ.unitId) {
                             // Unit was deleted but occupancy still references it
                             unitDisplay = `<span style="color: #dc2626; font-style: italic;">Unit (Deleted)</span>`;
+                            // Show unlink button for deleted units
+                            return `<div style="display: flex; align-items: center; gap: 4px; padding: 2px 0;">
+                                <span class="occupancy-info" style="font-size: 0.8rem; flex: 1;">${unitDisplay}</span>
+                                <button class="btn-action btn-secondary" onclick="unlinkDeletedUnit('${occ.id}', '${tenant.id}')" title="Unlink from Deleted Unit" style="padding: 2px 6px; font-size: 0.7rem; min-width: auto; height: 20px;">Unlink</button>
+                                <button class="btn-action btn-danger" onclick="removeTenantFromUnit('${occ.id}', '${tenant.id}')" title="Remove" style="padding: 2px 4px; font-size: 0.7rem; min-width: 20px; height: 20px;">×</button>
+                            </div>`;
                         } else {
                             unitDisplay = 'Property Level';
                         }
@@ -5248,6 +5254,12 @@ function rebuildTableWithContactColumns(tenantsByBuilding, tenantsWithoutBuildin
                         } else if (occ.unitId) {
                             // Unit was deleted but occupancy still references it
                             unitDisplay = `<span style="color: #dc2626; font-style: italic;">Unit (Deleted)</span>`;
+                            // Show unlink button for deleted units
+                            return `<div style="display: flex; align-items: center; gap: 4px; padding: 2px 0;">
+                                <span class="occupancy-info" style="font-size: 0.8rem; flex: 1;">${unitDisplay}</span>
+                                <button class="btn-action btn-secondary" onclick="unlinkDeletedUnit('${occ.id}', '${tenant.id}')" title="Unlink from Deleted Unit" style="padding: 2px 6px; font-size: 0.7rem; min-width: auto; height: 20px;">Unlink</button>
+                                <button class="btn-action btn-danger" onclick="removeTenantFromUnit('${occ.id}', '${tenant.id}')" title="Remove" style="padding: 2px 4px; font-size: 0.7rem; min-width: 20px; height: 20px;">×</button>
+                            </div>`;
                         } else {
                             unitDisplay = 'Property Level';
                         }
@@ -6687,6 +6699,33 @@ window.removeTenantFromUnit = function(occupancyId, tenantId) {
         .catch((error) => {
             console.error('Error removing occupancy:', error);
             alert('Error removing tenant from unit: ' + error.message);
+        });
+};
+
+// Unlink deleted unit from occupancy
+window.unlinkDeletedUnit = function(occupancyId, tenantId) {
+    if (!confirm('Unlink this occupancy from the deleted unit? The occupancy will become a property-level occupancy.')) {
+        return;
+    }
+    
+    db.collection('occupancies').doc(occupancyId).update({
+        unitId: null,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    })
+        .then(() => {
+            console.log('Occupancy unlinked from deleted unit successfully');
+            // Refresh table view
+            db.collection('tenants').get().then((snapshot) => {
+                const tenants = {};
+                snapshot.forEach((doc) => {
+                    tenants[doc.id] = { id: doc.id, ...doc.data() };
+                });
+                renderTenantsList(tenants);
+            });
+        })
+        .catch((error) => {
+            console.error('Error unlinking occupancy:', error);
+            alert('Error unlinking occupancy: ' + error.message);
         });
 };
 
