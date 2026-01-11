@@ -621,20 +621,12 @@
                                     <option value="">All Properties</option>
                                 </select>
                             </div>
-                            <div class="view-toggle">
-                                <button class="btn-toggle active" id="viewCardsBtn" data-view="cards">
-                                    <span>📋</span> Cards
-                                </button>
-                                <button class="btn-toggle" id="viewTableBtn" data-view="table">
-                                    <span>📊</span> Table
-                                </button>
-                            </div>
-                            <div class="table-view-options" id="tableViewOptions" style="display: none;">
+                            <div class="table-view-options" id="tableViewOptions" style="display: flex;">
                                 <!-- All contacts are shown by default, no filter needed -->
                             </div>
                         </div>
-                        <div id="tenantsList" class="tenants-grid"></div>
-                        <div id="tenantsTable" class="tenants-table-container" style="display: none;"></div>
+                        <div id="tenantsList" class="tenants-grid" style="display: none;"></div>
+                        <div id="tenantsTable" class="tenants-table-container"></div>
                     </div>
                 </div>
             </main>
@@ -989,7 +981,7 @@
                     
                     // Now load app.js after config is ready
                     const appScript = document.createElement('script');
-                    appScript.src = 'app.js?v=4.0';
+                    appScript.src = 'app.js?v=4.1';
                     appScript.onload = function() {
                         console.log('✅ app.js loaded successfully');
                     };
@@ -1015,7 +1007,7 @@
                             return;
                         }
                         const appScript = document.createElement('script');
-                        appScript.src = 'app.js?v=4.0';
+                        appScript.src = 'app.js?v=4.1';
                         document.head.appendChild(appScript);
                     };
                     fallback.onerror = function() {

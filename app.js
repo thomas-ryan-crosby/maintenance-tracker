@@ -319,43 +319,11 @@ function setupEventListeners() {
     const viewTableBtn = document.getElementById('viewTableBtn');
     const tenantPropertyFilter = document.getElementById('tenantPropertyFilter');
     
-    if (viewCardsBtn) {
-        viewCardsBtn.addEventListener('click', function() {
-            currentTenantView = 'cards';
-            viewCardsBtn.classList.add('active');
-            viewTableBtn.classList.remove('active');
-            // Hide table view options
-            const tableViewOptions = document.getElementById('tableViewOptions');
-            if (tableViewOptions) tableViewOptions.style.display = 'none';
-            // Reload tenants to render in card view
-            db.collection('tenants').get().then((snapshot) => {
-                const tenants = {};
-                snapshot.forEach((doc) => {
-                    tenants[doc.id] = { id: doc.id, ...doc.data() };
-                });
-                renderTenantsList(tenants);
-            });
-        });
-    }
-    
-    if (viewTableBtn) {
-        viewTableBtn.addEventListener('click', function() {
-            currentTenantView = 'table';
-            viewTableBtn.classList.add('active');
-            viewCardsBtn.classList.remove('active');
-            // Show table view options
-            const tableViewOptions = document.getElementById('tableViewOptions');
-            if (tableViewOptions) tableViewOptions.style.display = 'flex';
-            // Reload tenants to render in table view
-            db.collection('tenants').get().then((snapshot) => {
-                const tenants = {};
-                snapshot.forEach((doc) => {
-                    tenants[doc.id] = { id: doc.id, ...doc.data() };
-                });
-                renderTenantsList(tenants);
-            });
-        });
-    }
+    // Table view is now default - view toggle removed
+    // Set table view as default
+    currentTenantView = 'table';
+    const tableViewOptions = document.getElementById('tableViewOptions');
+    if (tableViewOptions) tableViewOptions.style.display = 'flex';
     
     if (tenantPropertyFilter) {
         tenantPropertyFilter.addEventListener('change', function() {
@@ -3311,7 +3279,7 @@ window.openPhotoModal = function(photoUrl) {
 };
 // Tenant Management
 let editingTenantId = null;
-let currentTenantView = 'cards'; // 'cards' or 'table'
+let currentTenantView = 'table'; // 'cards' or 'table' - table is now default
 let selectedPropertyForTenants = null;
 
 function loadTenants() {
@@ -3775,20 +3743,28 @@ async function renderTenantsTableView(tenants) {
             // Get ALL occupancies for this tenant
             const allTenantOccupancies = occupanciesMap[tenant.id] || [];
             
-            // Occupancies
-            let occupanciesHtml = '<span style="color: #999;">No occupancies</span>';
+            // Occupancies - show all occupancies for this tenant with add/remove buttons
+            let occupanciesHtml = '<div style="display: flex; flex-direction: column; gap: 4px;"><span style="color: #999; font-size: 0.8rem;">No occupancies</span></div>';
             if (allTenantOccupancies.length > 0) {
-                occupanciesHtml = allTenantOccupancies.map(occ => {
-                    if (occ.unitId && unitsMap[occ.unitId]) {
-                        const unit = unitsMap[occ.unitId];
-                        return `<span class="occupancy-info">Unit ${escapeHtml(unit.unitNumber || 'N/A')}</span>`;
-                    } else if (occ.unitId) {
-                        return `<span class="occupancy-info">Unit (ID: ${occ.unitId.substring(0, 8)}...)</span>`;
-                    } else {
-                        return `<span class="occupancy-info">Property Level</span>`;
-                    }
-                }).join('');
+                occupanciesHtml = '<div style="display: flex; flex-direction: column; gap: 4px;">' + 
+                    allTenantOccupancies.map(occ => {
+                        let unitDisplay = '';
+                        if (occ.unitId && unitsMap[occ.unitId]) {
+                            const unit = unitsMap[occ.unitId];
+                            unitDisplay = `Unit ${escapeHtml(unit.unitNumber || 'N/A')}`;
+                        } else if (occ.unitId) {
+                            unitDisplay = `Unit (ID: ${occ.unitId.substring(0, 8)}...)`;
+                        } else {
+                            unitDisplay = 'Property Level';
+                        }
+                        return `<div style="display: flex; align-items: center; gap: 4px; padding: 2px 0;">
+                            <span class="occupancy-info" style="font-size: 0.8rem; flex: 1;">${unitDisplay}</span>
+                            <button class="btn-action btn-danger" onclick="removeTenantFromUnit('${occ.id}', '${tenant.id}')" title="Remove" style="padding: 2px 4px; font-size: 0.7rem; min-width: 20px; height: 20px;">×</button>
+                        </div>`;
+                    }).join('') + '</div>';
             }
+            // Add button to add new occupancy
+            occupanciesHtml += '<button class="btn-action btn-view" onclick="addTenantToUnit(\'' + tenant.id + '\')" title="Add to Unit" style="margin-top: 4px; padding: 4px 8px; font-size: 0.75rem; width: 100%;">+ Add to Unit</button>';
             
             // Create empty contact cells
             const contactCells = [];
@@ -4855,20 +4831,28 @@ function rebuildTableWithContactColumns(tenantsByBuilding, tenantsWithoutBuildin
             // Get ALL occupancies for this tenant
             const allTenantOccupancies = occupanciesMap[tenant.id] || [];
             
-            // Occupancies
-            let occupanciesHtml = '<span style="color: #999;">No occupancies</span>';
+            // Occupancies - show all occupancies for this tenant with add/remove buttons
+            let occupanciesHtml = '<div style="display: flex; flex-direction: column; gap: 4px;"><span style="color: #999; font-size: 0.8rem;">No occupancies</span></div>';
             if (allTenantOccupancies.length > 0) {
-                occupanciesHtml = allTenantOccupancies.map(occ => {
-                    if (occ.unitId && unitsMap[occ.unitId]) {
-                        const unit = unitsMap[occ.unitId];
-                        return `<span class="occupancy-info">Unit ${escapeHtml(unit.unitNumber || 'N/A')}</span>`;
-                    } else if (occ.unitId) {
-                        return `<span class="occupancy-info">Unit (ID: ${occ.unitId.substring(0, 8)}...)</span>`;
-                    } else {
-                        return `<span class="occupancy-info">Property Level</span>`;
-                    }
-                }).join('');
+                occupanciesHtml = '<div style="display: flex; flex-direction: column; gap: 4px;">' + 
+                    allTenantOccupancies.map(occ => {
+                        let unitDisplay = '';
+                        if (occ.unitId && unitsMap[occ.unitId]) {
+                            const unit = unitsMap[occ.unitId];
+                            unitDisplay = `Unit ${escapeHtml(unit.unitNumber || 'N/A')}`;
+                        } else if (occ.unitId) {
+                            unitDisplay = `Unit (ID: ${occ.unitId.substring(0, 8)}...)`;
+                        } else {
+                            unitDisplay = 'Property Level';
+                        }
+                        return `<div style="display: flex; align-items: center; gap: 4px; padding: 2px 0;">
+                            <span class="occupancy-info" style="font-size: 0.8rem; flex: 1;">${unitDisplay}</span>
+                            <button class="btn-action btn-danger" onclick="removeTenantFromUnit('${occ.id}', '${tenant.id}')" title="Remove" style="padding: 2px 4px; font-size: 0.7rem; min-width: 20px; height: 20px;">×</button>
+                        </div>`;
+                    }).join('') + '</div>';
             }
+            // Add button to add new occupancy
+            occupanciesHtml += '<button class="btn-action btn-view" onclick="addTenantToUnit(\'' + tenant.id + '\')" title="Add to Unit" style="margin-top: 4px; padding: 4px 8px; font-size: 0.75rem; width: 100%;">+ Add to Unit</button>';
             
             // Create empty contact cells
             const contactCells = [];
@@ -5982,10 +5966,49 @@ window.deleteOccupancy = function(occupancyId) {
             if (currentTenantIdForDetail) {
                 loadOccupancies(currentTenantIdForDetail);
             }
+            // Refresh table view
+            if (currentTenantView === 'table') {
+                db.collection('tenants').get().then((snapshot) => {
+                    const tenants = {};
+                    snapshot.forEach((doc) => {
+                        tenants[doc.id] = { id: doc.id, ...doc.data() };
+                    });
+                    renderTenantsList(tenants);
+                });
+            }
         })
         .catch((error) => {
             console.error('Error deleting occupancy:', error);
             alert('Error deleting occupancy: ' + error.message);
+        });
+};
+
+// Add tenant to unit from table view
+window.addTenantToUnit = function(tenantId) {
+    window.addOccupancy(tenantId);
+};
+
+// Remove tenant from unit from table view
+window.removeTenantFromUnit = function(occupancyId, tenantId) {
+    if (!confirm('Are you sure you want to remove this tenant from the unit?')) {
+        return;
+    }
+    
+    db.collection('occupancies').doc(occupancyId).delete()
+        .then(() => {
+            console.log('Occupancy removed successfully');
+            // Refresh table view
+            db.collection('tenants').get().then((snapshot) => {
+                const tenants = {};
+                snapshot.forEach((doc) => {
+                    tenants[doc.id] = { id: doc.id, ...doc.data() };
+                });
+                renderTenantsList(tenants);
+            });
+        })
+        .catch((error) => {
+            console.error('Error removing occupancy:', error);
+            alert('Error removing tenant from unit: ' + error.message);
         });
 };
 
@@ -6091,6 +6114,16 @@ function handleOccupancySubmit(e) {
             if (currentTenantIdForDetail) {
                 loadOccupancies(currentTenantIdForDetail);
             }
+            // Refresh table view
+            if (currentTenantView === 'table') {
+                db.collection('tenants').get().then((snapshot) => {
+                    const tenants = {};
+                    snapshot.forEach((doc) => {
+                        tenants[doc.id] = { id: doc.id, ...doc.data() };
+                    });
+                    renderTenantsList(tenants);
+                });
+            }
         }).catch((error) => {
             clearTimeout(timeoutId);
             console.error('Error updating occupancy:', error);
@@ -6107,6 +6140,16 @@ function handleOccupancySubmit(e) {
                 closeOccupancyModal();
                 if (currentTenantIdForDetail) {
                     loadOccupancies(currentTenantIdForDetail);
+                }
+                // Refresh table view
+                if (currentTenantView === 'table') {
+                    db.collection('tenants').get().then((snapshot) => {
+                        const tenants = {};
+                        snapshot.forEach((doc) => {
+                            tenants[doc.id] = { id: doc.id, ...doc.data() };
+                        });
+                        renderTenantsList(tenants);
+                    });
                 }
             })
             .catch((error) => {
