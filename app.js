@@ -4062,7 +4062,7 @@ async function loadOrphanContacts(maxContacts, maxBrokers) {
             // Fill contact columns
             for (let i = 0; i < maxContacts; i++) {
                 if (i < regularOrphans.length) {
-                const contact = regularOrphans[i];
+                    const contact = regularOrphans[i];
                 orphanHtml += `
                     <td class="tenant-contact-cell" data-contact-type="contact">
                         <div class="contact-card-table">
