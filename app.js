@@ -509,6 +509,11 @@ function setupEventListeners() {
         });
     });
     
+    // Update FABs on scroll to ensure they stay visible when scrolling the table
+    window.addEventListener('scroll', function() {
+        updateFABsVisibility();
+    }, { passive: true });
+    
     // Also close building modal when clicking outside
     window.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal')) {
