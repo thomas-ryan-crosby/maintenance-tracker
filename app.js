@@ -5766,33 +5766,161 @@ window.addContact = function(tenantId) {
     }, 100);
 };
 
-// Load tenants for contact form dropdown
-function loadTenantsForContactSelect(selectedTenantId = null) {
+// Load tenants for contact form dropdown, grouped by building
+async function loadTenantsForContactSelect(selectedTenantId = null) {
     const tenantSelect = document.getElementById('contactTenantIdSelect');
     if (!tenantSelect) return;
     
     tenantSelect.innerHTML = '<option value="">No Tenant (Orphan Contact)</option>';
     
-    db.collection('tenants')
-        .orderBy('tenantName')
-        .get()
-        .then((querySnapshot) => {
-            querySnapshot.forEach((doc) => {
-                const tenant = doc.data();
-                const option = document.createElement('option');
-                option.value = doc.id;
-                option.textContent = tenant.tenantName || 'Unnamed Tenant';
-                tenantSelect.appendChild(option);
+    try {
+        // Load tenants, occupancies, units, and buildings
+        const [tenantsSnapshot, occupanciesSnapshot, unitsSnapshot, buildingsSnapshot] = await Promise.all([
+            db.collection('tenants').orderBy('tenantName').get(),
+            db.collection('occupancies').get(),
+            db.collection('units').get(),
+            db.collection('buildings').get()
+        ]);
+        
+        // Build maps
+        const occupanciesMap = {};
+        occupanciesSnapshot.forEach(doc => {
+            const occ = doc.data();
+            if (!occupanciesMap[occ.tenantId]) {
+                occupanciesMap[occ.tenantId] = [];
+            }
+            occupanciesMap[occ.tenantId].push({ ...occ, id: doc.id });
+        });
+        
+        const unitsMap = {};
+        unitsSnapshot.forEach(doc => {
+            unitsMap[doc.id] = { id: doc.id, ...doc.data() };
+        });
+        
+        const buildingsMap = {};
+        buildingsSnapshot.forEach(doc => {
+            buildingsMap[doc.id] = { id: doc.id, ...doc.data() };
+        });
+        
+        // Group tenants by building
+        const tenantsByBuilding = {};
+        const orphanedTenants = [];
+        
+        tenantsSnapshot.forEach(doc => {
+            const tenant = { id: doc.id, ...doc.data() };
+            const tenantOccupancies = occupanciesMap[tenant.id] || [];
+            
+            // Find which building(s) this tenant is in
+            const buildingIds = new Set();
+            tenantOccupancies.forEach(occ => {
+                if (occ.unitId && unitsMap[occ.unitId] && unitsMap[occ.unitId].buildingId) {
+                    const buildingId = unitsMap[occ.unitId].buildingId;
+                    if (buildingsMap[buildingId]) {
+                        buildingIds.add(buildingId);
+                    }
+                }
             });
             
-            // Set selected tenant if provided
-            if (selectedTenantId) {
-                tenantSelect.value = selectedTenantId;
+            if (buildingIds.size === 0) {
+                // Orphaned tenant (no building association)
+                orphanedTenants.push(tenant);
+            } else {
+                // Add tenant to each building it's associated with
+                buildingIds.forEach(buildingId => {
+                    if (!tenantsByBuilding[buildingId]) {
+                        tenantsByBuilding[buildingId] = [];
+                    }
+                    tenantsByBuilding[buildingId].push(tenant);
+                });
             }
-        })
-        .catch((error) => {
-            console.error('Error loading tenants for contact select:', error);
         });
+        
+        // Sort buildings by building number (extract number from name)
+        const sortedBuildings = Object.keys(buildingsMap)
+            .map(id => ({ id, ...buildingsMap[id] }))
+            .sort((a, b) => {
+                const extractBuildingNumber = (name) => {
+                    const match = (name || '').match(/(\d+)/);
+                    return match ? parseInt(match[1], 10) : Infinity;
+                };
+                
+                const numA = extractBuildingNumber(a.buildingName);
+                const numB = extractBuildingNumber(b.buildingName);
+                
+                if (numA !== Infinity && numB !== Infinity) {
+                    return numA - numB;
+                }
+                if (numA !== Infinity) return -1;
+                if (numB !== Infinity) return 1;
+                return (a.buildingName || '').localeCompare(b.buildingName || '', undefined, { numeric: true, sensitivity: 'base' });
+            });
+        
+        // Add building groups
+        sortedBuildings.forEach(building => {
+            const tenantsInBuilding = tenantsByBuilding[building.id] || [];
+            if (tenantsInBuilding.length > 0) {
+                // Sort tenants within building alphabetically
+                tenantsInBuilding.sort((a, b) => {
+                    return (a.tenantName || '').localeCompare(b.tenantName || '', undefined, { numeric: true, sensitivity: 'base' });
+                });
+                
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = building.buildingName || `Building ${building.id}`;
+                
+                tenantsInBuilding.forEach(tenant => {
+                    const option = document.createElement('option');
+                    option.value = tenant.id;
+                    option.textContent = tenant.tenantName || 'Unnamed Tenant';
+                    optgroup.appendChild(option);
+                });
+                
+                tenantSelect.appendChild(optgroup);
+            }
+        });
+        
+        // Add orphaned tenants group
+        if (orphanedTenants.length > 0) {
+            orphanedTenants.sort((a, b) => {
+                return (a.tenantName || '').localeCompare(b.tenantName || '', undefined, { numeric: true, sensitivity: 'base' });
+            });
+            
+            const orphanOptgroup = document.createElement('optgroup');
+            orphanOptgroup.label = '⚠️ Orphaned Tenants';
+            
+            orphanedTenants.forEach(tenant => {
+                const option = document.createElement('option');
+                option.value = tenant.id;
+                option.textContent = tenant.tenantName || 'Unnamed Tenant';
+                orphanOptgroup.appendChild(option);
+            });
+            
+            tenantSelect.appendChild(orphanOptgroup);
+        }
+        
+        // Set selected tenant if provided
+        if (selectedTenantId) {
+            tenantSelect.value = selectedTenantId;
+        }
+    } catch (error) {
+        console.error('Error loading tenants for contact select:', error);
+        // Fallback to simple list if error
+        db.collection('tenants')
+            .orderBy('tenantName')
+            .get()
+            .then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    const tenant = doc.data();
+                    const option = document.createElement('option');
+                    option.value = doc.id;
+                    option.textContent = tenant.tenantName || 'Unnamed Tenant';
+                    tenantSelect.appendChild(option);
+                });
+                
+                if (selectedTenantId) {
+                    tenantSelect.value = selectedTenantId;
+                }
+            });
+    }
 }
 
 window.editContactFromTable = function(contactId, event) {
