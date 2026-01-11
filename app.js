@@ -36,17 +36,17 @@ function updateFABsVisibility() {
         }
     }
     
-    // Show Add Contact FAB when tenant detail view is visible and contacts tab is active (visible when scrolling contacts)
+    // Show Add Contact FAB when on tenants page (table view) OR when viewing tenant details with contacts tab active
     if (fabAddContact) {
-        if (tenantDetailView && contactsTab) {
-            const isDetailViewVisible = tenantDetailView.style.display !== 'none';
-            const isContactsTabActive = contactsTab.classList.contains('active');
-            // Show when viewing tenant details with contacts tab active
-            const shouldShow = isDetailViewVisible && isContactsTabActive;
-            fabAddContact.style.display = shouldShow ? 'flex' : 'none';
-        } else {
-            fabAddContact.style.display = 'none';
-        }
+        const isTenantsPageVisible = tenantsPage && tenantsPage.style.display !== 'none';
+        const isDetailViewVisible = tenantDetailView && tenantDetailView.style.display !== 'none';
+        const isContactsTabActive = contactsTab && contactsTab.classList.contains('active');
+        
+        // Show when:
+        // 1. On tenants page (table view) - allows adding contacts from table
+        // 2. OR when viewing tenant details with contacts tab active
+        const shouldShow = (isTenantsPageVisible && !isDetailViewVisible) || (isDetailViewVisible && isContactsTabActive);
+        fabAddContact.style.display = shouldShow ? 'flex' : 'none';
     }
 }
 
