@@ -660,15 +660,26 @@ function renderBuildingsAndUnitsTable(buildings, units, propertyId) {
     
     Object.keys(units).forEach(id => {
         const unit = units[id];
+        // A unit is orphaned if:
+        // 1. It has no buildingId, OR
+        // 2. It has a buildingId but that building doesn't exist in the buildings collection
         if (unit.buildingId && buildings[unit.buildingId]) {
+            // Unit has a valid building - add to building group
             if (!unitsByBuilding[unit.buildingId]) {
                 unitsByBuilding[unit.buildingId] = [];
             }
             unitsByBuilding[unit.buildingId].push({ id, ...unit });
         } else {
+            // Unit is orphaned - no buildingId or building doesn't exist
             unitsWithoutBuilding.push({ id, ...unit });
         }
     });
+    
+    // Debug logging
+    console.log('Orphaned units count:', unitsWithoutBuilding.length);
+    if (unitsWithoutBuilding.length > 0) {
+        console.log('Orphaned units:', unitsWithoutBuilding.map(u => ({ id: u.id, unitNumber: u.unitNumber, buildingId: u.buildingId })));
+    }
     
     // Sort buildings by name (numeric-aware)
     const sortedBuildings = Object.keys(buildings).map(id => ({ id, ...buildings[id] })).sort((a, b) => {
