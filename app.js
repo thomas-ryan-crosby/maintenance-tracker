@@ -706,7 +706,7 @@ function renderBuildingsAndUnitsTable(buildings, units, propertyId) {
     
     let html = `
         <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
-            <table class="buildings-units-table" style="width: 100%; min-width: 1200px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-size: 0.875rem;">
+            <table class="buildings-units-table" style="width: 100%; min-width: 1300px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-size: 0.875rem;">
                 <thead>
                     <tr style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white;">
                         <th style="padding: 14px 10px; text-align: left; font-weight: 600; border-bottom: 2px solid #1e3a8a; white-space: nowrap; width: 140px;">Building</th>
