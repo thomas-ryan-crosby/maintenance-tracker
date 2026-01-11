@@ -3471,12 +3471,26 @@ async function renderTenantsTableView(tenants) {
         propertiesMap[doc.id] = { id: doc.id, ...doc.data() };
     });
     
-    // Group tenants by building
-    const tenantsByBuilding = {};
-    const tenantsWithoutBuilding = [];
+    // Separate moved out tenants from active tenants
+    const movedOutTenants = [];
+    const activeTenants = {};
     
     Object.keys(filteredTenants).forEach(tenantId => {
         const tenant = filteredTenants[tenantId];
+        if (tenant.status === 'Moved Out') {
+            const tenantOccupancies = occupanciesMap[tenantId] || [];
+            movedOutTenants.push({ tenant, occupancies: tenantOccupancies });
+        } else {
+            activeTenants[tenantId] = tenant;
+        }
+    });
+    
+    // Group active tenants by building
+    const tenantsByBuilding = {};
+    const tenantsWithoutBuilding = [];
+    
+    Object.keys(activeTenants).forEach(tenantId => {
+        const tenant = activeTenants[tenantId];
         const tenantOccupancies = occupanciesMap[tenantId] || [];
         
         if (tenantOccupancies.length === 0) {
@@ -6098,16 +6112,54 @@ window.removeTenantFromUnit = function(occupancyId, tenantId) {
 
 // Mark tenant as moved out
 window.markTenantAsMovedOut = function(tenantId) {
-    if (!confirm('Mark this tenant as moved out? This will update their status to "Moved Out".')) {
+    // Prompt for move-out date
+    const moveOutDateStr = prompt('Enter the move-out date (YYYY-MM-DD) or leave blank for today:', new Date().toISOString().split('T')[0]);
+    
+    if (moveOutDateStr === null) {
+        // User cancelled
         return;
     }
     
+    let moveOutDate = null;
+    if (moveOutDateStr) {
+        try {
+            moveOutDate = firebase.firestore.Timestamp.fromDate(new Date(moveOutDateStr));
+        } catch (error) {
+            alert('Invalid date format. Please use YYYY-MM-DD format.');
+            return;
+        }
+    } else {
+        // Default to today
+        moveOutDate = firebase.firestore.Timestamp.fromDate(new Date());
+    }
+    
+    // Update tenant status
     db.collection('tenants').doc(tenantId).update({
         status: 'Moved Out',
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     })
     .then(() => {
-        console.log('Tenant marked as moved out');
+        // Update all active occupancies for this tenant
+        return db.collection('occupancies')
+            .where('tenantId', '==', tenantId)
+            .where('status', '==', 'Active')
+            .get();
+    })
+    .then((occupanciesSnapshot) => {
+        const updatePromises = [];
+        occupanciesSnapshot.forEach((doc) => {
+            updatePromises.push(
+                db.collection('occupancies').doc(doc.id).update({
+                    moveOutDate: moveOutDate,
+                    status: 'Past',
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                })
+            );
+        });
+        return Promise.all(updatePromises);
+    })
+    .then(() => {
+        console.log('Tenant marked as moved out and occupancies updated');
         // Refresh table view
         db.collection('tenants').get().then((snapshot) => {
             const tenants = {};
