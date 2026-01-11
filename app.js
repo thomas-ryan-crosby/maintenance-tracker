@@ -3627,23 +3627,23 @@ async function renderTenantsTableView(tenants) {
             <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: center;">
                 <div style="font-weight: 600; font-size: 0.75rem; color: #333; margin-right: 10px;">Contact Types:</div>
                 <div style="display: flex; align-items: center; gap: 6px;">
-                    <span class="contact-type-indicator primary"></span>
+                    <span class="contact-type-indicator primary" title="Primary">#1</span>
                     <span style="font-size: 0.7rem;">Primary</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 6px;">
-                    <span class="contact-type-indicator secondary"></span>
+                    <span class="contact-type-indicator secondary" title="Secondary">#2</span>
                     <span style="font-size: 0.7rem;">Secondary</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 6px;">
-                    <span class="contact-type-indicator leasing"></span>
+                    <span class="contact-type-indicator leasing" title="Leasing">L</span>
                     <span style="font-size: 0.7rem;">Leasing</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 6px;">
-                    <span class="contact-type-indicator billing"></span>
+                    <span class="contact-type-indicator billing" title="Billing">$</span>
                     <span style="font-size: 0.7rem;">Billing</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 6px;">
-                    <span class="contact-type-indicator tenant-rep"></span>
+                    <span class="contact-type-indicator tenant-rep" title="Tenant Representative">TR</span>
                     <span style="font-size: 0.7rem;">Tenant Representative</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px; margin-left: 10px; padding-left: 10px; border-left: 1px solid #ddd;">
@@ -5203,12 +5203,12 @@ async function loadContactsForTableView(tenants, maxContacts, maxBrokers) {
                     const isLeasing = classifications.includes('Leasing');
                     const isBilling = classifications.includes('Billing');
                     
-                    // Create type indicator circles
+                    // Create type indicator icons
                     let typeIndicators = '<div class="contact-type-indicators">';
-                    if (isPrimary) typeIndicators += '<span class="contact-type-indicator primary" title="Primary"></span>';
-                    if (isSecondary) typeIndicators += '<span class="contact-type-indicator secondary" title="Secondary"></span>';
-                    if (isLeasing) typeIndicators += '<span class="contact-type-indicator leasing" title="Leasing"></span>';
-                    if (isBilling) typeIndicators += '<span class="contact-type-indicator billing" title="Billing"></span>';
+                    if (isPrimary) typeIndicators += '<span class="contact-type-indicator primary" title="Primary">#1</span>';
+                    if (isSecondary) typeIndicators += '<span class="contact-type-indicator secondary" title="Secondary">#2</span>';
+                    if (isLeasing) typeIndicators += '<span class="contact-type-indicator leasing" title="Leasing">L</span>';
+                    if (isBilling) typeIndicators += '<span class="contact-type-indicator billing" title="Billing">$</span>';
                     typeIndicators += '</div>';
                     
                     contactCell.innerHTML = `
