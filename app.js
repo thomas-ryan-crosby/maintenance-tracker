@@ -3672,54 +3672,28 @@ async function renderTenantsTableView(tenants) {
         brokerSubHeaders.push(`<th>Broker ${i}</th>`);
     }
     
-    // Sort buildings by lowest unit number (ascending)
+    // Sort buildings by building number (extract number from building name)
     const sortedBuildingNames = Object.keys(tenantsByBuilding).sort((a, b) => {
-        const groupA = tenantsByBuilding[a];
-        const groupB = tenantsByBuilding[b];
+        // Extract numeric part from building name (e.g., "Building 1" -> 1, "BLDG 2" -> 2)
+        const extractBuildingNumber = (name) => {
+            const match = name.match(/(\d+)/);
+            return match ? parseInt(match[1], 10) : Infinity; // If no number found, put at end
+        };
         
-        // Get all unit numbers for building A
-        const unitNumbersA = [];
-        groupA.tenants.forEach(({ occupancies }) => {
-            occupancies.forEach(occ => {
-                if (occ.unitId && unitsMap[occ.unitId]) {
-                    const unit = unitsMap[occ.unitId];
-                    if (unit.unitNumber) {
-                        unitNumbersA.push(unit.unitNumber);
-                    }
-                }
-            });
-        });
+        const numA = extractBuildingNumber(a);
+        const numB = extractBuildingNumber(b);
         
-        // Get all unit numbers for building B
-        const unitNumbersB = [];
-        groupB.tenants.forEach(({ occupancies }) => {
-            occupancies.forEach(occ => {
-                if (occ.unitId && unitsMap[occ.unitId]) {
-                    const unit = unitsMap[occ.unitId];
-                    if (unit.unitNumber) {
-                        unitNumbersB.push(unit.unitNumber);
-                    }
-                }
-            });
-        });
-        
-        // If no unit numbers, sort alphabetically
-        if (unitNumbersA.length === 0 && unitNumbersB.length === 0) {
-            return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+        // If both have numbers, sort numerically
+        if (numA !== Infinity && numB !== Infinity) {
+            return numA - numB;
         }
-        if (unitNumbersA.length === 0) return 1; // Buildings without units go to end
-        if (unitNumbersB.length === 0) return -1;
         
-        // Find minimum unit number for each building (numeric-aware sort)
-        const minUnitA = unitNumbersA.sort((x, y) => {
-            return (x || '').localeCompare(y || '', undefined, { numeric: true, sensitivity: 'base' });
-        })[0];
-        const minUnitB = unitNumbersB.sort((x, y) => {
-            return (x || '').localeCompare(y || '', undefined, { numeric: true, sensitivity: 'base' });
-        })[0];
+        // If only one has a number, it comes first
+        if (numA !== Infinity) return -1;
+        if (numB !== Infinity) return 1;
         
-        // Compare minimum unit numbers
-        return (minUnitA || '').localeCompare(minUnitB || '', undefined, { numeric: true, sensitivity: 'base' });
+        // If neither has a number, sort alphabetically
+        return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
     });
     
     // Render grouped by building (sorted by unit number)
