@@ -3157,6 +3157,19 @@ async function renderTenantsTableView(tenants) {
         occupanciesMap[occ.tenantId].push({ ...occ, id: doc.id });
     });
     
+    // Map occupancies by unitId to check if units are occupied
+    const occupanciesByUnitId = {};
+    occupanciesSnapshot.forEach(doc => {
+        const occ = doc.data();
+        if (occ.unitId && (occ.status === 'Active' || !occ.status)) {
+            // Only consider active occupancies (or those without status, assuming active)
+            if (!occupanciesByUnitId[occ.unitId]) {
+                occupanciesByUnitId[occ.unitId] = [];
+            }
+            occupanciesByUnitId[occ.unitId].push({ ...occ, id: doc.id });
+        }
+    });
+    
     const buildingsMap = {};
     buildingsSnapshot.forEach(doc => {
         buildingsMap[doc.id] = { id: doc.id, ...doc.data() };
@@ -3165,6 +3178,27 @@ async function renderTenantsTableView(tenants) {
     const unitsMap = {};
     unitsSnapshot.forEach(doc => {
         unitsMap[doc.id] = { id: doc.id, ...doc.data() };
+    });
+    
+    // Group units by building
+    const unitsByBuilding = {};
+    Object.keys(unitsMap).forEach(unitId => {
+        const unit = unitsMap[unitId];
+        if (unit.buildingId) {
+            if (!unitsByBuilding[unit.buildingId]) {
+                unitsByBuilding[unit.buildingId] = [];
+            }
+            unitsByBuilding[unit.buildingId].push(unit);
+        }
+    });
+    
+    // Sort units by unitNumber within each building
+    Object.keys(unitsByBuilding).forEach(buildingId => {
+        unitsByBuilding[buildingId].sort((a, b) => {
+            const aNum = a.unitNumber || '';
+            const bNum = b.unitNumber || '';
+            return aNum.localeCompare(bNum, undefined, { numeric: true, sensitivity: 'base' });
+        });
     });
     
     const propertiesMap = {};
@@ -3373,6 +3407,38 @@ async function renderTenantsTableView(tenants) {
         html += `
                     </tbody>
                 </table>
+        `;
+        
+        // Add units section for this building
+        const buildingId = group.building?.id;
+        if (buildingId && unitsByBuilding[buildingId] && unitsByBuilding[buildingId].length > 0) {
+            html += `
+                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                    <h4 style="margin: 0 0 12px 0; font-size: 0.9rem; font-weight: 600; color: #333;">All Units</h4>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            `;
+            
+            unitsByBuilding[buildingId].forEach(unit => {
+                const isOccupied = occupanciesByUnitId[unit.id] && occupanciesByUnitId[unit.id].length > 0;
+                const statusText = isOccupied ? 'Occupied' : 'Vacant';
+                const statusColor = isOccupied ? '#10b981' : '#6b7280';
+                const statusBg = isOccupied ? '#d1fae5' : '#f3f4f6';
+                
+                html += `
+                    <div style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: ${statusBg}; border: 1px solid ${statusColor}40; border-radius: 4px; font-size: 0.75rem;">
+                        <span style="font-weight: 600; color: #333;">${escapeHtml(unit.unitNumber || 'N/A')}</span>
+                        <span style="padding: 2px 6px; background: ${statusColor}; color: white; border-radius: 3px; font-size: 0.65rem; font-weight: 600;">${statusText}</span>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+            `;
+        }
+        
+        html += `
             </div>
         `;
     });
