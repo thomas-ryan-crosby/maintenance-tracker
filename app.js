@@ -443,9 +443,9 @@ function setupEventListeners() {
         addContactBtn.addEventListener('click', () => {
             let tenantId = currentTenantIdForDetail;
             if (!tenantId) {
-                const tenantDetailView = document.getElementById('tenantDetailView');
-                if (tenantDetailView) {
-                    tenantId = tenantDetailView.getAttribute('data-tenant-id');
+                const tenantDetailModal = document.getElementById('tenantDetailModal');
+                if (tenantDetailModal) {
+                    tenantId = tenantDetailModal.getAttribute('data-tenant-id');
                 }
             }
             if (tenantId) {
@@ -469,9 +469,9 @@ function setupEventListeners() {
         addOccupancyBtn.addEventListener('click', () => {
             let tenantId = currentTenantIdForDetail;
             if (!tenantId) {
-                const tenantDetailView = document.getElementById('tenantDetailView');
-                if (tenantDetailView) {
-                    tenantId = tenantDetailView.getAttribute('data-tenant-id');
+                const tenantDetailModal = document.getElementById('tenantDetailModal');
+                if (tenantDetailModal) {
+                    tenantId = tenantDetailModal.getAttribute('data-tenant-id');
                 }
             }
             if (tenantId) {
@@ -485,15 +485,18 @@ function setupEventListeners() {
     if (closeOccupancyModalBtn) closeOccupancyModalBtn.addEventListener('click', closeOccupancyModal);
     if (cancelOccupancyFormBtn) cancelOccupancyFormBtn.addEventListener('click', closeOccupancyModal);
     
-    // Tab switching for tenant detail view
-    const tenantTabButtons = document.querySelectorAll('#tenantDetailView .tab-btn');
+    // Tab switching for tenant detail modal
+    const tenantTabButtons = document.querySelectorAll('#tenantDetailModal .tab-btn');
     tenantTabButtons.forEach(btn => {
         btn.addEventListener('click', function() {
             const tabName = this.getAttribute('data-tab');
             
-            // Remove active class from all tabs and tab contents in tenant detail view
-            document.querySelectorAll('#tenantDetailView .tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('#tenantDetailView .tab-content').forEach(c => c.classList.remove('active'));
+            // Remove active class from all tabs and tab contents in tenant detail modal
+            document.querySelectorAll('#tenantDetailModal .tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('#tenantDetailModal .tab-content').forEach(c => {
+                c.classList.remove('active');
+                c.style.display = 'none';
+            });
             
             // Add active class to clicked tab
             this.classList.add('active');
@@ -502,11 +505,30 @@ function setupEventListeners() {
             const tabContent = document.getElementById(tabName + 'Tab');
             if (tabContent) {
                 tabContent.classList.add('active');
+                tabContent.style.display = 'block';
             }
             
             updateFABsVisibility();
         });
     });
+    
+    // Close tenant detail modal
+    const closeTenantDetailModalBtn = document.getElementById('closeTenantDetailModal');
+    if (closeTenantDetailModalBtn) {
+        closeTenantDetailModalBtn.addEventListener('click', function() {
+            window.backToTenants();
+        });
+    }
+    
+    // Close modal when clicking outside
+    const tenantDetailModal = document.getElementById('tenantDetailModal');
+    if (tenantDetailModal) {
+        tenantDetailModal.addEventListener('click', function(e) {
+            if (e.target === tenantDetailModal) {
+                window.backToTenants();
+            }
+        });
+    }
     
     // Update FABs on scroll to ensure they stay visible when scrolling the table
     window.addEventListener('scroll', function() {
@@ -5679,12 +5701,9 @@ let editingOccupancyId = null;
 
 window.viewTenantDetail = function(tenantId) {
     currentTenantIdForDetail = tenantId;
-    const tenantsList = document.querySelector('.tenants-page-content .section');
-    const tenantDetailView = document.getElementById('tenantDetailView');
-    if (tenantsList) tenantsList.style.display = 'none';
-    if (tenantDetailView) {
-        tenantDetailView.style.display = 'block';
-        tenantDetailView.setAttribute('data-tenant-id', tenantId);
+    const tenantDetailModal = document.getElementById('tenantDetailModal');
+    if (tenantDetailModal) {
+        tenantDetailModal.setAttribute('data-tenant-id', tenantId);
         db.collection('tenants').doc(tenantId).get().then((doc) => {
             const tenant = doc.data();
             if (tenant) {
@@ -5694,15 +5713,33 @@ window.viewTenantDetail = function(tenantId) {
         });
         loadContacts(tenantId);
         loadOccupancies(tenantId);
+        
+        // Show modal
+        tenantDetailModal.classList.add('show');
+        
+        // Reset to contacts tab
+        document.querySelectorAll('#tenantDetailModal .tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('#tenantDetailModal .tab-content').forEach(c => {
+            c.classList.remove('active');
+            c.style.display = 'none';
+        });
+        const contactsTabBtn = document.querySelector('#tenantDetailModal .tab-btn[data-tab="contacts"]');
+        const contactsTab = document.getElementById('contactsTab');
+        if (contactsTabBtn) contactsTabBtn.classList.add('active');
+        if (contactsTab) {
+            contactsTab.classList.add('active');
+            contactsTab.style.display = 'block';
+        }
     }
     updateFABsVisibility();
 };
 
 window.backToTenants = function() {
-    const tenantsList = document.querySelector('.tenants-page-content .section');
-    const tenantDetailView = document.getElementById('tenantDetailView');
-    if (tenantsList) tenantsList.style.display = 'block';
-    if (tenantDetailView) tenantDetailView.style.display = 'none';
+    const tenantDetailModal = document.getElementById('tenantDetailModal');
+    if (tenantDetailModal) {
+        tenantDetailModal.classList.remove('show');
+    }
+    currentTenantIdForDetail = null;
     updateFABsVisibility();
 };
 

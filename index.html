@@ -772,29 +772,33 @@
                 </div>
             </div>
             
-            <!-- Tenant Detail View -->
-            <div id="tenantDetailView" style="display: none;">
-                <div class="property-detail-header">
-                    <button id="backToTenantsBtn" class="btn-secondary">← Back to Tenants</button>
-                    <h3 id="tenantDetailName"></h3>
-                </div>
-                <div class="property-detail-tabs">
-                    <button class="tab-btn active" data-tab="contacts">Contacts</button>
-                    <button class="tab-btn" data-tab="occupancies">Occupancies</button>
-                </div>
-                <div id="contactsTab" class="tab-content active">
-                    <div class="section-header">
-                        <h4>Contacts</h4>
-                        <button id="addContactBtn" class="btn-primary btn-small" style="display: none;">+ Add Contact</button>
+            <!-- Tenant Detail Modal -->
+            <div id="tenantDetailModal" class="modal">
+                <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+                    <div class="modal-header">
+                        <h2 id="tenantDetailName">Tenant Details</h2>
+                        <button class="close-btn" id="closeTenantDetailModal">&times;</button>
                     </div>
-                    <div id="contactsList" class="contacts-list"></div>
-                </div>
-                <div id="occupanciesTab" class="tab-content">
-                    <div class="section-header">
-                        <h4>Occupancies</h4>
-                        <button id="addOccupancyBtn" class="btn-primary btn-small">+ Add Occupancy</button>
+                    <div class="modal-body">
+                        <div class="property-detail-tabs" style="margin-bottom: 20px; border-bottom: 2px solid #e2e8f0;">
+                            <button class="tab-btn active" data-tab="contacts">Contacts</button>
+                            <button class="tab-btn" data-tab="occupancies">Occupancies</button>
+                        </div>
+                        <div id="contactsTab" class="tab-content active">
+                            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h4 style="margin: 0;">Contacts</h4>
+                                <button id="addContactBtn" class="btn-primary btn-small" style="display: none;">+ Add Contact</button>
+                            </div>
+                            <div id="contactsList" class="contacts-list"></div>
+                        </div>
+                        <div id="occupanciesTab" class="tab-content" style="display: none;">
+                            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h4 style="margin: 0;">Occupancies</h4>
+                                <button id="addOccupancyBtn" class="btn-primary btn-small">+ Add Occupancy</button>
+                            </div>
+                            <div id="occupanciesList" class="occupancies-list"></div>
+                        </div>
                     </div>
-                    <div id="occupanciesList" class="occupancies-list"></div>
                 </div>
             </div>
             
@@ -1050,7 +1054,7 @@
                     
                     // Now load app.js after config is ready
                     const appScript = document.createElement('script');
-                    appScript.src = 'app.js?v=6.4';
+                    appScript.src = 'app.js?v=6.5';
                     appScript.onload = function() {
                         console.log('✅ app.js loaded successfully');
                     };
@@ -1076,7 +1080,7 @@
                             return;
                         }
                         const appScript = document.createElement('script');
-                        appScript.src = 'app.js?v=6.4';
+                        appScript.src = 'app.js?v=6.5';
                         document.head.appendChild(appScript);
                     };
                     fallback.onerror = function() {
