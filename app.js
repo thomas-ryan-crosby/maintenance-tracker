@@ -3979,11 +3979,13 @@ async function loadOrphanContacts(maxContacts, maxBrokers) {
         const tenantIds = new Set();
         allTenantsSnapshot.forEach(doc => tenantIds.add(doc.id));
         
-        // Find orphan contacts (contacts whose tenantId doesn't exist)
+        // Find orphan contacts (contacts whose tenantId is null, undefined, or doesn't exist)
         const orphanContacts = [];
         allContactsSnapshot.forEach(doc => {
             const contact = doc.data();
-            if (!tenantIds.has(contact.tenantId)) {
+            const tenantId = contact.tenantId;
+            // Contact is orphan if tenantId is null, undefined, empty string, or doesn't exist in tenants collection
+            if (!tenantId || tenantId === '' || !tenantIds.has(tenantId)) {
                 orphanContacts.push({ id: doc.id, ...contact });
             }
         });
@@ -5742,13 +5744,10 @@ window.addContact = function(tenantId) {
     editingContactId = null;
     document.getElementById('contactModalTitle').textContent = 'Add Contact';
     document.getElementById('contactId').value = '';
-    document.getElementById('contactTenantId').value = tenantId || '';
     document.getElementById('contactForm').reset();
     
-    // If no tenantId, set it to empty string (will create orphan contact)
-    if (!tenantId) {
-        document.getElementById('contactTenantId').value = '';
-    }
+    // Load tenants into dropdown
+    loadTenantsForContactSelect(tenantId || null);
     
     const submitBtn = document.querySelector('#contactForm button[type="submit"]');
     if (submitBtn) {
@@ -5762,6 +5761,35 @@ window.addContact = function(tenantId) {
         document.getElementById('contactName').focus();
     }, 100);
 };
+
+// Load tenants for contact form dropdown
+function loadTenantsForContactSelect(selectedTenantId = null) {
+    const tenantSelect = document.getElementById('contactTenantIdSelect');
+    if (!tenantSelect) return;
+    
+    tenantSelect.innerHTML = '<option value="">No Tenant (Orphan Contact)</option>';
+    
+    db.collection('tenants')
+        .orderBy('tenantName')
+        .get()
+        .then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+                const tenant = doc.data();
+                const option = document.createElement('option');
+                option.value = doc.id;
+                option.textContent = tenant.tenantName || 'Unnamed Tenant';
+                tenantSelect.appendChild(option);
+            });
+            
+            // Set selected tenant if provided
+            if (selectedTenantId) {
+                tenantSelect.value = selectedTenantId;
+            }
+        })
+        .catch((error) => {
+            console.error('Error loading tenants for contact select:', error);
+        });
+}
 
 window.editContactFromTable = function(contactId, event) {
     if (event) {
@@ -5777,7 +5805,10 @@ window.editContact = function(contactId) {
             editingContactId = contactId;
             document.getElementById('contactModalTitle').textContent = 'Edit Contact';
             document.getElementById('contactId').value = contactId;
-            document.getElementById('contactTenantId').value = contact.tenantId;
+            
+            // Load tenants and set selected tenant
+            loadTenantsForContactSelect(contact.tenantId || null);
+            
             document.getElementById('contactName').value = contact.contactName || '';
             document.getElementById('contactEmail').value = contact.contactEmail || '';
             document.getElementById('contactPhone').value = contact.contactPhone || '';
@@ -5834,7 +5865,8 @@ function closeContactModal() {
     }
     document.getElementById('contactForm').reset();
     document.getElementById('contactId').value = '';
-    document.getElementById('contactTenantId').value = '';
+    const tenantSelect = document.getElementById('contactTenantIdSelect');
+    if (tenantSelect) tenantSelect.value = '';
     editingContactId = null;
     
     const submitBtn = document.querySelector('#contactForm button[type="submit"]');
@@ -5858,7 +5890,7 @@ function handleContactSubmit(e) {
     };
     
     const id = document.getElementById('contactId').value;
-    const tenantId = document.getElementById('contactTenantId').value;
+    const tenantId = document.getElementById('contactTenantIdSelect').value || null; // Get from select dropdown
     const contactName = document.getElementById('contactName').value.trim();
     const contactEmail = document.getElementById('contactEmail').value.trim();
     const contactPhone = document.getElementById('contactPhone').value.trim();

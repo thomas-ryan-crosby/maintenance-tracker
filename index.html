@@ -851,7 +851,14 @@
                     <div class="modal-body">
                         <form id="contactForm">
                             <input type="hidden" id="contactId">
-                            <input type="hidden" id="contactTenantId">
+                            
+                            <div class="form-group">
+                                <label for="contactTenantIdSelect">Tenant (Optional)</label>
+                                <select id="contactTenantIdSelect">
+                                    <option value="">No Tenant (Orphan Contact)</option>
+                                </select>
+                                <small style="color: #666; font-size: 12px;">Leave blank to create an orphan contact</small>
+                            </div>
                             
                             <div class="form-group">
                                 <label for="contactName">Contact Name *</label>
@@ -1043,7 +1050,7 @@
                     
                     // Now load app.js after config is ready
                     const appScript = document.createElement('script');
-                    appScript.src = 'app.js?v=5.4';
+                    appScript.src = 'app.js?v=5.5';
                     appScript.onload = function() {
                         console.log('✅ app.js loaded successfully');
                     };
@@ -1069,7 +1076,7 @@
                             return;
                         }
                         const appScript = document.createElement('script');
-                        appScript.src = 'app.js?v=5.4';
+                        appScript.src = 'app.js?v=5.5';
                         document.head.appendChild(appScript);
                     };
                     fallback.onerror = function() {
