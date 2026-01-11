@@ -4328,6 +4328,11 @@ async function loadMovedOutTenantsSection(movedOutTenants, occupanciesMap, units
     if (Object.keys(movedOutTenantsMap).length > 0) {
         loadContactsForTableView(movedOutTenantsMap, maxContacts, maxBrokers);
     }
+    
+    // Apply broker visibility toggle to moved out tenants section (default to hidden)
+    const showBrokersToggle = document.getElementById('showBrokersToggle');
+    const shouldShowBrokers = showBrokersToggle ? showBrokersToggle.checked : false;
+    toggleBrokerColumns(shouldShowBrokers);
 }
 
 function deleteOrphanContact(contactId) {
