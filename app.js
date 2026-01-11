@@ -3672,8 +3672,58 @@ async function renderTenantsTableView(tenants) {
         brokerSubHeaders.push(`<th>Broker ${i}</th>`);
     }
     
-    // Render grouped by building
-    Object.keys(tenantsByBuilding).sort().forEach(buildingName => {
+    // Sort buildings by lowest unit number (ascending)
+    const sortedBuildingNames = Object.keys(tenantsByBuilding).sort((a, b) => {
+        const groupA = tenantsByBuilding[a];
+        const groupB = tenantsByBuilding[b];
+        
+        // Get all unit numbers for building A
+        const unitNumbersA = [];
+        groupA.tenants.forEach(({ occupancies }) => {
+            occupancies.forEach(occ => {
+                if (occ.unitId && unitsMap[occ.unitId]) {
+                    const unit = unitsMap[occ.unitId];
+                    if (unit.unitNumber) {
+                        unitNumbersA.push(unit.unitNumber);
+                    }
+                }
+            });
+        });
+        
+        // Get all unit numbers for building B
+        const unitNumbersB = [];
+        groupB.tenants.forEach(({ occupancies }) => {
+            occupancies.forEach(occ => {
+                if (occ.unitId && unitsMap[occ.unitId]) {
+                    const unit = unitsMap[occ.unitId];
+                    if (unit.unitNumber) {
+                        unitNumbersB.push(unit.unitNumber);
+                    }
+                }
+            });
+        });
+        
+        // If no unit numbers, sort alphabetically
+        if (unitNumbersA.length === 0 && unitNumbersB.length === 0) {
+            return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+        }
+        if (unitNumbersA.length === 0) return 1; // Buildings without units go to end
+        if (unitNumbersB.length === 0) return -1;
+        
+        // Find minimum unit number for each building (numeric-aware sort)
+        const minUnitA = unitNumbersA.sort((x, y) => {
+            return (x || '').localeCompare(y || '', undefined, { numeric: true, sensitivity: 'base' });
+        })[0];
+        const minUnitB = unitNumbersB.sort((x, y) => {
+            return (x || '').localeCompare(y || '', undefined, { numeric: true, sensitivity: 'base' });
+        })[0];
+        
+        // Compare minimum unit numbers
+        return (minUnitA || '').localeCompare(minUnitB || '', undefined, { numeric: true, sensitivity: 'base' });
+    });
+    
+    // Render grouped by building (sorted by unit number)
+    sortedBuildingNames.forEach(buildingName => {
         const group = tenantsByBuilding[buildingName];
         html += `
             <div class="building-group">
