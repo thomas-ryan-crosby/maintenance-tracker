@@ -4106,6 +4106,143 @@ async function loadOrphanContacts(maxContacts, maxBrokers) {
     }
 }
 
+async function loadMovedOutTenantsSection(movedOutTenants, occupanciesMap, unitsMap, maxContacts, maxBrokers) {
+    const tenantsTable = document.getElementById('tenantsTable');
+    if (!tenantsTable) return;
+    
+    // Generate contact column headers
+    const contactSubHeaders = [];
+    for (let i = 1; i <= maxContacts; i++) {
+        contactSubHeaders.push(`<th>Contact ${i}</th>`);
+    }
+    
+    const brokerSubHeaders = [];
+    for (let i = 1; i <= maxBrokers; i++) {
+        brokerSubHeaders.push(`<th>Broker ${i}</th>`);
+    }
+    
+    let movedOutHtml = `
+        <div class="building-group" style="border-left: 3px solid #9ca3af; margin-top: 30px;">
+            <div class="building-group-header" style="background: #f3f4f6;">
+                <input type="checkbox" class="email-select-building" data-building-id="" data-building-name="Moved Out Tenants" style="display: none; margin-right: 8px; cursor: pointer;">
+                <span style="font-weight: 600; color: #6b7280;">🚪 Moved Out Tenants${movedOutTenants.length > 0 ? ` (${movedOutTenants.length})` : ''}</span>
+                <span style="font-size: 0.75rem; color: #666; margin-left: 10px;">Tenants who have moved out</span>
+            </div>
+    `;
+    
+    if (movedOutTenants.length > 0) {
+        movedOutHtml += `
+            <table class="tenants-table">
+                    <thead>
+                        <tr class="header-major">
+                            <th rowspan="2">Occupancies</th>
+                            <th rowspan="2">Tenant Name</th>
+                            ${maxContacts > 0 ? `<th colspan="${maxContacts}">Contacts</th>` : ''}
+                            ${maxBrokers > 0 ? `<th colspan="${maxBrokers}">Brokers</th>` : ''}
+                        </tr>
+                        <tr class="header-sub">
+                            ${contactSubHeaders.join('')}
+                            ${brokerSubHeaders.join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        movedOutTenants.forEach(({ tenant, occupancies }) => {
+            // Get ALL occupancies for this tenant
+            const allTenantOccupancies = occupanciesMap[tenant.id] || [];
+            
+            // Occupancies - show all occupancies for this tenant
+            let occupanciesHtml = '<div style="display: flex; flex-direction: column; gap: 4px;"><span style="color: #999; font-size: 0.8rem;">No occupancies</span></div>';
+            if (allTenantOccupancies.length > 0) {
+                occupanciesHtml = '<div style="display: flex; flex-direction: column; gap: 4px;">' + 
+                    allTenantOccupancies.map(occ => {
+                        let unitDisplay = '';
+                        if (occ.unitId && unitsMap[occ.unitId]) {
+                            const unit = unitsMap[occ.unitId];
+                            unitDisplay = `Unit ${escapeHtml(unit.unitNumber || 'N/A')}`;
+                        } else if (occ.unitId) {
+                            unitDisplay = `Unit (ID: ${occ.unitId.substring(0, 8)}...)`;
+                        } else {
+                            unitDisplay = 'Property Level';
+                        }
+                        // Show move-out date if available
+                        if (occ.moveOutDate) {
+                            const moveOut = occ.moveOutDate.toDate ? occ.moveOutDate.toDate() : new Date(occ.moveOutDate);
+                            unitDisplay += ` <span style="color: #9ca3af; font-size: 0.7rem;">(Moved out: ${moveOut.toLocaleDateString()})</span>`;
+                        }
+                        return `<div style="display: flex; align-items: center; gap: 4px; padding: 2px 0;">
+                            <span class="occupancy-info" style="font-size: 0.8rem; flex: 1;">${unitDisplay}</span>
+                        </div>`;
+                    }).join('') + '</div>';
+            }
+            
+            // Create empty contact cells
+            const contactCells = [];
+            for (let i = 0; i < maxContacts; i++) {
+                contactCells.push(`<td class="tenant-contact-cell" data-contact-index="${i}" data-contact-type="contact" data-tenant-id="${tenant.id}" style="vertical-align: top;"><span style="color: #999;">Loading...</span></td>`);
+            }
+            
+            // Create empty broker cells
+            const brokerCells = [];
+            for (let i = 0; i < maxBrokers; i++) {
+                brokerCells.push(`<td class="tenant-contact-cell" data-contact-index="${i}" data-contact-type="broker" data-tenant-id="${tenant.id}" style="vertical-align: top;"><span style="color: #999;">Loading...</span></td>`);
+            }
+            
+            movedOutHtml += `
+                <tr data-tenant-id="${tenant.id}">
+                    <td class="tenant-occupancies-cell" style="vertical-align: top;">${occupanciesHtml}</td>
+                    <td class="tenant-name-cell" style="vertical-align: top;">
+                        <div class="tenant-name-wrapper">
+                            <div class="tenant-name-header">
+                                <input type="checkbox" class="email-select-tenant" data-tenant-id="${tenant.id}" style="display: none; cursor: pointer;">
+                                <span class="tenant-name-text" style="color: #9ca3af;">${escapeHtml(tenant.tenantName || 'Unnamed Tenant')}</span>
+                            </div>
+                            <div class="tenant-actions-compact">
+                                <button class="btn-action btn-view" onclick="viewTenantDetail('${tenant.id}')" title="View Details">
+                                    <span class="btn-icon">👁️</span>
+                                </button>
+                                <button class="btn-action btn-edit" onclick="editTenant('${tenant.id}')" title="Edit">
+                                    <span class="btn-icon">✏️</span>
+                                </button>
+                                <button class="btn-action btn-delete" onclick="deleteTenant('${tenant.id}')" title="Delete">
+                                    <span class="btn-icon">🗑️</span>
+                                </button>
+                            </div>
+                        </div>
+                    </td>
+                    ${contactCells.join('')}
+                    ${brokerCells.join('')}
+                </tr>
+            `;
+        });
+        
+        movedOutHtml += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+    } else {
+        movedOutHtml += `
+            <div style="padding: 20px; text-align: center; color: #999;">
+                No moved out tenants found.
+            </div>
+        </div>
+        `;
+    }
+    
+    tenantsTable.insertAdjacentHTML('beforeend', movedOutHtml);
+    
+    // Load contacts for moved out tenants
+    const movedOutTenantsMap = {};
+    movedOutTenants.forEach(({ tenant }) => {
+        movedOutTenantsMap[tenant.id] = tenant;
+    });
+    if (Object.keys(movedOutTenantsMap).length > 0) {
+        loadContactsForTableView(movedOutTenantsMap, maxContacts, maxBrokers);
+    }
+}
+
 function deleteOrphanContact(contactId) {
     if (confirm('Are you sure you want to delete this orphan contact?')) {
         db.collection('tenantContacts').doc(contactId).delete()
