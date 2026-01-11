@@ -673,8 +673,14 @@ function renderBuildingsList(buildings) {
         return;
     }
 
-    Object.keys(buildings).forEach(id => {
-        const building = buildings[id];
+    // Sort buildings by building name (numeric-aware)
+    const sortedBuildings = Object.keys(buildings).map(id => ({ id, ...buildings[id] })).sort((a, b) => {
+        const aName = a.buildingName || '';
+        const bName = b.buildingName || '';
+        return aName.localeCompare(bName, undefined, { numeric: true, sensitivity: 'base' });
+    });
+
+    sortedBuildings.forEach(({ id, ...building }) => {
         const item = document.createElement('div');
         item.className = 'building-item';
         item.innerHTML = `
@@ -944,9 +950,15 @@ function renderUnitsList(units, propertyId) {
                 }
             });
             
+            // Sort buildings by building name (numeric-aware)
+            const sortedBuildings = Object.keys(buildingsMap).map(id => ({ id, ...buildingsMap[id] })).sort((a, b) => {
+                const aName = a.buildingName || '';
+                const bName = b.buildingName || '';
+                return aName.localeCompare(bName, undefined, { numeric: true, sensitivity: 'base' });
+            });
+            
             // Render units grouped by building
-            Object.keys(buildingsMap).forEach(buildingId => {
-                const building = buildingsMap[buildingId];
+            sortedBuildings.forEach(({ id: buildingId, ...building }) => {
                 const buildingUnits = unitsByBuilding[buildingId] || [];
                 
                 const buildingSection = document.createElement('div');
@@ -968,7 +980,14 @@ function renderUnitsList(units, propertyId) {
                 if (buildingUnits.length === 0) {
                     buildingUnitsList.innerHTML = '<p style="color: #999; font-size: 14px; padding: 10px;">No units in this building.</p>';
                 } else {
-                    buildingUnits.forEach(unit => {
+                    // Sort units by unit number (numeric-aware)
+                    const sortedUnits = buildingUnits.sort((a, b) => {
+                        const aNum = a.unitNumber || '';
+                        const bNum = b.unitNumber || '';
+                        return aNum.localeCompare(bNum, undefined, { numeric: true, sensitivity: 'base' });
+                    });
+                    
+                    sortedUnits.forEach(unit => {
                         const item = document.createElement('div');
                         item.className = 'unit-item';
                         const statusBadge = unit.status ? `<span class="status-badge status-${unit.status.toLowerCase().replace(' ', '-')}">${unit.status}</span>` : '';
@@ -994,6 +1013,13 @@ function renderUnitsList(units, propertyId) {
             
             // Render units without a building (property-level units)
             if (unitsWithoutBuilding.length > 0) {
+                // Sort property-level units by unit number (numeric-aware)
+                const sortedPropertyLevelUnits = unitsWithoutBuilding.sort((a, b) => {
+                    const aNum = a.unitNumber || '';
+                    const bNum = b.unitNumber || '';
+                    return aNum.localeCompare(bNum, undefined, { numeric: true, sensitivity: 'base' });
+                });
+                
                 const propertyLevelSection = document.createElement('div');
                 propertyLevelSection.className = 'building-units-section';
                 propertyLevelSection.innerHTML = `
@@ -1006,7 +1032,7 @@ function renderUnitsList(units, propertyId) {
                 unitsList.appendChild(propertyLevelSection);
                 
                 const propertyLevelList = document.getElementById('units-property-level');
-                unitsWithoutBuilding.forEach(unit => {
+                sortedPropertyLevelUnits.forEach(unit => {
                     const item = document.createElement('div');
                     item.className = 'unit-item';
                     const statusBadge = unit.status ? `<span class="status-badge status-${unit.status.toLowerCase().replace(' ', '-')}">${unit.status}</span>` : '';
