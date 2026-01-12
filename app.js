@@ -9071,7 +9071,7 @@ async function renderLeasesTableView(leases, properties, tenants, units, buildin
                 const activeLeases = unitLeases.filter(l => isLeaseActive(l) && !isLeaseDeleted(l));
                 const legacyLeases = unitLeases.filter(l => isLeaseDeprecated(l) && !isLeaseDeleted(l));
                 
-                html += buildUnitLeaseRow(unit, activeLeases, legacyLeases, tenants, occupanciesByUnitId);
+                html += buildUnitLeaseRow(unit, activeLeases, legacyLeases, tenants, occupanciesByUnitId, filteredUnits);
             });
         });
         
@@ -9087,7 +9087,7 @@ async function renderLeasesTableView(leases, properties, tenants, units, buildin
                 const activeLeases = unitLeases.filter(l => isLeaseActive(l) && !isLeaseDeleted(l));
                 const legacyLeases = unitLeases.filter(l => isLeaseDeprecated(l) && !isLeaseDeleted(l));
                 
-                html += buildUnitLeaseRow(unit, activeLeases, legacyLeases, tenants, occupanciesByUnitId);
+                html += buildUnitLeaseRow(unit, activeLeases, legacyLeases, tenants, occupanciesByUnitId, filteredUnits);
             });
         }
         
@@ -9267,7 +9267,7 @@ function isLeaseActive(lease) {
 }
 
 // Build a unit lease row
-function buildUnitLeaseRow(unit, activeLeases, legacyLeases, tenants, occupanciesByUnitId = {}) {
+function buildUnitLeaseRow(unit, activeLeases, legacyLeases, tenants, occupanciesByUnitId = {}, filteredUnits = {}) {
     // Get tenant names from occupancies (this is the source of truth for which tenant is in which unit)
     const unitOccupancies = occupanciesByUnitId[unit.id] || [];
     const activeTenantNames = unitOccupancies.map(occ => {
