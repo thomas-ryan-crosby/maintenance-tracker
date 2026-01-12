@@ -9068,8 +9068,8 @@ async function renderLeasesTableView(leases, properties, tenants, units, buildin
                 return aNum.localeCompare(bNum, undefined, { numeric: true, sensitivity: 'base' });
             }).forEach(unit => {
                 const unitLeases = leasesByUnit[unit.id] || [];
-                const activeLeases = unitLeases.filter(l => isLeaseActive(l));
-                const legacyLeases = unitLeases.filter(l => isLeaseDeprecated(l));
+                const activeLeases = unitLeases.filter(l => isLeaseActive(l) && !isLeaseDeleted(l));
+                const legacyLeases = unitLeases.filter(l => isLeaseDeprecated(l) && !isLeaseDeleted(l));
                 
                 html += buildUnitLeaseRow(unit, activeLeases, legacyLeases, tenants, occupanciesByUnitId);
             });
