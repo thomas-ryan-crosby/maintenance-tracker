@@ -9231,6 +9231,11 @@ function isLeaseDeprecated(lease) {
 
 // Helper function to determine if a lease should be considered active
 function isLeaseActive(lease) {
+    // If deleted, never active
+    if (isLeaseDeleted(lease)) {
+        return false;
+    }
+    
     // If deprecated, never active
     if (isLeaseDeprecated(lease)) {
         return false;
@@ -9257,7 +9262,7 @@ function isLeaseActive(lease) {
         return false;
     }
     
-    // Default: if no explicit status or status is unclear, consider active (unless deprecated)
+    // Default: if no explicit status or status is unclear, consider active (unless deleted or deprecated)
     return true;
 }
 
@@ -9570,7 +9575,7 @@ async function loadUnitActiveLeases(unitId) {
         
         leasesSnapshot.forEach(doc => {
             const lease = { id: doc.id, ...doc.data() };
-            if (isLeaseActive(lease)) {
+            if (isLeaseActive(lease) && !isLeaseDeleted(lease)) {
                 leases.push(lease);
             }
         });
