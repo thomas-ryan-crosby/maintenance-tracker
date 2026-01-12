@@ -9134,7 +9134,87 @@ async function renderLeasesTableView(leases, properties, tenants, units, buildin
     
     html += '</tbody></table>';
     
-    if (filteredProperties.length === 0) {
+    // Add deleted leases section at the bottom
+    const allDeletedLeases = Object.values(leases).filter(l => isLeaseDeleted(l) && !shouldPermanentlyRemoveLease(l));
+    
+    if (allDeletedLeases.length > 0) {
+        // Group deleted leases by property
+        const deletedLeasesByProperty = {};
+        allDeletedLeases.forEach(lease => {
+            const propertyId = lease.propertyId;
+            if (!deletedLeasesByProperty[propertyId]) {
+                deletedLeasesByProperty[propertyId] = [];
+            }
+            deletedLeasesByProperty[propertyId].push(lease);
+        });
+        
+        html += '<div style="margin-top: 40px; padding-top: 30px; border-top: 3px solid #e5e7eb;">';
+        html += '<h3 style="margin-bottom: 20px; color: #666; font-size: 1.2rem;">Deleted Leases</h3>';
+        html += '<small style="color: #999; display: block; margin-bottom: 20px;">Leases will be permanently removed after 30 days</small>';
+        html += '<table class="data-table" style="width: 100%;">';
+        html += '<thead><tr>';
+        html += '<th style="padding: 12px 10px;">Unit / Tenant</th>';
+        html += '<th style="padding: 12px 10px;">Lease Details</th>';
+        html += '<th style="padding: 12px 10px;">Deleted Date</th>';
+        html += '<th style="padding: 12px 10px;">Actions</th>';
+        html += '</tr></thead><tbody>';
+        
+        // Render deleted leases by property
+        Object.keys(deletedLeasesByProperty).forEach(propertyId => {
+            const property = properties[propertyId];
+            if (!property) return;
+            
+            // Property header
+            html += `<tr class="property-header-row" style="background-color: #f8f9fa; font-weight: bold;">
+                <td colspan="4" style="padding: 15px; border-bottom: 2px solid #dee2e6;">
+                    ${escapeHtml(property.name || 'Unnamed Property')}
+                </td>
+            </tr>`;
+            
+            deletedLeasesByProperty[propertyId].forEach(lease => {
+                const tenant = tenants[lease.tenantId];
+                const tenantName = tenant ? tenant.tenantName : 'Unknown Tenant';
+                const unit = lease.unitId ? units[lease.unitId] : null;
+                const unitDisplay = unit ? `Unit ${escapeHtml(unit.unitNumber || 'N/A')}` : 'Property Level';
+                
+                // Calculate days until permanent removal
+                const deletedDate = lease.deletedAt.toDate ? lease.deletedAt.toDate() : new Date(lease.deletedAt);
+                const today = new Date();
+                const daysSinceDeletion = Math.floor((today - deletedDate) / (1000 * 60 * 60 * 24));
+                const daysRemaining = 30 - daysSinceDeletion;
+                
+                const deletedDateFormatted = deletedDate.toLocaleDateString();
+                const daysRemainingText = daysRemaining > 0 ? `${daysRemaining} days remaining` : 'Will be removed soon';
+                
+                html += `<tr style="opacity: 0.7;">
+                    <td style="padding: 10px; vertical-align: top;">
+                        <div style="font-weight: 600;">${escapeHtml(tenantName)}</div>
+                        <div style="font-size: 0.85em; color: #666;">${unitDisplay}</div>
+                    </td>
+                    <td style="padding: 10px; vertical-align: top;">
+                        <div style="font-size: 0.9em;">
+                            <div>Lease #: ${escapeHtml(lease.leaseNumber || lease.id.substring(0, 8))}</div>
+                            ${lease.monthlyRent ? `<div>Rent: $${lease.monthlyRent.toLocaleString('en-US', { minimumFractionDigits: 2 })}/mo</div>` : ''}
+                        </div>
+                    </td>
+                    <td style="padding: 10px; vertical-align: top;">
+                        <div style="font-size: 0.9em;">
+                            <div>${deletedDateFormatted}</div>
+                            <div style="color: #999; font-size: 0.85em;">${daysRemainingText}</div>
+                        </div>
+                    </td>
+                    <td style="padding: 10px; vertical-align: top;">
+                        <button class="btn-sm btn-primary" onclick="window.openLeaseModal('${lease.id}')">View</button>
+                    </td>
+                </tr>`;
+            });
+        });
+        
+        html += '</tbody></table>';
+        html += '</div>';
+    }
+    
+    if (filteredProperties.length === 0 && allDeletedLeases.length === 0) {
         leasesTable.innerHTML = '<p style="text-align: center; padding: 40px; color: #666;">No properties found.</p>';
     } else {
         leasesTable.innerHTML = html;
