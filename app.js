@@ -9416,7 +9416,10 @@ function formatLeaseSummaries(leases, tenants) {
             <div style="margin-bottom: 8px; padding: 8px; background: #f8f9fa; border-radius: 4px; border-left: 3px solid ${getStatusColor(lease.status)};">
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 4px;">
                     <div style="flex: 1;">
-                        <div style="font-weight: 600; margin-bottom: 4px;">${escapeHtml(tenantName)}</div>
+                        <div style="font-weight: 600; margin-bottom: 4px;">
+                            ${escapeHtml(tenantName)}
+                            <span style="font-size: 0.7em; font-weight: 400; color: #999; margin-left: 6px;">ID: ${lease.id.substring(0, 8)}</span>
+                        </div>
                         <div style="font-size: 0.85em; color: #666;">
                             <span class="status-badge ${statusClass}" style="margin-right: 8px;">${lease.status}</span>
                             ${startDate} - ${endDate}
@@ -9801,7 +9804,10 @@ function renderLeaseDetailList(leases, tenants, container) {
             <div class="lease-detail-card" style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 20px; background: white;">
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
                     <div>
-                        <h4 style="margin: 0 0 8px 0; color: #1e293b;">${escapeHtml(tenantName)}</h4>
+                        <h4 style="margin: 0 0 8px 0; color: #1e293b;">
+                            ${escapeHtml(tenantName)}
+                            <span style="font-size: 0.7em; font-weight: 400; color: #999; margin-left: 6px;">ID: ${lease.id.substring(0, 8)}</span>
+                        </h4>
                         <div style="color: #64748b; font-size: 0.9em;">
                             <span class="status-badge ${statusClass}">${lease.status}</span>
                             <span style="margin-left: 10px;">Lease #: ${escapeHtml(lease.leaseNumber || lease.id.substring(0, 8))}</span>
